@@ -550,7 +550,12 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
       <div class="st-quotes">${S.insight.cards.map((c,i)=>`<div class="st-q sv-c" style="--i:${i}"><b>${esc(c[0])}</b><span>${esc(c[1])}</span>${c[2]?`<small>${esc(c[2])}</small>`:""}</div>`).join("")}</div>
       <div class="st-two">
         <div class="st-say sv-c" style="--i:4"><h3>${esc(S.product.h)}</h3><div class="st-say-g"><div><div class="st-ok">พูดแบบนี้</div><ul>${li(S.product.say)}</ul></div><div><div class="st-no">ไม่พูด</div><ul>${li(S.product.dont)}</ul></div></div></div>
-        <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มเป้าหมาย และสิ่งที่แต่ละกลุ่มต้องได้ยิน</h3>${S.audiences.map(a=>`<div class="st-a"><div class="st-a-k"><b>${esc(a[0])}</b><small>${esc(a[1])}</small></div><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
+        <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มที่คุยด้วย — เลื่อนอายุดูว่าแต่ละกลุ่มต้องได้ยินอะไร</h3>
+          <div class="st-age"><input type="range" id="st-age" min="20" max="50" value="26" aria-label="อายุ"><div class="st-age-scale">${[20,25,30,35,40,45,50].map(a=>`<span>${a}</span>`).join("")}</div>
+            <div class="st-age-bands">${S.audiences.map((a,i)=>`<i data-a="${i}" style="--c:${["#3fa3ff","#0A5BFF","#7ff3dc"][i]};left:${[6,33,66][i]}%;width:${[33,40,34][i]}%"></i>`).join("")}</div>
+            <div class="st-age-bubble" id="st-age-b"><b>26</b>ปี</div></div>
+          <div class="st-personas">${S.audiences.map((a,i)=>`<div class="st-p" data-a="${i}" style="--c:${["#3fa3ff","#0A5BFF","#7ff3dc"][i]}"><div class="st-p-av">${esc(String(a[0]).charAt(0))}</div><b>${esc(a[0])}</b><small>${esc(a[1])}</small><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
+        </div>
       </div>${CRED}</section>
     <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
       <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
@@ -576,6 +581,9 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
   secs.forEach(n=>io2.observe(n));
   el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); const t=$(a.getAttribute("href")); const top=t?t.getBoundingClientRect().top+window.scrollY-90:0; if(LEN) LEN.scrollTo(top,{duration:1.2}); else window.scrollTo({top,behavior:"smooth"}); });
   renderUmbrella();
+  (()=>{ const r=$("#st-age"); if(!r) return; const pick=v=>{ v=+v; const i=v<30?0:v<40?1:2; el.querySelectorAll(".st-p").forEach(p=>p.classList.toggle("on",+p.dataset.a===i)); el.querySelectorAll(".st-age-bands i").forEach(b=>b.classList.toggle("on",+b.dataset.a===i)); const bb=$("#st-age-b"); bb.querySelector("b").textContent=v; bb.style.left=((v-20)/30*100)+"%"; };
+    r.addEventListener("input",()=>pick(r.value)); el.querySelectorAll(".st-p").forEach(p=>p.onclick=()=>{ r.value=[26,36,44][+p.dataset.a]; pick(r.value); }); pick(r.value);
+    let t=0; const auto=setInterval(()=>{ if(!$("#st-age")) return clearInterval(auto); t=(t+1)%3; r.value=[26,36,44][t]; pick(r.value); },3500); r.addEventListener("pointerdown",()=>clearInterval(auto),{once:true}); })();
   el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); $("#st-plan-body").querySelectorAll("[data-n]").forEach(countUp);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
   $("#st-go").onclick=()=>setTab("review");
 }
