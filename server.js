@@ -16,7 +16,7 @@ function config_() {
 }
 
 /* ===== สิทธิ์เข้าดู: แท็บ Access [vid, ชื่อ, เบอร์, สถานะ, ขอเมื่อ, ตัดสินโดย, ตัดสินเมื่อ, role, อุปกรณ์] ===== */
-const STAFF_CODES = { "9999": "admin" };
+const STAFF_CODES = { "9999": "admin", "0000": "client" }; // 0000 = ลูกค้าเข้าดู · 9999 = ทีมงาน
 function accessSheet_() { return tab_("Access", ["vid","ชื่อ","เบอร์","สถานะ","ขอเมื่อ","ตัดสินโดย","ตัดสินเมื่อ","role","อุปกรณ์"]); }
 function accessRows_() { const sh = accessSheet_(); const n = sh.getLastRow(); return n > 1 ? sh.getRange(2, 1, n-1, 9).getValues() : []; }
 function accessOf_(vid) { if (!vid) return null; const rows = accessRows_(); for (let i = rows.length-1; i >= 0; i--) if (String(rows[i][0]) === String(vid)) return { row: i+2, vid: String(rows[i][0]), name: String(rows[i][1]), phone: String(rows[i][2]), status: String(rows[i][3]), at: rows[i][4], by: String(rows[i][5]), decidedAt: rows[i][6], role: String(rows[i][7]), ua: String(rows[i][8]) }; return null; }
@@ -44,8 +44,8 @@ function staffLogin(p) {
   const vid = String(p && p.vid || "").trim(), code = String(p && p.code || "").trim(), name = String(p && p.name || "").trim().slice(0,40);
   if (!STAFF_CODES[code]) return { ok:false, msg:"รหัสไม่ถูกต้อง" }; if (!vid || !name) return { ok:false, msg:"กรุณาใส่ชื่อ" };
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
-  try { const sh = accessSheet_(); const cur = accessOf_(vid); const rec = [vid, name, "", "approved", cur ? cur.at : new Date(), "รหัสทีมงาน", new Date(), STAFF_CODES[code], String(p.ua||"").slice(0,120)];
-    if (cur) sh.getRange(cur.row, 1, 1, 9).setValues([rec]); else sh.appendRow(rec); return { ok:true, admin:true }; } finally { lock.releaseLock(); }
+  try { const sh = accessSheet_(); const cur = accessOf_(vid); const rec = [vid, name, "", "approved", cur ? cur.at : new Date(), STAFF_CODES[code] === "admin" ? "รหัสทีมงาน" : "รหัสลูกค้า", new Date(), STAFF_CODES[code], String(p.ua||"").slice(0,120)];
+    if (cur) sh.getRange(cur.row, 1, 1, 9).setValues([rec]); else sh.appendRow(rec); return { ok:true, admin: STAFF_CODES[code] === "admin" }; } finally { lock.releaseLock(); }
 }
 function listAccess(p) { admin_(p); const rows = accessRows_(); return rows.map((r, i) => ({ vid: String(r[0]), name: String(r[1]), phone: String(r[2]), status: String(r[3]), at: r[4] ? new Date(r[4]).getTime() : 0, by: String(r[5]), decidedAt: r[6] ? new Date(r[6]).getTime() : 0, role: String(r[7]), ua: String(r[8]||"").replace(/^Mozilla\/5\.0 \(([^;)]+).*$/, "$1").slice(0,24) })).reverse().slice(0, 100); }
 function setAccess(p) {

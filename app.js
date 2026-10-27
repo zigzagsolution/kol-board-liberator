@@ -469,7 +469,7 @@ $("#g-send").onclick=()=>{ const name=$("#g-name").value.trim(), phone=$("#g-pho
 $("#g-staff-link").onclick=e=>{ e.preventDefault(); gateShow("gate-staff"); $("#g-sname").value=reviewer||""; setTimeout(()=>$("#g-code").focus(),50); };
 $("#g-back").onclick=e=>{ e.preventDefault(); gateShow("gate-form"); };
 $("#g-staff-ok").onclick=()=>{ const code=$("#g-code").value.trim(), name=$("#g-sname").value.trim(); const err=t=>{ $("#g-serr").textContent=t; $("#g-serr").hidden=false; }; if(!/^\d{4}$/.test(code)){ err("ใส่รหัส 4 หลัก"); return; } if(!name){ err("กรุณาใส่ชื่อ"); return; }
-  $("#g-staff-ok").disabled=true; api("staffLogin",[{vid:VID,code,name}]).then(r=>{ $("#g-staff-ok").disabled=false; if(!r||!r.ok){ err((r&&r.msg)||"รหัสไม่ถูกต้อง"); return; } gateSave({vid:VID,name,phone:"",admin:true,at:Date.now()}); reviewer=name; try{localStorage.setItem("kol_reviewer",name);}catch(e){} showName(); gateOpen(); }).catch(e=>{ $("#g-staff-ok").disabled=false; err("ตรวจรหัสไม่สำเร็จ: "+(e&&e.message||e)); }); };
+  $("#g-staff-ok").disabled=true; api("staffLogin",[{vid:VID,code,name}]).then(r=>{ $("#g-staff-ok").disabled=false; if(!r||!r.ok){ err((r&&r.msg)||"รหัสไม่ถูกต้อง"); return; } gateSave({vid:VID,name,phone:"",admin:!!r.admin,at:Date.now()}); reviewer=name; try{localStorage.setItem("kol_reviewer",name);}catch(e){} showName(); gateOpen(); }).catch(e=>{ $("#g-staff-ok").disabled=false; err("ตรวจรหัสไม่สำเร็จ: "+(e&&e.message||e)); }); };
 ["#g-code","#g-sname"].forEach(sel=>$(sel).addEventListener("keydown",e=>{ if(e.key==="Enter") $("#g-staff-ok").click(); }));
 $("#g-retry").onclick=()=>gateShow("gate-form");
 /* admin: คำขอเข้าดู */
@@ -480,7 +480,7 @@ $("#adm-btn").onclick=()=>{ $("#amodal").hidden=false; $("#alist").textContent="
     $("#alist").querySelectorAll("button[data-v]").forEach(b=>b.onclick=()=>{ b.disabled=true; api("setAccess",[{vid:VID,target:b.dataset.v,status:b.dataset.s,by:reviewer||ACCESS.name}]).then(()=>{ toast(b.dataset.s==="approved"?"อนุมัติแล้ว — หน้าของเขาจะเปิดเอง":"ปฏิเสธแล้ว"); logEv("access",b.dataset.s+" "+b.dataset.v); $("#adm-btn").click(); admCount(); }).catch(err=>{ b.disabled=false; toast("ไม่สำเร็จ: "+(err&&err.message||err)); }); }); }).catch(err=>{ $("#alist").textContent="โหลดไม่สำเร็จ: "+(err&&err.message||err); }); };
 $("#a-close").onclick=()=>{ $("#amodal").hidden=true; }; $("#amodal").addEventListener("click",e=>{ if(e.target.id==="amodal") $("#amodal").hidden=true; });
 /* เริ่มต้น */
-if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
+if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-staff"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
 
 
 

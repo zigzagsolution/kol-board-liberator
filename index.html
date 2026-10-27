@@ -193,16 +193,18 @@
     <label for="g-phone">เบอร์โทร</label><input id="g-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="08x-xxx-xxxx">
     <div class="g-err" id="g-err" hidden></div>
     <button class="btn primary" id="g-send" type="button">ขอเข้าดูบอร์ด</button>
-    <div class="alt">ทีมงาน MIDI? <a href="#" id="g-staff-link">ใส่รหัสเข้าใช้งาน</a></div>
+    <div class="alt">มีรหัสแล้ว? <a href="#" id="g-staff-link">ใส่รหัสเข้าดู</a></div>
     <div class="foot">MIDI digital Co., Ltd. · ข้อมูลใช้เพื่อยืนยันตัวตนเท่านั้น</div>
   </div>
   <div class="gc" id="gate-staff" hidden>
-    <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd."><div class="eb">สำหรับทีมงาน MIDI</div><h1 style="font-size:20px">เข้าใช้งานด้วยรหัส</h1>
-    <label for="g-code">รหัส 4 หลัก</label><input id="g-code" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
-    <label for="g-sname">ชื่อ</label><input id="g-sname" type="text" maxlength="40" placeholder="ชื่อของคุณ">
+    <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd."><div class="eb">Liberator · 29 ต.ค. – 20 พ.ย. 2569</div><h1>Strategy &amp; KOL <b>Approval</b> Board</h1>
+    <p>ใส่รหัสที่ได้รับจากทีมงาน MIDI และชื่อของคุณ เพื่อเข้าดูบอร์ด</p>
+    <label for="g-code">รหัสเข้าดู</label><input id="g-code" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="รหัส 4 หลัก">
+    <label for="g-sname">ชื่อ–นามสกุล / บริษัท</label><input id="g-sname" type="text" maxlength="40" placeholder="เช่น คุณเอ · Liberator">
     <div class="g-err" id="g-serr" hidden></div>
-    <button class="btn primary" id="g-staff-ok" type="button">เข้าใช้งาน</button>
-    <div class="alt"><a href="#" id="g-back">← กลับไปขอเข้าดู</a></div>
+    <button class="btn primary" id="g-staff-ok" type="button">เข้าดูบอร์ด</button>
+    <div class="alt">ยังไม่มีรหัส? <a href="#" id="g-back">ขอสิทธิ์เข้าดูด้วยชื่อและเบอร์โทร</a></div>
+    <div class="foot">MIDI digital Co., Ltd. · ข้อมูลใช้เพื่อยืนยันตัวตนเท่านั้น</div>
   </div>
   <div class="gc wait" id="gate-wait" hidden>
     <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd."><div class="ring"></div><h2>ส่งคำขอแล้ว — รอการอนุมัติ</h2>
@@ -225,6 +227,6 @@
 <script src="strategy.js?v=6"></script>
 <script src="umbrella.js?v=5"></script>
 <script src="config.js?v=8"></script>
-<script src="app.js?v=39"></script>
+<script src="app.js?v=40"></script>
 </body>
 </html>
