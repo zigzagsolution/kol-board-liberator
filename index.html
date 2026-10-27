@@ -168,6 +168,14 @@
 <div class="acts"><button class="btn" id="r-cancel" type="button">ยกเลิก</button><button class="btn primary" id="r-ok" type="button">ตัดออกจากทีม</button></div></div></div>
 <div class="modal" id="pmodal" hidden><div class="card pcard" id="pcard"></div></div>
 <div class="modal" id="umodal" hidden><div class="card" style="max-width:440px"><h3>ย้อนกลับไปเวอร์ชันก่อนหน้า</h3><p>ระบบเก็บสำเนาอัตโนมัติทุกครั้งก่อน "ล้าง" หรือ "ใช้วันที่ MIDI วางไว้" (เก็บล่าสุด 20 ครั้ง) เลือกเวอร์ชันที่จะกู้คืน</p><div class="ulist" id="ulist">กำลังโหลด…</div><div class="acts"><button class="btn" id="u-cancel" type="button">ปิด</button></div></div></div>
+<div class="modal" id="tgate" hidden><div class="card" style="max-width:380px;text-align:center">
+  <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd." style="height:44px;margin-bottom:8px">
+  <h3 style="margin:0 0 4px">ใส่รหัสเพื่อเปิดหน้า <span id="tg-name"></span></h3>
+  <p style="margin:0 0 12px;font-size:12.5px;color:var(--ink2)">รหัสจากทีมงาน MIDI — ต้องใส่ทุกครั้งที่เปลี่ยนหน้า</p>
+  <input id="tg-code" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="รหัส 4 หลัก" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:22px;text-align:center;letter-spacing:.4em">
+  <div class="g-err" id="tg-err" hidden>รหัสไม่ถูกต้อง</div>
+  <div class="acts" style="margin-top:14px"><button class="btn" id="tg-cancel" type="button">ยกเลิก</button><button class="btn primary" id="tg-ok" type="button">เปิดหน้า</button></div>
+</div></div>
 <div class="gate" id="gate" hidden>
   <div class="gc" id="gate-form">
     <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd."><div class="eb">Liberator · 29 ต.ค. – 20 พ.ย. 2569</div><h1>Strategy &amp; KOL <b>Approval</b> Board</h1>
@@ -207,7 +215,7 @@
 <script src="lenis.min.js"></script>
 <script src="strategy.js?v=6"></script>
 <script src="umbrella.js?v=5"></script>
-<script src="config.js?v=5"></script>
-<script src="app.js?v=34"></script>
+<script src="config.js?v=6"></script>
+<script src="app.js?v=35"></script>
 </body>
 </html>

@@ -129,9 +129,15 @@ function render(){
   $("#t-sched").textContent=tl.all.filter(d=>datesOf(d).length).length+"/"+tl.all.length;
 }
 /* ===== tabs ===== */
-let TAB="strategy"; try{ TAB=localStorage.getItem("kol_tab")||"strategy"; }catch(e){}
+let TAB="strategy"; // เริ่มที่หน้ากลยุทธ์เสมอ
 function setTab(t){ TAB=t; document.body.dataset.tab=t; try{ if(t==="strategy"){ setTimeout(smoothOn,0); } else if(typeof smoothOff==="function") smoothOff(); }catch(e){} document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab)); setTab(TAB);
+/* ทุกหน้าที่ไม่ใช่กลยุทธ์ ต้องใส่รหัสทุกครั้ง */
+const TAB_CODES=(CFG.TAB_CODES||["0000","9999"]).map(String);
+function askTabCode(t){ const m=$("#tgate"); if(!m) return setTab(t); m.hidden=false; const inp=$("#tg-code"); inp.value=""; $("#tg-err").hidden=true; $("#tg-name").textContent=({review:"พิจารณา",team:"ทีม",plan:"แผน 4 ระยะ",sched:"ตารางโพสต์"})[t]||t; setTimeout(()=>inp.focus(),50);
+  const ok=()=>{ const v=inp.value.trim(); if(TAB_CODES.includes(v)){ m.hidden=true; try{ logEv("tabcode",t); }catch(e){} setTab(t); } else { $("#tg-err").hidden=false; inp.select(); } };
+  $("#tg-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#tg-cancel").onclick=()=>{ m.hidden=true; }; }
+function gotoTab(t){ if(t==="strategy") return setTab(t); askTabCode(t); }
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>gotoTab(b.dataset.tab)); setTab(TAB);
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
 /* ===== team 50 ===== */
@@ -589,8 +595,8 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     r.addEventListener("input",()=>pick(r.value)); el.querySelectorAll(".st-p").forEach(p=>p.onclick=()=>{ r.value=[26,36,44][+p.dataset.a]; pick(r.value); }); pick(r.value);
     let t=0; const auto=setInterval(()=>{ if(!$("#st-age")) return clearInterval(auto); t=(t+1)%3; r.value=[26,36,44][t]; pick(r.value); },3500); r.addEventListener("pointerdown",()=>clearInterval(auto),{once:true}); })();
   el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); $("#st-plan-body").querySelectorAll("[data-n]").forEach(countUp);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
-  $("#st-go").onclick=()=>setTab("review");
+  $("#st-go").onclick=()=>gotoTab("review");
 }
 try{ renderStrategy(); }catch(e){ console.error(e); }
-window.KOL={$,esc,setTab,renderUmbrella,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB,_dbg:()=>({data,inTeam,autoDates,aiPlan,phaseDays,TL_DAYS,tlPhase})}; // ให้ planmedia.js ใช้
+window.KOL={$,esc,setTab,gotoTab,renderUmbrella,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB,_dbg:()=>({data,inTeam,autoDates,aiPlan,phaseDays,TL_DAYS,tlPhase})}; // ให้ planmedia.js ใช้
 })();

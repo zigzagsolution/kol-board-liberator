@@ -720,3 +720,4 @@ html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!
 @media (max-width:760px){.notice-list{grid-template-columns:auto 1fr}.notice-list em{grid-column:1/-1;white-space:normal;text-align:center}}
 body.present .notice-list{display:none}
 @media (prefers-reduced-motion:reduce){.nl-ic{animation:none}}
+#tgate .card{border-top:5px solid #e8194c}#tgate .btn.primary{background:#e8194c;border-color:#e8194c}
