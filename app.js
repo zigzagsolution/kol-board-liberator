@@ -20,7 +20,8 @@ const KOL_REACH_TARGET=5e6, KOL_VISIT_TARGET=50000; /* เด็ค: TikTok/IG M
 const TOR_MICRO_MIN=30, TOR_NANO_MIN=20; /* TOR 6.3.4(3): Micro 5,000+ ≥30 คน · Nano 1,000+ ≥20 คน รวม ≥50 */
 const torTier=d=>(d.f||0)>=5000?"micro":(d.f||0)>=1000?"nano":"below";
 function api(name,args){ if(!APP_URL) return Promise.reject(new Error("ยังไม่ได้ตั้งค่า APP_URL ใน config.js"));
-  return fetch(APP_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({name,args:args||[]}),redirect:"follow"})
+  args=(args||[]).map((a,i)=>(i===0&&a&&typeof a==="object"&&!Array.isArray(a))?Object.assign({_vid:(typeof VID!=="undefined"?VID:"")},a):a); if(!args.length) args=[{_vid:(typeof VID!=="undefined"?VID:"")}];
+  return fetch(APP_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({name,args}),redirect:"follow"})
     .then(r=>r.json()).then(j=>{ if(j&&j.error) throw new Error(j.error); return j&&("result" in j)?j.result:j; }); }
 
 function parseCSV(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];
@@ -419,8 +420,39 @@ function progStart(){ const el=$("#prog"); el.classList.remove("done"); prog.v=0
 function progDone(){ clearInterval(prog.t); prog.manual=false; const el=$("#prog"); el.firstElementChild.style.width="100%"; el.classList.add("done"); if(!$("#ov").hidden){ ovSet(100,true); setTimeout(()=>ovSet(100,false),350); } }
 function skeleton(n){ const s=$("#skel"); if(!s) return; s.innerHTML=Array.from({length:n},(_,i)=>`<div><span style="width:28px"></span><span style="width:${120+((i*37)%90)}px"></span><span style="flex:1;max-width:${30+((i*53)%50)}%"></span><span style="width:50px"></span></div>`).join(""); }
 function load(){ progStart(); setStatus("warn","กำลังโหลดข้อมูล… 0%"); api("getData",[]).then(p=>{ try{ applyPayload(p); }catch(e){ setStatus("warn","อ่านข้อมูลไม่ได้"); showMsg("อ่านข้อมูลจากชีตไม่ได้ — ตรวจรูปแบบตารางต้นทาง"); } })
-  .catch(err=>{ clearInterval(prog.t); ovSet(0,false); setStatus("warn","โหลดไม่สำเร็จ"); showMsg("โหลดข้อมูลไม่สำเร็จ: "+(err&&err.message||err)); }); }
+  .catch(err=>{ clearInterval(prog.t); ovSet(0,false); const m=String(err&&err.message||err); if(/ยังไม่ได้รับอนุญาต|ถูกปฏิเสธ/.test(m)){ try{ localStorage.removeItem("kol_access"); }catch(e){} ACCESS=null; gateShow(/ปฏิเสธ/.test(m)?"gate-denied":"gate-form"); return; } setStatus("warn","โหลดไม่สำเร็จ"); showMsg("โหลดข้อมูลไม่สำเร็จ: "+m); }); }
 $("#refresh").onclick=()=>{ prog.manual=true; load(); }; showName(); skeleton(8);
-load(); setInterval(()=>{ if(!document.hidden) load(); },30000);
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
+/* ===== ประตูหน้าแรก: ขอสิทธิ์ → ทีม MIDI อนุมัติ ===== */
+let ACCESS=null; try{ ACCESS=JSON.parse(localStorage.getItem("kol_access")||"null"); }catch(e){}
+const isAdmin=()=>!!(ACCESS&&ACCESS.admin);
+function gateShow(id){ ["gate-form","gate-staff","gate-wait","gate-denied"].forEach(x=>$("#"+x).hidden=x!==id); $("#gate").hidden=false; }
+function gateOpen(){ ovSet(0,false); clearInterval(prog.t); setStatus("",""); $("#gate").hidden=true; if(ACCESS&&ACCESS.name&&!reviewer){ reviewer=ACCESS.name; try{localStorage.setItem("kol_reviewer",reviewer);}catch(e){} showName(); } $("#adm-btn").hidden=!isAdmin(); load(); setInterval(()=>{ if(!document.hidden) load(); },30000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); }); if(isAdmin()) { admCount(); setInterval(admCount,30000); } }
+function gateSave(a){ ACCESS=a; try{ localStorage.setItem("kol_access",JSON.stringify(a)); }catch(e){} }
+let gatePoll=null;
+function gateWait(name,phone){ gateShow("gate-wait"); $("#g-who").textContent=`👤 ${name} · ${phone}`; clearInterval(gatePoll); let n=0;
+  const check=()=>api("accessStatus",[{vid:VID}]).then(r=>{ n++; $("#g-st").textContent=`ตรวจสถานะอัตโนมัติทุก 10 วินาที · ตรวจแล้ว ${n} ครั้ง`; if(r&&r.status==="approved"){ clearInterval(gatePoll); gateSave({vid:VID,name:r.name||name,phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="denied"){ clearInterval(gatePoll); gateShow("gate-denied"); } }).catch(()=>{});
+  gatePoll=setInterval(check,10000); }
+$("#g-send").onclick=()=>{ const name=$("#g-name").value.trim(), phone=$("#g-phone").value.trim(); const err=t=>{ $("#g-err").textContent=t; $("#g-err").hidden=false; };
+  if(name.length<2){ err("กรุณาใส่ชื่อ"); $("#g-name").focus(); return; } if(phone.replace(/\D/g,"").length<9){ err("กรุณาใส่เบอร์โทรให้ครบ"); $("#g-phone").focus(); return; }
+  $("#g-err").hidden=true; $("#g-send").disabled=true; $("#g-send").textContent="กำลังส่ง…";
+  api("requestAccess",[{vid:VID,name,phone,ua:navigator.userAgent.slice(0,120)}]).then(r=>{ $("#g-send").disabled=false; $("#g-send").textContent="ขอเข้าดูบอร์ด"; try{ localStorage.setItem("kol_gate_req",JSON.stringify({name,phone})); }catch(e){}
+    if(r&&r.status==="approved"){ gateSave({vid:VID,name,phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="denied"){ gateShow("gate-denied"); } else gateWait(name,phone); })
+  .catch(e=>{ $("#g-send").disabled=false; $("#g-send").textContent="ขอเข้าดูบอร์ด"; err("ส่งคำขอไม่สำเร็จ: "+(e&&e.message||e)); }); };
+["#g-name","#g-phone"].forEach(sel=>$(sel).addEventListener("keydown",e=>{ if(e.key==="Enter") $("#g-send").click(); }));
+$("#g-staff-link").onclick=e=>{ e.preventDefault(); gateShow("gate-staff"); $("#g-sname").value=reviewer||""; setTimeout(()=>$("#g-code").focus(),50); };
+$("#g-back").onclick=e=>{ e.preventDefault(); gateShow("gate-form"); };
+$("#g-staff-ok").onclick=()=>{ const code=$("#g-code").value.trim(), name=$("#g-sname").value.trim(); const err=t=>{ $("#g-serr").textContent=t; $("#g-serr").hidden=false; }; if(!/^\d{4}$/.test(code)){ err("ใส่รหัส 4 หลัก"); return; } if(!name){ err("กรุณาใส่ชื่อ"); return; }
+  $("#g-staff-ok").disabled=true; api("staffLogin",[{vid:VID,code,name}]).then(r=>{ $("#g-staff-ok").disabled=false; if(!r||!r.ok){ err((r&&r.msg)||"รหัสไม่ถูกต้อง"); return; } gateSave({vid:VID,name,phone:"",admin:true,at:Date.now()}); reviewer=name; try{localStorage.setItem("kol_reviewer",name);}catch(e){} showName(); gateOpen(); }).catch(e=>{ $("#g-staff-ok").disabled=false; err("ตรวจรหัสไม่สำเร็จ: "+(e&&e.message||e)); }); };
+["#g-code","#g-sname"].forEach(sel=>$(sel).addEventListener("keydown",e=>{ if(e.key==="Enter") $("#g-staff-ok").click(); }));
+$("#g-retry").onclick=()=>gateShow("gate-form");
+/* admin: คำขอเข้าดู */
+function admCount(){ api("listAccess",[{vid:VID}]).then(list=>{ const n=(list||[]).filter(x=>x.status==="pending").length; $("#adm-n").textContent=n; $("#adm-btn").classList.toggle("hot",n>0); }).catch(()=>{}); }
+$("#adm-btn").onclick=()=>{ $("#amodal").hidden=false; $("#alist").textContent="กำลังโหลด…"; api("listAccess",[{vid:VID}]).then(list=>{ list=list||[]; const pend=list.filter(x=>x.status==="pending"), rest=list.filter(x=>x.status!=="pending").slice(0,20);
+    const row=x=>`<div class="req${x.status!=="pending"?" done":""}"><div class="avc">${esc(String(x.name||"?").trim().slice(0,1))}</div><div><div class="nm">${esc(x.name)}${x.role==="admin"?" · ทีมงาน":""}</div><div class="ph">${esc(x.phone||"")}${x.phone?" · ":""}ขอเมื่อ ${new Date(x.at).toLocaleString("th-TH",{dateStyle:"short",timeStyle:"short"})}${x.ua?" · "+esc(x.ua):""}</div></div>${x.status==="pending"?`<div class="acts"><button class="btn primary" data-v="${esc(x.vid)}" data-s="approved">อนุมัติ</button><button class="btn" data-v="${esc(x.vid)}" data-s="denied">ปฏิเสธ</button></div>`:`<div class="tag${x.status==="approved"?"":" no"}">${x.status==="approved"?"✓ อนุมัติ":"✗ ปฏิเสธ"}${x.by?" โดย "+esc(x.by):""}${x.decidedAt?" "+new Date(x.decidedAt).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):""}</div>`}</div>`;
+    $("#alist").innerHTML=(pend.length?`<div class="gh">รออนุมัติ ${pend.length}</div>`+pend.map(row).join(""):`<div class="empty">ไม่มีคำขอค้าง</div>`)+(rest.length?`<div class="gh">ล่าสุด</div>`+rest.map(row).join(""):"");
+    $("#alist").querySelectorAll("button[data-v]").forEach(b=>b.onclick=()=>{ b.disabled=true; api("setAccess",[{vid:VID,target:b.dataset.v,status:b.dataset.s,by:reviewer||ACCESS.name}]).then(()=>{ toast(b.dataset.s==="approved"?"อนุมัติแล้ว — หน้าของเขาจะเปิดเอง":"ปฏิเสธแล้ว"); logEv("access",b.dataset.s+" "+b.dataset.v); $("#adm-btn").click(); admCount(); }).catch(err=>{ b.disabled=false; toast("ไม่สำเร็จ: "+(err&&err.message||err)); }); }); }).catch(err=>{ $("#alist").textContent="โหลดไม่สำเร็จ: "+(err&&err.message||err); }); };
+$("#a-close").onclick=()=>{ $("#amodal").hidden=true; }; $("#amodal").addEventListener("click",e=>{ if(e.target.id==="amodal") $("#amodal").hidden=true; });
+/* เริ่มต้น */
+if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
+window.KOL={$,esc,setTab,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB}; // ให้ planmedia.js ใช้
 })();

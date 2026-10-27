@@ -13,8 +13,49 @@ function config_() {
   return c;
 }
 
+/* ===== สิทธิ์เข้าดู: แท็บ Access [vid, ชื่อ, เบอร์, สถานะ, ขอเมื่อ, ตัดสินโดย, ตัดสินเมื่อ, role, อุปกรณ์] ===== */
+const STAFF_CODES = { "9999": "admin" };
+function accessSheet_() { return tab_("Access", ["vid","ชื่อ","เบอร์","สถานะ","ขอเมื่อ","ตัดสินโดย","ตัดสินเมื่อ","role","อุปกรณ์"]); }
+function accessRows_() { const sh = accessSheet_(); const n = sh.getLastRow(); return n > 1 ? sh.getRange(2, 1, n-1, 9).getValues() : []; }
+function accessOf_(vid) { if (!vid) return null; const rows = accessRows_(); for (let i = rows.length-1; i >= 0; i--) if (String(rows[i][0]) === String(vid)) return { row: i+2, vid: String(rows[i][0]), name: String(rows[i][1]), phone: String(rows[i][2]), status: String(rows[i][3]), at: rows[i][4], by: String(rows[i][5]), decidedAt: rows[i][6], role: String(rows[i][7]), ua: String(rows[i][8]) }; return null; }
+function auth_(p) { const a = accessOf_(p && p._vid); if (!a || a.status !== "approved") throw new Error(a && a.status === "denied" ? "คำขอเข้าดูถูกปฏิเสธ" : "ยังไม่ได้รับอนุญาตให้เข้าดู"); return a; }
+function admin_(p) { const a = auth_(p); if (a.role !== "admin") throw new Error("เฉพาะทีมงาน MIDI"); return a; }
+const normPhone_ = s => String(s||"").replace(/\D/g, "");
+function requestAccess(p) {
+  const vid = String(p && p.vid || "").trim(), name = String(p && p.name || "").trim().slice(0,60), phone = String(p && p.phone || "").trim().slice(0,20);
+  if (!vid || !name) throw new Error("missing");
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try {
+    const cur = accessOf_(vid); if (cur && cur.status !== "pending") return { status: cur.status, admin: cur.role === "admin", name: cur.name };
+    if (cur) return { status: "pending" };
+    const sh = accessSheet_(); const rows = accessRows_(); const ph = normPhone_(phone);
+    const prior = ph ? rows.find(r => String(r[3]) === "approved" && normPhone_(r[2]) === ph) : null;
+    if (prior) { sh.appendRow([vid, name, phone, "approved", new Date(), "auto (เบอร์เคยอนุมัติ)", new Date(), String(prior[7]||"viewer"), String(p.ua||"").slice(0,120)]); try { pushLine_("✅ เข้าดูบอร์ด KOL (เบอร์เคยอนุมัติ)\n" + name + "\n" + phone); } catch (e) {} return { status: "approved", admin: String(prior[7]) === "admin", name }; }
+    sh.appendRow([vid, name, phone, "pending", new Date(), "", "", "viewer", String(p.ua||"").slice(0,120)]);
+    const pending = rows.filter(r => String(r[3]) === "pending").length + 1; const C = config_();
+    try { pushLine_("🔔 ขอเข้าดูบอร์ด KOL\n👤 " + name + "\n📞 " + phone + "\n⏰ " + Utilities.formatDate(new Date(), "Asia/Bangkok", "d MMM HH:mm") + "\nรออนุมัติ " + pending + " คน — เปิดบอร์ด → ปุ่ม 🔔 คำขอเข้าดู" + (C.APP_URL ? "\n" + C.APP_URL : "")); } catch (e) {}
+    return { status: "pending" };
+  } finally { lock.releaseLock(); }
+}
+function accessStatus(p) { const a = accessOf_(p && p.vid); return a ? { status: a.status, admin: a.role === "admin", name: a.name } : { status: "none" }; }
+function staffLogin(p) {
+  const vid = String(p && p.vid || "").trim(), code = String(p && p.code || "").trim(), name = String(p && p.name || "").trim().slice(0,40);
+  if (!STAFF_CODES[code]) return { ok:false, msg:"รหัสไม่ถูกต้อง" }; if (!vid || !name) return { ok:false, msg:"กรุณาใส่ชื่อ" };
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try { const sh = accessSheet_(); const cur = accessOf_(vid); const rec = [vid, name, "", "approved", cur ? cur.at : new Date(), "รหัสทีมงาน", new Date(), STAFF_CODES[code], String(p.ua||"").slice(0,120)];
+    if (cur) sh.getRange(cur.row, 1, 1, 9).setValues([rec]); else sh.appendRow(rec); return { ok:true, admin:true }; } finally { lock.releaseLock(); }
+}
+function listAccess(p) { admin_(p); const rows = accessRows_(); return rows.map((r, i) => ({ vid: String(r[0]), name: String(r[1]), phone: String(r[2]), status: String(r[3]), at: r[4] ? new Date(r[4]).getTime() : 0, by: String(r[5]), decidedAt: r[6] ? new Date(r[6]).getTime() : 0, role: String(r[7]), ua: String(r[8]||"").replace(/^Mozilla\/5\.0 \(([^;)]+).*$/, "$1").slice(0,24) })).reverse().slice(0, 100); }
+function setAccess(p) {
+  const me = admin_(p); const target = accessOf_(p && p.target); if (!target) throw new Error("ไม่พบคำขอ");
+  const status = p.status === "approved" ? "approved" : "denied";
+  accessSheet_().getRange(target.row, 4, 1, 4).setValues([[status, target.at, String(p.by || me.name || "").slice(0,60), new Date()]]);
+  return { ok:true };
+}
+
 /** ข้อมูลทั้งหมดที่หน้าใช้: ตารางจากชีตต้นทาง + ผลพิจารณา */
-function getData() {
+function getData(p) {
+  auth_(p);
   const ss = SpreadsheetApp.openById(SOURCE_ID);
   const sh = SOURCE_TAB ? ss.getSheetByName(SOURCE_TAB) : ss.getSheets()[0];
   const grid = sh.getDataRange().getDisplayValues();
@@ -24,6 +65,7 @@ function getData() {
 /** บันทึกผล {key,name,status,by} — status: "pass" | "fail" | "" (ยกเลิก) */
 function setReview(r) {
   if (!r || !r.key) throw new Error("missing key");
+  auth_(r);
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
     const sh = reviewSheet_();
@@ -45,6 +87,7 @@ function setReview(r) {
 /** บันทึกระยะในแผน {key,name,phase:"1,3",by} — เก็บคอลัมน์ G ของแถว Reviews */
 function setPhase(r) {
   if (!r || !r.key) throw new Error("missing key");
+  auth_(r);
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
     const sh = reviewSheet_(); const vals = sh.getDataRange().getValues();
@@ -72,7 +115,7 @@ function setPhases(list) {
   } finally { lock.releaseLock(); }
 }
 /** วันโพสต์ {key,name,dates:"8,21",by} — คอลัมน์ I ของ Reviews */
-function setDates(r) { return setDatesMany([r]); }
+function setDates(r) { auth_(r); return setDatesMany([r]); }
 function setDatesMany(list) {
   if (!list || !list.length) return {ok:true, n:0};
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
@@ -90,6 +133,7 @@ function setDatesMany(list) {
 /** แนวคอนเทนต์ต่อโพสต์ {key,kol,name,day,format,brief,status,link,by} — แท็บ Posts */
 function setPost(p) {
   if (!p || !p.key) throw new Error("missing key");
+  auth_(p);
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
     const sh = tab_("Posts", ["key","kol","ชื่อ KOL","วัน","รูปแบบ","แนวคอนเทนต์","สถานะ","ลิงก์โพสต์","แก้โดย","เวลา"]);
@@ -138,6 +182,7 @@ function currentDates_() {
 /** คำแนะนำ KOL จากลูกค้า {name,link,f,cat,note,by,vid} */
 function addSuggestion(s) {
   if (!s || !s.name) throw new Error("missing name");
+  auth_(s);
   if (String(s.name).trim() === RESET_CODE) { resetAll_(); return {ok:true, reset:true}; }
   if (String(s.name).trim() === "ทดสอบไลน์") { throw new Error("LINE: " + pushLine_("✅ ทดสอบแจ้งเตือนจาก KOL Approval Board โดย " + (s.by||"-"))); }
   const sh = tab_("Suggestions", ["เวลา","ชื่อบัญชี","ลิงก์","ผู้ติดตาม","หมวด","หมายเหตุ","ผู้แนะนำ","visitor"]);
@@ -211,9 +256,11 @@ function pushLine_(text) {
   if (!LINE_TOKEN || !LINE_TO) result = "ยังไม่ได้ตั้งค่า LINE_TOKEN/LINE_TO ใน Script Properties (token=" + (LINE_TOKEN?"มี":"ไม่มี") + ", to=" + (LINE_TO?"มี":"ไม่มี") + ")";
   else {
     try {
-      const res = UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", { method: "post", contentType: "application/json",
-        headers: { Authorization: "Bearer " + LINE_TOKEN }, payload: JSON.stringify({ to: LINE_TO, messages: [{ type: "text", text: text }] }), muteHttpExceptions: true });
-      result = "HTTP " + res.getResponseCode() + " " + String(res.getContentText()).slice(0, 160);
+      const tos = String(LINE_TO).split(/[,\s]+/).filter(Boolean); const outs = [];
+      tos.forEach(to => { const res = UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", { method: "post", contentType: "application/json",
+        headers: { Authorization: "Bearer " + LINE_TOKEN }, payload: JSON.stringify({ to: to, messages: [{ type: "text", text: text }] }), muteHttpExceptions: true });
+        outs.push("HTTP " + res.getResponseCode() + " " + String(res.getContentText()).slice(0, 80)); });
+      result = outs.join(" | ");
     } catch (e) { result = "ERR " + String(e && e.message || e).slice(0, 200); }
   }
   try { tab_("LineLog", ["เวลา","ข้อความ","ผล"]).appendRow([new Date(), text.slice(0,200), result]); } catch (e) {}
@@ -235,4 +282,4 @@ function setup_() {
   Logger.log("Review sheet: " + sh.getParent().getUrl());
 }
 
-return { getData, setReview, setPhase, setPhases, setDates, setDatesMany, setPost, snapshotDates, listSnapshots, restoreSnapshot, addSuggestion, logEvents };
+return { getData, setReview, setPhase, setPhases, setDates, setDatesMany, setPost, snapshotDates, listSnapshots, restoreSnapshot, requestAccess, accessStatus, staffLogin, listAccess, setAccess, addSuggestion, logEvents };
