@@ -210,7 +210,13 @@ function sanitize_(grid) {
   const hdr = hdrRow >= 0 ? grid[hdrRow] : [];
   const drop = hdr.map((h,i) => HIDE_COLS.some(k => String(h).toLowerCase().indexOf(k.toLowerCase()) >= 0) ? i : -1).filter(i => i >= 0);
   const phone = /(\+66|0)\d{1,2}[-\s]?\d{3,4}[-\s]?\d{3,4}/g;
-  return grid.map(r => r.filter((_, i) => drop.indexOf(i) < 0).map(c => String(c).replace(phone, "0xx-xxx-xxxx")));
+  const money = /\d[\d,.]*\s*(?:[–-]\s*\d[\d,.]*\s*)?(?:บาท|฿|THB)/gi; // ราคา/เรทที่หลุดมาอยู่ในหมายเหตุ
+  const noteCols = hdr.map((h,i) => /หมายเหตุ|note/i.test(String(h)) ? i : -1).filter(i => i >= 0);
+  const bigNum = /\d{1,3}(?:,\d{3})+|\d{4,}/g; // ในช่องหมายเหตุ: ตัวเลข 4 หลักขึ้นไปถือเป็นราคา ปิดบังทั้งหมด
+  return grid.map(r => r.filter((_, i) => drop.indexOf(i) < 0).map((c, j) => { let v = String(c).replace(phone, "0xx-xxx-xxxx").replace(money, "[เรท — ไม่แสดง]");
+    const orig = hdr.length ? hdr.findIndex((_, k) => drop.indexOf(k) < 0 && hdr.slice(0, k).filter((__, q) => drop.indexOf(q) < 0).length === j) : -1;
+    if (noteCols.indexOf(orig) >= 0) v = v.replace(bigNum, "[เรท]");
+    return v; }));
 }
 function resetAll_() {
   const ss = reviewSheet_().getParent();
