@@ -10,14 +10,13 @@ const TIERS=[
 const $=s=>document.querySelector(s);
 /* ===== API: คุยกับ Apps Script (ตั้งค่า URL ใน config.js) ===== */
 const APP_URL=(window.KOL_CONFIG&&window.KOL_CONFIG.APP_URL)||"";
-const TARGET=Number(window.KOL_CONFIG&&window.KOL_CONFIG.TARGET)||50;
-const PHASES=(window.KOL_CONFIG&&window.KOL_CONFIG.PHASES)||[
-  {n:"1",title:"Build Festival Desire",d:"6–13 พ.ย. 2569 · Awareness",goal:"Teaser \"SAVE THE DATE 20–29 พ.ย.\" · Reel #น่าลงทุน #น่าเที่ยว #น่าอยู่ · ต่อยอดงานบุกสยาม 8 พ.ย. · Caravan 3 เส้นทาง · ลานย่าโม / Korat Neighborhood",brief:"เป้า: ให้คนจำวันงานและจองวันไว้ — บอกวัน/สถานที่/3 ประสบการณ์ ชี้ไป LINE OA รับสิทธิ์ Early Bird",c:"#6f6f75"},
-  {n:"2",title:"Drive Attendance",d:"13–19 พ.ย. 2569 · Consideration",goal:"Vlog \"โคราชหนึ่งวัน\" เลือก 4 จุดจาก 4 Pillars (งานออกแบบ → Local Food → Street Art → Creative Space) จบด้วยแผนที่ตามรอย · Guide จุดจอดรถ/ร้านอาหาร · Line-up สายเต้น/เพลง/ช้อป/กิน · นับถอยหลัง",brief:"เป้า: ให้ตัดสินใจเดินทาง — เส้นทาง ที่พัก ที่จอดรถ แพ็กเกจ/คูปอง ชวนนัดเพื่อน ปิดท้าย \"จองวันเสาร์นี้\"",c:"#f05a85"},
-  {n:"3",title:"Festival Experience",d:"20–29 พ.ย. 2569 · Conversion",goal:"20–22 เปิดเมือง K-Street/K-Sounder · 23–26 จุดกิจกรรม 7 จุดช่วงเย็น · 27 เปิดงานทางการ · 27–29 K-BATx Expo / K-Battle รอบชิง / Jennifer Kim × Orchestra · เช็กอิน 7 จุดผ่าน LINE",brief:"เป้า: ให้คนที่ยังไม่มา มาสุดสัปดาห์นี้ — ไลฟ์/Highlight รายวัน รีวิว Street Food & Fashion จบด้วยพิกัดบูธ + QR แลกสิทธิ์หน้างาน",c:"#e8194c"}];
-const HASHTAGS="#อวดเมืองโคราช #อวดเมือง2569 #KBattle2026 #น่าลงทุน #น่าเที่ยว #น่าอยู่";
-const KOL_REACH_TARGET=5e6, KOL_VISIT_TARGET=50000; /* เด็ค: TikTok/IG Mega 3–5 + Micro 50+ → Reach ~5M × 1% = 50,000 คน (1 ใน 4 ของเป้า 200,000) */
-const TOR_MICRO_MIN=30, TOR_NANO_MIN=20; /* TOR 6.3.4(3): Micro 5,000+ ≥30 คน · Nano 1,000+ ≥20 คน รวม ≥50 */
+const CFG=window.KOL_CONFIG||{};
+const TARGET=Number(CFG.TARGET)||50;
+const PHASES=CFG.PHASES||[{n:"1",title:"ระยะ 1",d:"",from:0,to:6,c:"#8a8fa8",goal:"",brief:""},{n:"2",title:"ระยะ 2",d:"",from:7,to:13,c:"#3fa3ff",goal:"",brief:""},{n:"3",title:"ระยะ 3",d:"",from:14,to:20,c:"#0A5BFF",goal:"",brief:""}];
+const NP=PHASES.length;
+const HASHTAGS=CFG.HASHTAGS||"";
+const KOL_REACH_TARGET=Number(CFG.REACH_TARGET)||0, KOL_VISIT_TARGET=Number(CFG.VISIT_TARGET)||0;
+const TOR_MICRO_MIN=Number(CFG.TOR_MICRO_MIN)||0, TOR_NANO_MIN=Number(CFG.TOR_NANO_MIN)||0;
 const torTier=d=>(d.f||0)>=5000?"micro":(d.f||0)>=1000?"nano":"below";
 function api(name,args){ if(!APP_URL) return Promise.reject(new Error("ยังไม่ได้ตั้งค่า APP_URL ใน config.js"));
   args=(args||[]).map((a,i)=>(i===0&&a&&typeof a==="object"&&!Array.isArray(a))?Object.assign({_vid:(typeof VID!=="undefined"?VID:"")},a):a); if(!args.length) args=[{_vid:(typeof VID!=="undefined"?VID:"")}];
@@ -37,13 +36,14 @@ function parseRows(csv){
   const rows=parseCSV(csv); const out=[]; let group="", col=null, codeCol=null;
   for(const r of rows){ const a=(r[0]||"").trim();
     if(codeCol==null){ r.forEach((h,i)=>{ if(/^\s*(code|รหัส)\s*$/i.test(h||"")) codeCol=i; }); }
-    if(a==="ลำดับ"){ col={}; r.forEach((h,i)=>{h=(h||"").trim(); if(/ชื่อ/.test(h))col.name=i; else if(/หมวด/.test(h))col.cat=i; else if(/ติดตาม/.test(h))col.f=i; else if(/ลิงก์/.test(h))col.link=i; else if(/หมายเหตุ/.test(h))col.note=i; else if(/rate|เรท/i.test(h))col.rate=i; else if(/^code$|รหัส/i.test(h))col.code=i;}); if(col.code==null&&codeCol!=null) col.code=codeCol; continue; }
+    if(a==="ลำดับ"){ col={}; r.forEach((h,i)=>{h=(h||"").trim(); if(/ชื่อ/.test(h))col.name=i; else if(/หมวด/.test(h))col.cat=i; else if(/ติดตาม/.test(h))col.f=i; else if(/ลิ้?งก์|link/i.test(h)){col.link=i;col.link2=i+1;} else if(/หมายเหตุ/.test(h))col.note=i; else if(/rate|เรท/i.test(h))col.rate=i; else if(/^code$|รหัส/i.test(h))col.code=i;}); if(col.code==null&&codeCol!=null) col.code=codeCol; continue; }
     if(!col) continue;
     if(a && !/^\d+$/.test(a) && !(r[1]||"").trim()){ group=a; continue; }
     if(!/^\d+$/.test(a)) continue;
     const g=i=>i==null?"":(r[i]||"");
     const name=g(col.name).replace(/\s+/g," ").trim(); if(!name) continue;
-    const it={idx:+a, group, name, cat:g(col.cat).replace(/\s+/g," ").trim(), fRaw:g(col.f).trim(), link:g(col.link).trim(), note:g(col.note).trim(), code:g(col.code).replace(/[^A-Za-z0-9ก-๙_\-]/g,"").replace(/^[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]+/,"").trim().toUpperCase()};
+    const l1=g(col.link).trim(), l2=g(col.link2).trim(); const link=/^https?:/.test(l2)?l2:/^https?:/.test(l1)?l1:(l2||l1);
+    const it={idx:+a, group, name, cat:g(col.cat).replace(/\s+/g," ").trim(), fRaw:g(col.f).trim(), link, note:g(col.note).trim(), code:g(col.code).replace(/[^A-Za-z0-9ก-๙_\-]/g,"").replace(/^[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]+/,"").trim().toUpperCase()};
     it.f=num(it.fRaw); it.tier=tierOf(it.f); it.url=linkOf(it.link); it.artist=/ศิลปิน/.test(group); it.key=it.name.toLowerCase();
     it.h=hash([it.cat,it.fRaw,it.link,it.note,it.code].join("|")); out.push(it);
   } return out;
@@ -62,7 +62,7 @@ const iniOf=d=>esc(String(d.name||"?").trim().replace(/^[^a-zA-Zก-๙0-9]+/,""
 let POSTS={}; /* key = rid_day → {format,brief,status,link,by} */
 const STATUS=[["plan","วางแผน"],["brief","บรีฟแล้ว"],["draft","ส่งดราฟต์"],["done","โพสต์แล้ว"]];
 const FORMATS=["คลิปสั้น (TikTok/Reels)","Vlog","ไลฟ์","โพสต์ภาพ/แคโรเซล","สตอรี่"];
-const datesOf=d=>{ const r=reviews[rid(d)]; return String(r&&r.dates||"").split(",").map(s=>+s).filter(n=>n>=6&&n<=29); };
+const datesOf=d=>{ const r=reviews[rid(d)]; return String(r&&r.dates||"").split(",").map(s=>s.trim()).filter(s=>s!=="").map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<DAYS); };
 const phasesOf=d=>{ const r=reviews[rid(d)]; return String(r&&r.phase||"").split(",").map(s=>s.trim()).filter(Boolean); };
 /* ป้าย Code ที่แสดงบนหน้า: ชื่อที่โชว์ (ค่าว่าง = ไม่โชว์) */
 const CODE_LABEL={ PANU:"P'PANU Recommend", BEE:"MiDi", "":"MiDi" };
@@ -133,7 +133,8 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab)
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
 /* ===== team 50 ===== */
-const CATS=[["ศิลปิน",/ศิลปิน|นักร้อง|ไอดอล/],["กิน / ร้านอาหาร",/กิน|อาหาร|อร่อย|ร้าน|food|restaurant/i],["คาเฟ่",/คาเฟ่|cafe/i],["ท่องเที่ยว",/เที่ยว|travel|ทริป/i],["ที่พัก / โรงแรม",/ที่พัก|โรงแรม|hotel/i],["ไลฟ์สไตล์ / อื่น ๆ",/.*/]];
+const RX={news:/ข่าว|news|อัปเดต|อัพเดท|update/i, edu:/ความรู้|เทคนิค|สอน|how|tip|trick|แนะนำ/i, review:/รีวิว|review|gadget|ชี้เป้า|แกะกล่อง|unbox/i, fin:/finance|invest|ลงทุน|หุ้น|business|ธุรกิจ|เศรษฐกิจ|การเงิน|money/i, life:/lifestyle|ไลฟ์สไตล์|travel|ท่องเที่ยว|photo|ถ่ายภาพ/i, host:/พิธีกร|คอลัมนิสต์|ผู้ดำเนินรายการ|mc|วิทยากร|speaker|creator/i, mobile:/มือถือ|smart ?phone|แอป|app/i};
+const CATS=[["ข่าว/อัปเดตเทค",RX.news],["ความรู้/สอนใช้",RX.edu],["รีวิว Gadget/IT",RX.review],["การเงิน/ลงทุน",RX.fin],["ไลฟ์สไตล์",RX.life],["อื่น ๆ",/.*/]];
 function catsOf(d){ const s=(d.cat||"")+" "+(d.group||""); const out=CATS.filter(([k,re],i)=>i<CATS.length-1&&re.test(s)).map(x=>x[0]); return out.length?out:[CATS[CATS.length-1][0]]; }
 function renderTeam(sorted,reachAll){
   const {all,team,spare}=teamList(sorted); const fails=sorted.filter(d=>rvOf(d)==="fail"), np=all.length, confirmed=all.filter(d=>rvOf(d)==="pass").length;
@@ -143,9 +144,9 @@ function renderTeam(sorted,reachAll){
   $("#tp-line").textContent=np>=TARGET?`ทีมพร้อม ${TARGET} คน${spare.length?` · สำรอง ${spare.length} คน`:""} · ยืนยันแล้ว ${confirmed} · ตัดออก ${fails.length}`:`อยู่ในทีม ${np} คน · ตัดออก ${fails.length} · ขาดอีก ${short} ช่อง`;
   const w=$("#tp-warn"); if(short>0){ w.hidden=false; w.className="tp-warn"; w.textContent=`⚠ ตัดออกแล้ว ${fails.length} คน — ทีมเหลือ ${np} ยังขาด ${short} คน ทีมงานกำลังหา KOL มาเติม`; } else { w.hidden=false; w.className="tp-warn ok"; w.textContent=fails.length?`ตัดออก ${fails.length} คน ทีมยังครบ ${TARGET} · ตัดได้อีก ${np-TARGET} คนก่อนจะขาด`:`✓ ทีมครบ ${TARGET} · ตัดได้อีก ${np-TARGET} คนก่อนจะขาด — ไม่ชอบใครกด "ตัดออก" ได้เลย`; }
   const reach=team.reduce((s,d)=>s+(d.f||0),0);
-  $("#tp-stats").innerHTML=`<div><div class="l">Reach ของทีม</div><div class="v">${fmtN(reach)}</div></div><div><div class="l">เป้า reach KOL (แผน)</div><div class="v${reach>=KOL_REACH_TARGET?" ok":""}">${Math.round(reach/KOL_REACH_TARGET*100)}%<small> / 5M</small></div></div><div><div class="l">คาดคนเข้างานจาก KOL (1%)</div><div class="v">${fmtN(Math.round(reach*0.01))}<small> / 50K</small></div></div>`;
+  $("#tp-stats").innerHTML=`<div><div class="l">Reach ของทีม</div><div class="v">${fmtN(reach)}</div></div>`+(KOL_REACH_TARGET?`<div><div class="l">เป้า reach KOL</div><div class="v${reach>=KOL_REACH_TARGET?" ok":""}">${Math.round(reach/KOL_REACH_TARGET*100)}%<small> / ${fmtN(KOL_REACH_TARGET)}</small></div></div>`:`<div><div class="l">เฉลี่ยต่อคน</div><div class="v">${fmtN(team.length?Math.round(reach/team.length):0)}</div></div>`)+`<div><div class="l">หมวดที่ครอบคลุม</div><div class="v">${new Set(team.flatMap(catsOf)).size}/${CATS.length}</div></div>`;
   const mic=team.filter(d=>torTier(d)==="micro").length, nan=team.filter(d=>torTier(d)==="nano").length, below=team.filter(d=>torTier(d)==="below").length;
-  const torEl=$("#tor"); torEl.innerHTML=`<span class="lb">เงื่อนไข TOR 6.3.4(3)</span><span class="${mic>=TOR_MICRO_MIN?"ok":"bad"}">Micro (5,000+ ผู้ติดตาม) <b>${mic}</b> / ≥${TOR_MICRO_MIN}</span><span class="${nan>=TOR_NANO_MIN?"ok":"bad"}">Nano (1,000–4,999) <b>${nan}</b> / ≥${TOR_NANO_MIN}</span>${below?`<span class="bad">ต่ำกว่า 1,000: ${below} คน (ไม่นับ)</span>`:""}<span class="hint">${nan<TOR_NANO_MIN?`ต้องหา Nano เพิ่มอีก ${TOR_NANO_MIN-nan} คน ถึงจะครบเงื่อนไข`:"ครบตามเงื่อนไข ✓"}</span>`;
+  const torEl=$("#tor"); torEl.hidden=!(TOR_MICRO_MIN||TOR_NANO_MIN); torEl.innerHTML=`<span class="lb">เงื่อนไข TOR 6.3.4(3)</span><span class="${mic>=TOR_MICRO_MIN?"ok":"bad"}">Micro (5,000+ ผู้ติดตาม) <b>${mic}</b> / ≥${TOR_MICRO_MIN}</span><span class="${nan>=TOR_NANO_MIN?"ok":"bad"}">Nano (1,000–4,999) <b>${nan}</b> / ≥${TOR_NANO_MIN}</span>${below?`<span class="bad">ต่ำกว่า 1,000: ${below} คน (ไม่นับ)</span>`:""}<span class="hint">${nan<TOR_NANO_MIN?`ต้องหา Nano เพิ่มอีก ${TOR_NANO_MIN-nan} คน ถึงจะครบเงื่อนไข`:"ครบตามเงื่อนไข ✓"}</span>`;
   const slots=$("#slots"); slots.innerHTML="";
   for(let i=0;i<TARGET;i++){ const d=team[i]; const el=document.createElement("div");
     if(!d){ el.className="slot empty"; el.textContent=i+1; }
@@ -165,7 +166,7 @@ function renderPlan(sorted){
   const passed=teamList(sorted).all;
   $("#phases").innerHTML=PHASES.map(p=>{ const list=passed.filter(d=>phasesOf(d).includes(p.n)); const reach=list.reduce((s,d)=>s+(d.f||0),0);
     const faces=list.slice(0,14).map(d=>{ const s=avSrc(d); return s?`<img src="${s}" alt="" title="${esc(d.name)}" data-k="${esc(d.key)}">`:`<span class="f" title="${esc(d.name)}" data-k="${esc(d.key)}">${iniOf(d)}</span>`; }).join("")+(list.length>14?`<span class="f more">+${list.length-14}</span>`:"");
-    return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(p.d)}</div><div class="g">${esc(p.goal)}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="faces">${list.length?faces:`<div class="empty-p">ยังไม่มี KOL ในระยะนี้ — เลือกจากรายชื่อด้านล่าง</div>`}</div></div>`; }).join("");
+    return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(rangeLabel(p))}</div><div class="g">${esc(p.goal)}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="faces">${list.length?faces:`<div class="empty-p">ยังไม่มี KOL ในระยะนี้ — เลือกจากรายชื่อด้านล่าง</div>`}</div></div>`; }).join("");
   $("#phases").querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>{ const d=data.find(x=>x.key===el.dataset.k); if(d) openCard(d); });
   const unset=passed.filter(d=>!phasesOf(d).length).length; const byz=[...new Set(passed.map(d=>(reviews[rid(d)]||{}).phaseBy).filter(Boolean))]; $("#plan-who").textContent=byz.length?"จัดโดย: "+byz.join(", "):"";
   const list=$("#plan-list"); if(!passed.length){ list.innerHTML=`<div class="empty">ยังไม่มี KOL ในทีม</div>`; return; }
@@ -174,55 +175,59 @@ function renderPlan(sorted){
     el.querySelectorAll(".pch button").forEach(b=>b.onclick=()=>togglePhase(d,b.dataset.p)); });
 }
 /* ===== AI plan: กติกาที่อธิบายได้ ===== */
-const LOCAL_RE=/โคราช|korat|นครราชสีมา|เมืองย่า|ย่าโม/i;
+/* กติกา MIDI จัดให้ — แคมเปญเปิดตัวฟีเจอร์ AI ของแอปลงทุน: 1 Tease · 2 Reveal · 3 Prove · 4 Convert */
 function aiPlan(passed){
-  const total=passed.reduce((s,d)=>s+(d.f||0),0); const out=new Map();
-  passed.forEach(d=>{ const sc=[0,0,0], why=[[],[],[]]; const txt=(d.name+" "+d.cat); const f=d.f||0;
-    const add=(i,n,w)=>{ sc[i]+=n; why[i].push(w); };
-    if(d.artist){ add(0,4,"ศิลปิน — Teaser \"SAVE THE DATE\" เปิดตัวแคมเปญ ฐานแฟนกรุงเทพฯ ต่อยอดงานบุกสยาม 8 พ.ย."); if(/สามารถ.{0,12}ร่วมงาน|วันเปิดงาน/.test(d.cat||"")) add(2,5,"ระบุว่ามาร่วมงานได้วันเปิดงาน 27 พ.ย. — ลงช่วง 27–29 (เปิดงานทางการ / K-Battle รอบชิง)"); }
-    if(f>=1e6) add(0,3,"Mega "+fmtN(f)+" — เปิดการรับรู้วงกว้าง (เป้า reach KOL รวม 5M)"); else if(f>=3e5) add(0,2,"Macro "+fmtN(f)+" — reach สูง เหมาะช่วงเปิดตัว"); else if(f>=1e5) add(1,1,"Macro ระดับกลาง — Vlog \"โคราชหนึ่งวัน\" ชวนวางแผนทริป");
-    if(LOCAL_RE.test(txt)){ add(2,3,"บัญชีท้องถิ่นโคราช — เช็กอิน 7 จุด / Highlight รายวัน ช่วง 23–26 (จุดกิจกรรมในเมืองช่วงเย็น)"); add(1,1,"รู้จักพื้นที่ — Guide จุดจอดรถ/ร้านอาหาร/เส้นทาง Caravan"); }
-    if(/ท่องเที่ยว|travel|ทริป|เที่ยว/i.test(d.cat||d.group)){ add(1,2,"สายท่องเที่ยว — Vlog 4 จุด 4 Pillars จบด้วยแผนที่ตามรอย"); if(f>=1.5e5) add(0,1,"ท่องเที่ยวยอดสูง — ชวนคนกรุงเทพฯ/ปริมณฑล (Segment 2) มาโคราช"); }
-    if(/คาเฟ่|cafe/i.test(d.cat)) add(1,1,"คาเฟ่ — Creative Space / จุดเช็กอินช่วงวางแผน");
-    if(/กิน|อาหาร|อร่อย|food|ร้าน/i.test(d.cat)) add(2,2,"สายกิน — รีวิว Street Food \"กินของใหม่ ใส่ของเท่\" จบด้วยพิกัดบูธ");
-    if(/ที่พัก|โรงแรม|hotel/i.test(d.cat)) add(1,2,"ที่พัก — ช่วยตัดสินใจค้างคืน (เป้าน่าเที่ยว 100,000 คน)");
-    if(/คอมมูนิตี้|community/i.test(d.cat)) add(1,2,"บัญชีคอมมูนิตี้ — กระจาย Line-up / กิจกรรม 7 จุด");
-    if(/แฟชั่น|fashion|สตรีท|street|เต้น|dance|ศิลปะ|art|ออกแบบ|design/i.test(txt)) { add(2,3,"สาย Street/Fashion/Art — ตรง K-STREET และ Street Fashion ช่วง 20–22 เปิดเมือง"); add(1,1,"Street Art / งานออกแบบ — 1 ใน 4 Pillars ของ Vlog"); }
-    if(f<5e4&&!d.artist) add(2,1,"Micro/Nano — คอนเทนต์หน้างานจริง + ลิงก์/QR รายคนแลกสิทธิ์หน้างาน");
-    if(!sc.some(Boolean)) add(1,1,"ทั่วไป — ใส่ช่วงกลางเพื่อเสริมความถี่");
+  const total=passed.reduce((s,d)=>s+(d.f||0),0); const out=new Map(); const Z=()=>PHASES.map(()=>0), ZZ=()=>PHASES.map(()=>[]);
+  const P=(n)=>Math.min(NP-1,n); // ดัชนีระยะ (กัน config ที่มีน้อยกว่า 4 ระยะ)
+  passed.forEach(d=>{ const sc=Z(), why=ZZ(); const txt=(d.name+" "+d.cat); const f=d.f||0;
+    const add=(i,n,w)=>{ i=P(i); sc[i]+=n; why[i].push(w); };
+    if(f>=1e6) add(1,4,"Mega "+fmtN(f)+" — เดโมวันเปิดตัวให้คนเห็นวงกว้าง"); else if(f>=3e5){ add(1,3,"Macro "+fmtN(f)+" — reach สูง เหมาะวันเปิดตัว"); add(0,1,"Teaser ก่อนเปิดตัว — ปูกระแส"); } else if(f>=1e5) add(2,2,"Macro ระดับกลาง — สอนใช้จริง/เปรียบเทียบ");
+    if(RX.news.test(txt)){ add(0,3,"สายข่าวเทค — Teaser \"AI กำลังมา\" + นับถอยหลัง"); add(1,2,"รายงานวันเปิดตัวแบบข่าว"); }
+    if(RX.edu.test(txt)){ add(2,4,"สายความรู้/เทคนิค — How-to ใช้ AI วิเคราะห์หุ้นทีละขั้น"); add(1,1,"อธิบายฟีเจอร์วันเปิดตัว"); }
+    if(RX.review.test(txt)){ add(2,3,"สายรีวิว — รีวิวตรง ๆ ไม่เกินจริง ข้อดี/ข้อจำกัด"); add(3,2,"สรุปรีวิว + CTA ลองใช้"); }
+    if(RX.fin.test(txt)){ add(1,3,"สายการเงิน/ลงทุน — เปิดตัวอย่างน่าเชื่อถือ อธิบายกรอบความเสี่ยง"); add(3,3,"ปิดการตัดสินใจ — เคสจริง + ขั้นตอนเปิดบัญชี"); }
+    if(RX.life.test(txt)){ add(0,2,"ไลฟ์สไตล์ — ตั้งคำถามชีวิตนักลงทุนมือใหม่"); add(3,3,"use case ในชีวิตประจำวัน — CTA ดาวน์โหลด"); }
+    if(RX.host.test(txt)) add(1,2,"พิธีกร/นักพูด — เล่าภาพใหญ่วันเปิดตัว");
+    if(RX.mobile.test(txt)) add(2,2,"สายมือถือ/แอป — เดโมในแอปจริง");
+    if(f<5e4) add(3,2,"Micro/Nano — ลิงก์/โค้ดรายคน วัดการเปิดบัญชี");
+    if(!sc.some(Boolean)) add(2,1,"ทั่วไป — ใส่ช่วงสอนใช้เพื่อเสริมความถี่");
     out.set(d.key,{d,sc,why}); });
-  // assign primary = argmax; balance by reach share (target ≈ 32/30/38 %)
-  const target=[.30,.42,.28].map(x=>x*total); const sum=[0,0,0]; const pick={};
-  const order=[...passed].sort((a,b)=>(b.f||0)-(a.f||0));
-  order.forEach(d=>{ const o=out.get(d.key); const ranked=[0,1,2].sort((i,j)=>o.sc[j]-o.sc[i]||sum[i]-sum[j]); let i=ranked[0];
-    if(sum[i]+(d.f||0)>target[i]*1.25 && o.sc[ranked[1]]>=o.sc[i]-2){ i=ranked[1]; o.why[i].push("ย้ายมาระยะนี้เพื่อบาลานซ์ reach ระหว่างระยะ"); }
-    const ph=[String(i+1)]; const j=ranked.find(k=>k!==i&&o.sc[k]>=4&&o.sc[k]>=o.sc[i]-1); if(j!=null) ph.push(String(j+1));
-    if(ph.includes("3")){ const slot=d.artist||(d.f||0)>=3e5?"27–29 พ.ย. (เปิดงานทางการ / รอบชิง / Jennifer Kim)":/แฟชั่น|fashion|สตรีท|street|เต้น|dance|ศิลปะ|art/i.test(d.name+" "+d.cat)?"20–22 พ.ย. (K-Street & K-Sounder เปิดเมือง)":"23–26 พ.ย. (จุดกิจกรรม 7 จุดช่วงเย็น)"; o.why[2].push("ช่วงที่แนะนำ: "+slot); }
+  const share=NP===4?[.22,.30,.28,.20]:PHASES.map(()=>1/NP); const target=share.map(x=>x*total); const sum=Z(); const pick={};
+  const order=[...passed].sort((a,b)=>(b.f||0)-(a.f||0)); const idx=PHASES.map((_,i)=>i);
+  order.forEach(d=>{ const o=out.get(d.key); const ranked=[...idx].sort((i,j)=>o.sc[j]-o.sc[i]||sum[i]-sum[j]); let i=ranked[0];
+    if(sum[i]+(d.f||0)>target[i]*1.3 && o.sc[ranked[1]]>=o.sc[i]-2){ i=ranked[1]; o.why[i].push("ย้ายมาระยะนี้เพื่อบาลานซ์ reach ระหว่างระยะ"); }
+    const ph=[String(i+1)]; const j=ranked.find(k=>k!==i&&o.sc[k]>=3&&o.sc[k]>=o.sc[i]-1); if(j!=null) ph.push(String(j+1));
     sum[i]+=(d.f||0); pick[d.key]={d,ph:ph.sort(),whyP:o.why,why:ph.map(p=>o.why[+p-1]).flat().filter((v,k,a)=>a.indexOf(v)===k)}; });
-  // ระยะ 1 ต้องผสม Micro ด้วย ไม่ใช่ศิลปินล้วน: เติมสายเที่ยว/ท้องถิ่น/คาเฟ่ ที่ยอด < 300K จนระยะ 1 มี ≈ 30% ของทีม
-  // ระยะ 2 คือสัปดาห์ตัดสินใจเดินทาง: อย่างน้อย 55% ของทีมต้องมีโพสต์ในระยะ 2
-  { const want2=Math.round(passed.length*0.55); const have2=()=>Object.values(pick).filter(x=>x.ph.includes("2")).length;
-    const c2=Object.values(pick).filter(x=>!x.ph.includes("2")).sort((a,b)=>out.get(b.d.key).sc[1]-out.get(a.d.key).sc[1]);
-    for(const x of c2){ if(have2()>=want2) break; x.ph.push("2"); x.ph.sort(); const w="อัดก่อนงาน — ช่วง 13–19 คือสัปดาห์ที่คนตัดสินใจเดินทาง ต้องเห็นซ้ำ ≥3 ครั้งก่อนลงมือ"; x.whyP[1].push(w); x.why.push(w); } }
-  { const want=Math.max(4,Math.round(passed.length*0.35)); const have=()=>Object.values(pick).filter(x=>x.ph.includes("1")).length;
-    const cand=Object.values(pick).filter(x=>!x.ph.includes("1")&&!x.d.artist&&(x.d.f||0)<3e5).sort((a,b)=>{ const s=x=>(/ท่องเที่ยว|เที่ยว|travel/i.test(x.d.cat)?2:0)+(LOCAL_RE.test(x.d.name+" "+x.d.cat)?2:0)+(/คาเฟ่|cafe/i.test(x.d.cat)?1:0)+Math.min(1,(x.d.f||0)/1e5); return s(b)-s(a); });
-    for(const x of cand){ if(have()>=want) break; x.ph.push("1"); x.ph.sort(); const w="Micro ร่วมเปิดตัว — นับถอยหลัง/ชวนเพื่อนมาโคราช กระจายการรับรู้ในกลุ่มสายเที่ยวและคนท้องถิ่น"; x.whyP[0].push(w); x.why.push(w); } }
-  // guarantee each phase has at least 3 people when possible
-  [0,1,2].forEach(i=>{ const have=Object.values(pick).filter(x=>x.ph.includes(String(i+1))).length; if(have<3&&passed.length>=9){ Object.values(pick).sort((a,b)=>out.get(b.d.key).sc[i]-out.get(a.d.key).sc[i]).filter(x=>!x.ph.includes(String(i+1))).slice(0,3-have).forEach(x=>{ x.ph.push(String(i+1)); x.ph.sort(); x.whyP[i].push("เพิ่มให้ระยะที่ "+(i+1)+" มีคนครบขั้นต่ำ"); x.why.push("เพิ่มให้ระยะที่ "+(i+1)+" มีคนครบขั้นต่ำ"); }); } });
+  // วันเปิดตัว (ระยะ 2) ต้องมีคนอย่างน้อย 40% ของทีม — surround effect
+  if(NP>=2){ const want=Math.round(passed.length*0.4); const have=()=>Object.values(pick).filter(x=>x.ph.includes("2")).length;
+    const c=Object.values(pick).filter(x=>!x.ph.includes("2")).sort((a,b)=>out.get(b.d.key).sc[1]-out.get(a.d.key).sc[1]);
+    for(const x of c){ if(have()>=want) break; x.ph.push("2"); x.ph.sort(); const w="ร่วมวันเปิดตัว — หลายช่องโพสต์ไล่กันใน 48 ชม. ให้คนเห็นซ้ำ ≥3 ครั้ง"; x.whyP[1].push(w); x.why.push(w); } }
+  // ทุกระยะมีอย่างน้อย 3 คน
+  idx.forEach(i=>{ const have=Object.values(pick).filter(x=>x.ph.includes(String(i+1))).length; if(have<3&&passed.length>=3*NP){ Object.values(pick).sort((a,b)=>out.get(b.d.key).sc[i]-out.get(a.d.key).sc[i]).filter(x=>!x.ph.includes(String(i+1))).slice(0,3-have).forEach(x=>{ x.ph.push(String(i+1)); x.ph.sort(); const w="เพิ่มให้ระยะที่ "+(i+1)+" มีคนครบขั้นต่ำ"; x.whyP[i].push(w); x.why.push(w); }); } });
   return {pick,sum,total};
 }
-/* ===== timeline 6–29 พ.ย. จากแผน PR ===== */
-const TL_DAYS=Array.from({length:24},(_,i)=>6+i);
-const TL_W={6:2,7:2,8:4,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:5,18:5,19:5,20:4,21:4,22:3,23:2,24:2,25:2,26:3,27:4,28:4,29:3};
-const TL_EV=[{d:8,t:"บุกสยาม",s:"Kick-off กทม. KOL 5–8 คน"},{d:13,t:"เริ่ม TVC + เทงบสื่อ",s:"ช่วงเร่งคนตัดสินใจ 13–19"},{d:19,t:"Press Tour",s:"สื่อไลฟ์สไตล์ 19–20"},{d:20,t:"เปิดเมือง",s:"K-Street / K-Sounder 20–22"},{d:23,t:"7 จุดในเมือง",s:"ช่วงเย็น 23–26"},{d:27,t:"เปิดงานทางการ",s:"K-BATx · รอบชิง · Jennifer Kim 27–29"}];
-const tlPhase=d=>d<13?1:d<20?2:3;
-function renderTimeline(){ const el=$("#timeline"); if(!el||el.dataset.done) return; el.dataset.done=1; const today=new Date(); const td=(today.getMonth()===10&&today.getFullYear()===2026)?today.getDate():0;
-  const cells=[]; const spans=[[1,6,12,"ระยะ 1 · 6–12"],[2,13,19,"ระยะ 2 · 13–19"],[3,20,29,"ระยะ 3 · 20–29"]];
-  spans.forEach(([p,a,b,l])=>cells.push(`<div class="tl-phase ph${p}" data-n="${p}" style="grid-column:${a-5}/${b-4}">${l}</div>`));
-  TL_DAYS.forEach(d=>{ const w=TL_W[d]||1, p=tlPhase(d), dow=new Date(2026,10,d).getDay(); cells.push(`<div class="tl-bar ph${p}${w>=4?" hot":""}" style="grid-column:${d-5}" title="${d} พ.ย. · ความเข้ม ${w}/5"><i style="height:${w*20}%"></i></div>`); cells.push(`<div class="tl-day${dow===0||dow===6?" we":""}${d===td?" today":""}" style="grid-column:${d-5}">${d}</div>`); });
-  TL_EV.forEach((e,i)=>{ const p=tlPhase(e.d); const nxt=TL_EV[i+2]?TL_EV[i+2].d:30; const span=Math.max(2,Math.min(5,nxt-e.d,30-e.d)); cells.push(`<div class="tl-ev ph${p}" style="grid-column:${e.d-5}/span ${span};grid-row:${4+(i%2)}"><div class="pin"><b>${esc(e.t)}</b>${esc(e.s)}</div></div>`); });
-  el.innerHTML=`<h2>ไทม์ไลน์ 6–29 พ.ย. <span class="h-sub">แถบสูง = ช่วงที่ควรเน้นโพสต์ · หมุด = เหตุการณ์จากแผน PR</span></h2><div class="tl-grid">${cells.join("")}</div><div class="tl-legend"><span><i></i>เน้นมาก: 12–19 (สัปดาห์ตัดสินใจเดินทาง) และ 8 บุกสยาม</span><span><i class="lo"></i>ระหว่างงาน: ไลฟ์/Highlight เป็นหลัก เน้นสุดสัปดาห์ 20–21 และ 27–28</span><span>ตัวหนา = เสาร์–อาทิตย์ · สัดส่วนเป้าหมาย: ก่อนงาน ≈65% / ระหว่างงาน ≈35%</span></div>`; }
+/* ===== ปฏิทินแคมเปญ: วัน = ดัชนี 0..DAYS-1 นับจาก START ===== */
+const START=(()=>{ const m=String(CFG.START||"2026-11-01").split("-"); return new Date(+m[0],+m[1]-1,+m[2]); })();
+const DAYS=Math.max(7,Math.min(60,Number(CFG.DAYS)||28));
+const TL_DAYS=Array.from({length:DAYS},(_,i)=>i);
+const DAY=i=>new Date(START.getFullYear(),START.getMonth(),START.getDate()+i);
+const TH_M=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const dLabel=i=>{ const d=DAY(i); return d.getDate()+" "+TH_M[d.getMonth()]; };
+const dDow=i=>["อา","จ","อ","พ","พฤ","ศ","ส"][DAY(i).getDay()];
+const isWE=i=>{ const w=DAY(i).getDay(); return w===0||w===6; };
+const tlPhase=i=>{ const p=PHASES.find(p=>i>=p.from&&i<=p.to); return p?+p.n:NP; };
+const phaseDays=n=>TL_DAYS.filter(i=>tlPhase(i)===+n);
+const TL_W={}; TL_DAYS.forEach(i=>{ const v=Array.isArray(CFG.INTENSITY)&&CFG.INTENSITY[i]; TL_W[i]=v?Math.max(1,Math.min(5,+v)):(isWE(i)?4:3); });
+const TL_EV=(CFG.EVENTS||[]).filter(e=>e.d>=0&&e.d<DAYS);
+const rangeLabel=p=>p.d||(dLabel(p.from)+" – "+dLabel(p.to));
+function renderTimeline(){ const el=$("#timeline"); if(!el||el.dataset.done) return; el.dataset.done=1; const t0=new Date(); const td=TL_DAYS.find(i=>DAY(i).toDateString()===t0.toDateString());
+  const cells=[];
+  PHASES.forEach(p=>cells.push(`<div class="tl-phase" data-n="${p.n}" style="--ph:${p.c};grid-column:${p.from+1}/${p.to+2}">ระยะ ${p.n} · ${esc(rangeLabel(p))}</div>`));
+  TL_DAYS.forEach(i=>{ const w=TL_W[i], p=PHASES[tlPhase(i)-1]; cells.push(`<div class="tl-bar${w>=4?" hot":""}" style="--ph:${p.c};grid-column:${i+1}" title="${dLabel(i)} · ความเข้ม ${w}/5"><i style="height:${w*20}%"></i></div>`); cells.push(`<div class="tl-day${isWE(i)?" we":""}${i===td?" today":""}" style="grid-column:${i+1}">${DAY(i).getDate()}${i===0||DAY(i).getDate()===1?`<small>${TH_M[DAY(i).getMonth()]}</small>`:""}</div>`); });
+  TL_EV.forEach((e,i)=>{ const p=PHASES[tlPhase(e.d)-1]; const nxt=TL_EV[i+2]?TL_EV[i+2].d:DAYS; const span=Math.max(2,Math.min(6,nxt-e.d,DAYS-e.d)); cells.push(`<div class="tl-ev" style="--ph:${p.c};grid-column:${e.d+1}/span ${span};grid-row:${4+(i%2)}"><div class="pin"><b>${esc(e.t)}</b>${esc(e.s||"")}</div></div>`); });
+  el.innerHTML=`<h2>ไทม์ไลน์ ${esc(dLabel(0))} – ${esc(dLabel(DAYS-1))} <span class="h-sub">แถบสูง = ช่วงที่ควรเน้นโพสต์ · หมุด = จังหวะสำคัญของแคมเปญ</span></h2><div class="tl-grid" style="grid-template-columns:repeat(${DAYS},minmax(0,1fr))">${cells.join("")}</div><div class="tl-legend"><span><i></i>เน้นมาก: วันเปิดตัว + สัปดาห์สอนใช้ + โค้งสุดท้าย</span><span><i class="lo"></i>เบา: ช่วง Teaser</span><span>ตัวหนา = เสาร์–อาทิตย์</span></div>`; }
 renderTimeline();
+(()=>{ const a=$("#hash-txt"); if(a) a.textContent=HASHTAGS; const b=$("#sc-range"); if(b) b.textContent=dLabel(0)+" – "+dLabel(DAYS-1); const c=$("#hd-sub"); if(c&&CFG.SUB) c.textContent=CFG.SUB; })();
 const splitWhy=w=>{ const i=w.indexOf(" — "); return i>0?[w.slice(0,i),w.slice(i+3)]:[w,""]; };
 const chipsHtml=(arr,max)=>`<div class="why-chips">${arr.slice(0,max||99).map(w=>{ const [t,d]=splitWhy(w); const cls=/^ช่วงที่แนะนำ/.test(w)?"when":/^ย้าย|^เพิ่มให้/.test(w)?"mv":""; return `<span class="${cls}" title="${esc(w)}">${esc(cls==="when"?w.replace("ช่วงที่แนะนำ: ","📍 "):t)}</span>`; }).join("")}</div>`;
 let PLAN_MODE="manual";
@@ -230,13 +235,13 @@ $("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ PLAN_MODE=b
 function renderAI(passed){
   if(PLAN_MODE!=="ai") return; if(!passed.length){ $("#ai-sum").textContent="ยังไม่มี KOL ในทีม"; $("#ai-kpi").innerHTML=""; $("#ai-phases").innerHTML=""; $("#ai-list").innerHTML=""; return; }
   const {pick,total}=aiPlan(passed); const rows=Object.values(pick);
-  const cnt=[1,2,3].map(n=>rows.filter(x=>x.ph.includes(String(n))).length), sum=[1,2,3].map(n=>rows.filter(x=>x.ph.includes(String(n))).reduce((s,x)=>s+(x.d.f||0),0));
+  const cnt=PHASES.map(p=>rows.filter(x=>x.ph.includes(p.n)).length), sum=PHASES.map(p=>rows.filter(x=>x.ph.includes(p.n)).reduce((s,x)=>s+(x.d.f||0),0));
   const diff=rows.filter(x=>{ const cur=phasesOf(x.d).join(","); return cur&&cur!==x.ph.join(","); }).length, unset=rows.filter(x=>!phasesOf(x.d).length).length;
   $("#ai-kpi").innerHTML=PHASES.map((p,i)=>`<div style="--ph:${p.c}"><span class="n">${cnt[i]}</span><span class="l">KOL</span><span class="r">${fmtN(sum[i])}</span><span class="l">reach · ${Math.round(sum[i]/total*100)}%</span></div>`).join("");
-  const preN=rows.filter(x=>x.ph.includes("1")||x.ph.includes("2")).length;
-  $("#ai-sum").textContent=`จัด ${rows.length} คน · reach รวม ${fmtN(total)} จากเป้า KOL 5M · อัดก่อนงาน: ${preN}/${rows.length} คน (${Math.round(preN/rows.length*100)}%) มีโพสต์ก่อน 20 พ.ย. · ระยะ 3 แนะนำช่วงวันให้ด้วย (20–22 / 23–26 / 27–29)${unset?` · ยังไม่จัดเอง ${unset} คน`:""}${diff?` · ต่างจากที่จัดเองอยู่ ${diff} คน`:""}`;
+  const launchN=rows.filter(x=>x.ph.includes("2")).length;
+  $("#ai-sum").textContent=`จัด ${rows.length} คน · reach รวม ${fmtN(total)} · ร่วมวันเปิดตัว ${launchN} คน (${Math.round(launchN/rows.length*100)}%)${unset?` · ยังไม่จัดเอง ${unset} คน`:""}${diff?` · ต่างจากที่จัดเองอยู่ ${diff} คน`:""}`;
   $("#ai-phases").innerHTML=PHASES.map(p=>{ const list=rows.filter(x=>x.ph.includes(p.n)).sort((a,b)=>(b.d.f||0)-(a.d.f||0)); const reach=list.reduce((s,x)=>s+(x.d.f||0),0);
-    return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(p.d)}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="who-l">${list.map(x=>{ const s=avSrc(x.d); return `<div class="wl" data-k="${esc(x.d.key)}">${s?`<img src="${s}" alt="">`:`<span class="f">${iniOf(x.d)}</span>`}<div><b>${esc(x.d.name)} <span class="sub">${fmtN(x.d.f)}</span></b>${chipsHtml([...new Set((x.whyP[+p.n-1]||[]).concat(p.n==="3"?x.why.filter(w=>/^ช่วงที่แนะนำ/.test(w)):[]))],3)}</div></div>`; }).join("")}</div></div>`; }).join("");
+    return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(rangeLabel(p))}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="who-l">${list.map(x=>{ const s=avSrc(x.d); return `<div class="wl" data-k="${esc(x.d.key)}">${s?`<img src="${s}" alt="">`:`<span class="f">${iniOf(x.d)}</span>`}<div><b>${esc(x.d.name)} <span class="sub">${fmtN(x.d.f)}</span></b>${chipsHtml([...new Set(x.whyP[+p.n-1]||[])],3)}</div></div>`; }).join("")}</div></div>`; }).join("");
   $("#ai-phases").querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>{ const d=data.find(x=>x.key===el.dataset.k); if(d) openCard(d); });
   $("#ai-list").innerHTML=rows.sort((a,b)=>(b.d.f||0)-(a.d.f||0)).map(x=>{ const cur=phasesOf(x.d).join(","); return `<div class="ai-row" data-k="${esc(x.d.key)}">${avatarEl(x.d)}<div><div class="nm">${esc(x.d.name)} <i style="font-style:normal;color:var(--mute);font-weight:500;font-size:12px">${fmtN(x.d.f)}</i>${cur&&cur!==x.ph.join(",")?` <span class="diff">จัดเองไว้: ระยะ ${esc(cur)}</span>`:""}</div>${chipsHtml(x.why)}</div><div class="tags">${x.ph.map(p=>`<span style="--ph:${PHASES[+p-1].c}">ระยะ ${p}</span>`).join("")}</div></div>`; }).join("");
   $("#ai-list").querySelectorAll(".ai-row .av,.ai-row .nm").forEach(el=>el.onclick=()=>{ const d=data.find(x=>x.key===el.closest(".ai-row").dataset.k); if(d) openCard(d); });
@@ -253,21 +258,21 @@ function togglePhase(d,p){ if(!reviewer){ askName(()=>togglePhase(d,p)); return;
 let SC_SEL=null;
 function renderSched(all){ const el=$("#sc"); if(!el||$("#tabs .tab.active").dataset.tab!=="sched") return;
   const ev={}; TL_EV.forEach(e=>ev[e.d]=e.t);
-  const SUG={}; try{ autoDates(all).forEach(r=>{ SUG[r.key]=r.dates.split(",").map(Number).filter(Boolean); }); }catch(e){}
+  const SUG={}; try{ autoDates(all).forEach(r=>{ SUG[r.key]=r.dates.split(",").filter(s=>s!=="").map(Number); }); }catch(e){}
   const tot={}; all.forEach(d=>datesOf(d).forEach(x=>{ tot[x]=tot[x]||{n:0,r:0}; tot[x].n++; tot[x].r+=(d.f||0); }));
-  let h=`<div class="corner">KOL · ${all.length} คน</div>`+TL_DAYS.map(x=>{ const dow=new Date(2026,10,x).getDay(); return `<div class="hd ph${tlPhase(x)}${dow===0||dow===6?" we":""}">${x}<small>${["อา","จ","อ","พ","พฤ","ศ","ส"][dow]}</small>${ev[x]?`<span class="ev" title="${esc(ev[x])}">${esc(ev[x])}</span>`:""}</div>`; }).join("");
+  let h=`<div class="corner">KOL · ${all.length} คน</div>`+TL_DAYS.map(x=>{ const p=PHASES[tlPhase(x)-1]; return `<div class="hd${isWE(x)?" we":""}" style="box-shadow:inset 0 3px 0 ${p.c}">${DAY(x).getDate()}<small>${dDow(x)}${x===0||DAY(x).getDate()===1?" "+TH_M[DAY(x).getMonth()]:""}</small>${ev[x]?`<span class="ev" title="${esc(ev[x])}">${esc(ev[x])}</span>`:""}</div>`; }).join("");
   const maxN=Math.max(1,...Object.values(tot).map(t=>t.n));
   h+=`<div class="totl">โพสต์/วัน<br>reach/วัน<br><span style="font-size:9px">แถบ = แนะนำ</span></div>`+TL_DAYS.map(x=>{ const t=tot[x]||{n:0,r:0}; const w=TL_W[x]||1; return `<div class="tot${t.n?(w>=4&&t.n<2?" lo":t.n>=4?" hi":""):" lo"}" title="แนะนำความเข้ม ${w}/5">${t.n||"–"}<small>${t.r?fmtN(t.r):""}</small><span class="rec"><i style="width:${w*20}%"></i></span></div>`; }).join("");
-  const groups=[[1,"ระยะ 1 · เปิดตัว",PHASES[0].c],[2,"ระยะ 2 · ตัดสินใจเดินทาง",PHASES[1].c],[3,"ระยะ 3 · ระหว่างงาน",PHASES[2].c],[0,"ยังไม่ได้จัดระยะ","#c9c9ce"]];
+  const groups=PHASES.map(p=>[+p.n,"ระยะ "+p.n+" · "+p.title,p.c]).concat([[0,"ยังไม่ได้จัดระยะ","#c9c9ce"]]);
   const used=new Set();
   groups.forEach(([p,label,c])=>{ const list=all.filter(d=>{ if(used.has(d.key)) return false; const ph=phasesOf(d); const ok=p?ph[0]===String(p):!ph.length; if(ok) used.add(d.key); return ok; }).sort((a,b)=>(b.f||0)-(a.f||0)); if(!list.length) return;
     h+=`<div class="grp" style="--ph:${c}">${label} · ${list.length} คน</div>`;
     list.forEach(d=>{ const ds=datesOf(d), ph=phasesOf(d); const src=avSrc(d); const ini=iniOf(d);
       h+=`<div class="who${SC_SEL===d.key?" sel":""}" draggable="true" data-k="${esc(d.key)}" title="ลากไปวางในช่องวัน หรือแตะเพื่อเลือก">${src?`<div class="av"><img src="${src}" alt=""></div>`:`<div class="av av-txt">${ini}</div>`}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="f">${fmtN(d.f)}${ph.length?` · ระยะ ${ph.join(",")}`:""}</div></div><span class="n">${ds.length?ds.length+" โพสต์":""}</span></div>`;
-      TL_DAYS.forEach(x=>{ const dow=new Date(2026,10,x).getDay(); const inPh=ph.length?ph.includes(String(tlPhase(x))):false; const has=ds.includes(x);
+      TL_DAYS.forEach(x=>{ const dow=DAY(x).getDay(); const inPh=ph.length?ph.includes(String(tlPhase(x))):false; const has=ds.includes(x);
         const sug=!ds.length&&(SUG[rid(d)]||[]).includes(x);
-        h+=`<div class="cell${dow===0||dow===6?" we":""}${inPh&&!has?" rec":""}" data-k="${esc(d.key)}" data-d="${x}" style="--ph:${c}">${has?`<div class="post" draggable="true" data-k="${esc(d.key)}" data-d="${x}" title="${esc(d.name)} · ${x} พ.ย. — กดเพื่อดู/แก้แนวคอนเทนต์" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}<span class="st st-${postOf(d,x).status}"></span></div>`:sug?`<div class="post sug" data-sug="1" title="MIDI แนะนำ ${x} พ.ย. — กดเพื่อยืนยัน หรือลากรูปไปวันอื่น" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}</div>`:""}</div>`; }); }); });
-  el.innerHTML=h;
+        h+=`<div class="cell${dow===0||dow===6?" we":""}${inPh&&!has?" rec":""}" data-k="${esc(d.key)}" data-d="${x}" style="--ph:${c}">${has?`<div class="post" draggable="true" data-k="${esc(d.key)}" data-d="${x}" title="${esc(d.name)} · ${dLabel(x)} — กดเพื่อดู/แก้แนวคอนเทนต์" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}<span class="st st-${postOf(d,x).status}"></span></div>`:sug?`<div class="post sug" data-sug="1" title="MIDI แนะนำ ${dLabel(x)} — กดเพื่อยืนยัน หรือลากรูปไปวันอื่น" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}</div>`:""}</div>`; }); }); });
+  el.style.gridTemplateColumns=`176px repeat(${DAYS},minmax(0,1fr))`; el.innerHTML=h;
   const withDates=all.filter(d=>datesOf(d).length).length, posts=Object.values(tot).reduce((s,t)=>s+t.n,0);
   $("#sc-sum").textContent=`กำหนดวันแล้ว ${withDates}/${all.length} คน · รวม ${posts} โพสต์ · รูปจาง ๆ เส้นประ = วันที่ MIDI แนะนำ (กดเพื่อยืนยัน หรือลากไปวันอื่น) · ขีดสีใต้ช่อง = วันในระยะของคนนั้น`;
   // drag & drop
@@ -280,29 +285,29 @@ function renderSched(all){ const el=$("#sc"); if(!el||$("#tabs .tab.active").dat
   el.querySelectorAll(".who").forEach(w=>w.addEventListener("click",()=>{ SC_SEL=SC_SEL===w.dataset.k?null:w.dataset.k; el.querySelectorAll(".who").forEach(x=>x.classList.toggle("sel",x.dataset.k===SC_SEL)); if(SC_SEL) toast("แตะช่องวันเพื่อวาง "+(data.find(x=>x.key===SC_SEL)||{}).name); }));
 }
 /* ===== แนวคอนเทนต์ที่ MIDI ร่างให้ต่อโพสต์ ===== */
-function briefFor(d,day){ const p=tlPhase(day), txt=d.name+" "+d.cat, f=d.f||0; const local=LOCAL_RE.test(txt), travel=/ท่องเที่ยว|เที่ยว|travel|ทริป/i.test(d.cat||d.group), food=/กิน|อาหาร|อร่อย|food|ร้าน/i.test(d.cat), cafe=/คาเฟ่|cafe/i.test(d.cat), hotel=/ที่พัก|โรงแรม|hotel/i.test(d.cat), comm=/คอมมูนิตี้|community/i.test(d.cat), street=/แฟชั่น|fashion|สตรีท|street|เต้น|dance|ศิลปะ|art/i.test(txt);
-  const cta="ปิดท้าย: วัน 20–29 พ.ย. + ชี้ไป LINE OA อวดเมือง City Expo รับสิทธิ์ (Early Bird / Korat City Reward) + ลิงก์/QR ของตัวเอง";
-  let fmt=p===1?FORMATS[0]:p===2?FORMATS[1]:FORMATS[2], b="";
-  if(p===1){ if(d.artist) b=day===8?`คลิป 30–60 วิ จากงานบุกสยาม (ลาน Block i) "เจอกันโคราช 20–29 พ.ย." เล่า 3 ประสบการณ์ K-STREET / K-SOUNDER / K-EXPO ชวนแฟนคลับจองวัน`:`คลิป 30–60 วิ "SAVE THE DATE 20–29 พ.ย. มาเจอกันที่โคราช" พูด Key message ของแบรนด์ + ชวนแฟนคลับมาเจอ (ไอเดียศิลปินคิดเอง ตาม SOW)`;
-    else if(local) b=`"ของดีโคราชที่คนต่างจังหวัดยังไม่รู้" 1 อย่าง + บอกว่าปลายเดือนนี้มีเทศกาล 20–29 พ.ย. ชวนเพื่อนต่างจังหวัดจองวันมา`;
-    else if(travel||cafe) b=`นับถอยหลัง "อีก ${Math.max(1,20-day)} วัน เจอกันโคราช" แท็กเพื่อน 3 คนชวนจองวัน + โชว์ 1 สิ่งที่อยากไปทำในงาน`;
-    else b=`แนะนำเทศกาลอวดเมืองโคราช 20–29 พ.ย. ในสไตล์ช่องตัวเอง + ชวนผู้ติดตามจองวันไว้`; }
-  else if(p===2){ if(travel) b=`Vlog "โคราชหนึ่งวัน" เลือก 4 จุดจาก 4 Pillars (งานออกแบบ → Local Food → Street Art → Creative Space) จบด้วยแผนที่ตามรอย + "สัปดาห์หน้ามาเจอกันที่งาน"`;
-    else if(hotel) b=`ที่พัก + ที่จอดรถ + วิธีเดินทางเข้าเมือง (เส้นทาง Caravan) + แพ็กเกจ ททท. ไทยเที่ยวไทยพลัส คูปอง 2,000 — ตัดข้ออ้าง "ไปยังไง พักไหน"`;
-    else if(cafe) b=`คาเฟ่/Creative Space 2–3 แห่งใกล้จุดจัดงาน เป็นจุดเช็กอินก่อนเข้างาน + นัดเพื่อน "เสาร์นี้ไปโคราช"`;
-    else if(comm) b=`Line-up กิจกรรมแยกสาย (เต้น/เพลง/ช้อป/กิน) + แผนที่ 7 จุดในเมือง ให้คนเลือกวันที่ตรงกับตัวเอง`;
-    else if(d.artist) b=`Artist story / นับถอยหลังกับแฟนคลับ "อีก ${Math.max(1,20-day)} วัน" + ชวนมาเจอในงาน`;
-    else if(food) b=`Street Food โคราชที่ต้องมากิน 3 ร้าน + บอกว่าร้านเหล่านี้มาออกบูธในงาน ชวนวางแผนมากินวันเสาร์`;
-    else b=`แนะนำไฮไลต์งาน 1 อย่างที่ตรงกับช่องตัวเอง + ข้อมูลเดินทาง/ที่พัก ให้คนตัดสินใจมา`; }
-  else { if(day<=22) b=street?`ไลฟ์/คลิปสั้นจาก K-Street & K-Sounder เปิดเมือง (Dance Competition / Painting Show) "คืนนี้มีอะไร" + พิกัด + ชวนมาสุดสัปดาห์นี้`:`คลิปบรรยากาศเปิดเมือง 20–22 + Street Food "กินของใหม่ ใส่ของเท่" จบด้วยพิกัดบูธ + ชวนมาเสาร์-อาทิตย์นี้`;
-    else if(day<=26) b=local||food?`เช็กอิน 1 ใน 7 จุดในเมืองช่วงเย็น + รีวิวร้าน/บูธ Street Food "กินของใหม่ ใส่ของเท่" ให้เจ้าของเล่า 1 ประโยค จบด้วยพิกัดจริง + "สุดสัปดาห์ 27–29 งานใหญ่"`:`Highlight รายวันจาก 7 จุดในเมือง + ชวนมาวันเปิดงานทางการ 27 พ.ย. (K-BATx · รอบชิง · Jennifer Kim)`;
-    else b=d.artist||f>=3e5?`ไลฟ์/คลิปวันเปิดงานทางการ 27 พ.ย. — K-BATx Expo · K-Battle รอบชิง · Jennifer Kim × Orchestra ชวนคนที่ยังไม่มา "มาวันสุดท้ายยังทัน"`:`Highlight สุดสัปดาห์ปิดงาน + รีวิวบูธ/ร้านที่ชอบ + QR แลกสิทธิ์หน้างาน ชวนคนใกล้โคราชมา 28–29`;
-    if(day>=27&&!d.artist&&f<3e5) fmt=FORMATS[0]; }
+function briefFor(d,day){ const p=tlPhase(day), txt=d.name+" "+d.cat, f=d.f||0; const news=RX.news.test(txt), edu=RX.edu.test(txt), review=RX.review.test(txt), fin=RX.fin.test(txt), life=RX.life.test(txt), host=RX.host.test(txt); const launch=TL_EV.find(e=>/เปิดตัว/.test(e.t)); const L=launch?launch.d:(PHASES[1]?PHASES[1].from:0); const left=Math.max(0,L-day);
+  const cta="ปิดท้าย: \"ลองเองได้ในแอป Liberator\" + ลิงก์/โค้ดของตัวเอง (วัดผลรายคน) · ย้ำว่า AI ช่วยคิด คนตัดสินใจ ความเสี่ยงอยู่ที่ผู้ลงทุน";
+  let fmt=p===1?FORMATS[0]:p===2?FORMATS[0]:p===3?FORMATS[1]:FORMATS[0], b="";
+  if(p===1){ if(news) b=`Teaser ข่าว "Liberator กำลังปล่อยฟีเจอร์ AI" — เล่าสิ่งที่รู้ + ตั้งคำถามให้คนเดา นับถอยหลัง ${left} วัน`;
+    else if(fin) b=`ตั้งคำถามกับคนดู: "ถ้า AI ช่วยลงทุน คุณกล้าให้มันทำอะไรบ้าง?" เล่าจุดเจ็บของนักลงทุน (ข้อมูลเยอะ ตัดสินใจไม่ทัน ไม่มีวินัย) + บอกว่า ${left} วันจะมีคำตอบ`;
+    else if(life) b=`สถานการณ์จริง: อยากเริ่มลงทุนแต่ไม่รู้จะดูอะไร — ทิ้งท้าย "อีก ${left} วันมีตัวช่วย" ไม่ต้องบอกชื่อฟีเจอร์`;
+    else b=`Teaser สั้น 15–30 วิ: โชว์ปัญหาการลงทุนที่ AI น่าจะช่วยได้ + นับถอยหลัง ${left} วัน + #AIคิดให้คุณตัดสินใจ`; }
+  else if(p===2){ if(f>=3e5||host) b=`คลิปเปิดตัว 60 วิ: เดโมหน้าจอจริง 1 เคส (ถามคำถามเกี่ยวกับหุ้น → AI สรุป/วิเคราะห์ → คนตัดสินใจ) + พูดชัดว่า AI ไม่ได้ลงทุนแทน`;
+    else if(edu) b=`อธิบายฟีเจอร์ AI แบบเข้าใจง่าย: ทำอะไรได้ 3 อย่าง ไม่ทำอะไร 1 อย่าง + ลองใช้ให้ดู 1 ขั้นตอน`;
+    else if(fin) b=`เปิดตัวในมุมนักลงทุน: ใช้ AI ช่วยคัดกรอง/อ่านงบ/สรุปข่าว แล้วเทียบกับที่เคยทำเอง ใช้เวลาต่างกันแค่ไหน`;
+    else b=`แกะกล่องฟีเจอร์ AI ใหม่ในแอป Liberator — เดโม 1 ฟีเจอร์ที่ว้าวที่สุด จบด้วย "ลองเองได้แล้ววันนี้"`; }
+  else if(p===3){ if(edu) b=`How-to ทีละขั้น: ใช้ AI ใน Liberator วิเคราะห์หุ้น 1 ตัวตั้งแต่ต้นจนจบ (ถาม → อ่านผล → ตั้งเงื่อนไขความเสี่ยง) พร้อมทริค 3 ข้อ`;
+    else if(review) b=`รีวิวตรง ๆ หลังใช้ 1 สัปดาห์: ชอบ 3 ข้อ ข้อจำกัด 2 ข้อ ใครเหมาะ/ไม่เหมาะ — ความน่าเชื่อถือสำคัญกว่าขาย`;
+    else if(fin) b=`เคสจริง: เปรียบเทียบการตัดสินใจก่อน-หลังมี AI (เวลา/ข้อมูล/ความมั่นใจ) + ย้ำกรอบความเสี่ยงที่ตัวเองตั้ง`;
+    else b=`ตอบข้อกังวลที่คนถามบ่อย (AI ผิดได้ไหม / ข้อมูลมาจากไหน / ต้องมีพอร์ตใหญ่ไหม) ด้วยการลองให้ดูในแอป`; }
+  else { if(life) b=`use case ในชีวิตประจำวัน: เช็กพอร์ตกับ AI 5 นาทีก่อนนอน/ระหว่างเดินทาง + ขั้นตอนเปิดบัญชีสั้น ๆ + สิทธิพิเศษ`;
+    else if(f<5e4) b=`CTA ชัด: เปิดบัญชี/ดาวน์โหลด 3 ขั้นตอน + โค้ด/สิทธิพิเศษของช่อง + ตอบคอมเมนต์ที่ถาม`;
+    else b=`รีแคปฟีเจอร์ AI ที่ชอบที่สุด 1 อย่าง + "ถ้ายังไม่ได้ลอง เหลืออีก ${Math.max(0,DAYS-1-day)} วันสำหรับสิทธิพิเศษ" + ขั้นตอนเปิดบัญชี`; fmt=FORMATS[0]; }
   return {format:fmt,brief:b+"\n"+cta+"\n"+HASHTAGS}; }
 const postKey=(d,day)=>rid(d)+"_"+day;
 const postOf=(d,day)=>{ const p=POSTS[postKey(d,day)]; if(p&&(p.brief||p.format)) return Object.assign({sug:false},p); const b=briefFor(d,day); return {format:b.format,brief:b.brief,status:"plan",link:"",sug:true}; };
-function openPost(d,day){ const p=postOf(d,day), ph=tlPhase(day), c=PHASES[ph-1].c, dow=["อา","จ","อ","พ","พฤ","ศ","ส"][new Date(2026,10,day).getDay()];
-  $("#pcard").innerHTML=`<button class="kc-x" type="button" id="pc-x" aria-label="ปิด">×</button><div class="pc-top" style="--ph:${c}">${avatarEl(d)}<div><h3>${esc(d.name)}</h3><div class="d">${fmtN(d.f)} · ${esc(d.cat||"—")}<br>ระยะ ${ph} · ${esc(PHASES[ph-1].title)}</div></div><div class="day"><b>${day}</b><small>พ.ย. · ${dow}</small></div></div>
+function openPost(d,day){ const p=postOf(d,day), ph=tlPhase(day), c=PHASES[ph-1].c, dow=dDow(day);
+  $("#pcard").innerHTML=`<button class="kc-x" type="button" id="pc-x" aria-label="ปิด">×</button><div class="pc-top" style="--ph:${c}">${avatarEl(d)}<div><h3>${esc(d.name)}</h3><div class="d">${fmtN(d.f)} · ${esc(d.cat||"—")}<br>ระยะ ${ph} · ${esc(PHASES[ph-1].title)}</div></div><div class="day"><b>${DAY(day).getDate()}</b><small>${TH_M[DAY(day).getMonth()]} · ${dow}</small></div></div>
   <div class="pc-bd"><div class="pc-row"><label>รูปแบบ</label><select id="pc-fmt">${FORMATS.map(f=>`<option${f===p.format?" selected":""}>${esc(f)}</option>`).join("")}</select></div>
   <div class="pc-row"><label>แนวคอนเทนต์</label><div><textarea id="pc-brief">${esc(p.brief)}</textarea><div class="pc-hint">${p.sug?`<b>MIDI ร่างให้</b> ตามระยะ/สายของช่อง — แก้ได้เลย`:`แก้ล่าสุดโดย ${esc(p.by||"-")}`} · กด "ใช้ร่างของ MIDI" เพื่อคืนค่าเริ่มต้น</div></div></div>
   <div class="pc-row"><label>สถานะ</label><select id="pc-st">${STATUS.map(([k,l])=>`<option value="${k}"${k===p.status?" selected":""}>${l}</option>`).join("")}</select></div>
@@ -312,23 +317,22 @@ function openPost(d,day){ const p=postOf(d,day), ph=tlPhase(day), c=PHASES[ph-1]
   $("#pc-reset").onclick=()=>{ const b=briefFor(d,day); $("#pc-brief").value=b.brief; $("#pc-fmt").value=b.format; };
   $("#pc-del").onclick=()=>{ close(); setDates(d,datesOf(d).filter(x=>x!==day)); };
   $("#pc-save").onclick=()=>{ if(!reviewer){ askName(()=>$("#pc-save").click()); return; } const rec={key:postKey(d,day),kol:rid(d),name:d.name,day,format:$("#pc-fmt").value,brief:$("#pc-brief").value.trim(),status:$("#pc-st").value,link:$("#pc-link").value.trim(),by:reviewer}; const prev=POSTS[rec.key]; POSTS[rec.key]=rec; close(); render(); logEv("post",d.name+" "+day);
-    api("setPost",[rec]).then(()=>toast(`บันทึกแนวคอนเทนต์ ${d.name} · ${day} พ.ย.`)).catch(err=>{ if(prev) POSTS[rec.key]=prev; else delete POSTS[rec.key]; render(); toast("บันทึกไม่สำเร็จ: "+(err&&err.message||err)); }); }; logEv("post-open",d.name+" "+day); }
+    api("setPost",[rec]).then(()=>toast(`บันทึกแนวคอนเทนต์ ${d.name} · ${dLabel(day)}`)).catch(err=>{ if(prev) POSTS[rec.key]=prev; else delete POSTS[rec.key]; render(); toast("บันทึกไม่สำเร็จ: "+(err&&err.message||err)); }); }; logEv("post-open",d.name+" "+day); }
 $("#pmodal").addEventListener("click",e=>{ if(e.target.id==="pmodal") $("#pmodal").hidden=true; });
 function renderPostList(all){ const el=$("#plist"); if(!el) return; const items=[]; all.forEach(d=>datesOf(d).forEach(day=>items.push({d,day,p:postOf(d,day)}))); items.sort((a,b)=>a.day-b.day||(b.d.f||0)-(a.d.f||0));
   if(!items.length){ el.innerHTML=`<div class="empty">ยังไม่มีโพสต์ในตาราง — กดรูปจาง ๆ ที่ MIDI แนะนำ หรือ "ใช้วันที่ MIDI วางไว้"</div>`; return; }
-  let last=0; el.innerHTML=items.map(({d,day,p})=>{ const ph=tlPhase(day), c=PHASES[ph-1].c; const head=last!==ph?`<div class="gh">ระยะ ${ph} · ${esc(PHASES[ph-1].title)} · ${esc(PHASES[ph-1].d.split(" ·")[0])}</div>`:""; last=ph; const st=STATUS.find(x=>x[0]===p.status)||STATUS[0];
-    return head+`<div class="pl2" data-k="${esc(d.key)}" data-d="${day}" style="--ph:${c}"><div class="dy">${day}<small>พ.ย.</small></div>${avatarEl(d)}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="fm">${esc(p.format)}</div></div><div class="br${p.sug?" sug":""}">${esc(p.brief.split("\n")[0])}</div><div class="stt st-${p.status}">${st[1]}</div></div>`; }).join("");
+  let last=0; el.innerHTML=items.map(({d,day,p})=>{ const ph=tlPhase(day), c=PHASES[ph-1].c; const head=last!==ph?`<div class="gh">ระยะ ${ph} · ${esc(PHASES[ph-1].title)} · ${esc(rangeLabel(PHASES[ph-1]))}</div>`:""; last=ph; const st=STATUS.find(x=>x[0]===p.status)||STATUS[0];
+    return head+`<div class="pl2" data-k="${esc(d.key)}" data-d="${day}" style="--ph:${c}"><div class="dy">${DAY(day).getDate()}<small>${TH_M[DAY(day).getMonth()]}</small></div>${avatarEl(d)}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="fm">${esc(p.format)}</div></div><div class="br${p.sug?" sug":""}">${esc(p.brief.split("\n")[0])}</div><div class="stt st-${p.status}">${st[1]}</div></div>`; }).join("");
   el.querySelectorAll(".pl2").forEach(r=>r.onclick=()=>{ const d=data.find(x=>x.key===r.dataset.k); if(d) openPost(d,+r.dataset.d); }); }
 function setDates(d,ds){ if(!reviewer){ askName(()=>setDates(d,ds)); return; } ds=[...new Set(ds)].sort((a,b)=>a-b); const id=rid(d); const prev=reviews[id]; reviews[id]=Object.assign({},prev,{dates:ds.join(",")}); render(); logEv("dates",d.name+" → "+(ds.join(",")||"-"));
-  api("setDates",[{key:id,name:d.name,dates:ds.join(","),by:reviewer}]).then(()=>toast(`${d.name}: ${ds.length?ds.map(x=>x+" พ.ย.").join(", "):"ไม่มีวัน"}`)).catch(err=>{ reviews[id]=prev; render(); toast("บันทึกไม่สำเร็จ: "+(err&&err.message||err)); }); }
+  api("setDates",[{key:id,name:d.name,dates:ds.join(","),by:reviewer}]).then(()=>toast(`${d.name}: ${ds.length?ds.map(dLabel).join(", "):"ไม่มีวัน"}`)).catch(err=>{ reviews[id]=prev; render(); toast("บันทึกไม่สำเร็จ: "+(err&&err.message||err)); }); }
 /* MIDI วางวันให้: ใส่วันตามระยะ + ช่วงที่แนะนำ กระจายไม่ให้วันเดียวแน่น */
 function autoDates(all){ const load={}; all.forEach(d=>datesOf(d).forEach(x=>load[x]=(load[x]||0)+1)); const out=[]; const AIP=aiPlan(all).pick;
   const pickDay=(days)=>{ let best=days[0], bl=Infinity; days.forEach(x=>{ const l=(load[x]||0)-(TL_W[x]||1)*0.5; if(l<bl){ bl=l; best=x; } }); load[best]=(load[best]||0)+1; return best; };
-  all.filter(d=>!datesOf(d).length).sort((a,b)=>(b.f||0)-(a.f||0)).forEach(d=>{ let ph=phasesOf(d); if(!ph.length&&AIP[d.key]) ph=AIP[d.key].ph; const ds=[]; const txt=d.name+" "+d.cat; const f=d.f||0;
-    if(ph.includes("1")) ds.push(d.artist||f>=1e6?8:pickDay([6,7,9,10,11,12]));
-    if(ph.includes("2")) ds.push(pickDay([15,16,17,18,19,13,14,12]));
-    if(ph.includes("3")) ds.push(d.artist||f>=3e5?pickDay([27,28,29]):/แฟชั่น|fashion|สตรีท|street|เต้น|dance|ศิลปะ|art/i.test(txt)?pickDay([20,21,22]):pickDay([23,24,25,26,21,22]));
-    if(!ph.length) ds.push(pickDay([15,16,17,18,19,20,21,22]));
+  const launch=TL_EV.find(e=>/เปิดตัว/.test(e.t)); const L=launch?launch.d:(PHASES[1]?PHASES[1].from:0);
+  all.filter(d=>!datesOf(d).length).sort((a,b)=>(b.f||0)-(a.f||0)).forEach(d=>{ let ph=phasesOf(d); if(!ph.length&&AIP[d.key]) ph=AIP[d.key].ph; const ds=[]; const f=d.f||0;
+    ph.forEach(n=>{ const days=phaseDays(n); if(!days.length) return; if(+n===2&&f>=3e5) ds.push(days.includes(L)?L:days[0]); else if(+n===2) ds.push(pickDay(days.filter(x=>x>=L).concat(days))); else ds.push(pickDay(days)); });
+    if(!ph.length) ds.push(pickDay(phaseDays(Math.min(3,NP))));
     out.push({key:rid(d),name:d.name,dates:[...new Set(ds)].sort((a,b)=>a-b).join(","),by:reviewer}); });
   return out; }
 function snapshot(label){ const snap={}; data.forEach(d=>{ const ds=datesOf(d); if(ds.length) snap[rid(d)]={name:d.name,dates:ds.join(",")}; }); if(!Object.keys(snap).length) return Promise.resolve(); return api("snapshotDates",[{by:reviewer,label,snap}]).catch(()=>{}); }
@@ -340,7 +344,7 @@ $("#sc-auto").onclick=async()=>{ if(!reviewer){ askName(()=>$("#sc-auto").onclic
   api("setDatesMany",[list]).then(()=>toast(`วางวันให้ ${list.length} คนแล้ว — ลากขยับได้เลย`)).catch(err=>{ Object.assign(reviews,prev); render(); toast("บันทึกไม่สำเร็จ: "+(err&&err.message||err)); }); };
 $("#sc-clear").onclick=async()=>{ if(!reviewer){ askName(()=>$("#sc-clear").onclick()); return; } if(!confirm("ล้างวันโพสต์ของทุกคน? (กู้คืนได้จากปุ่ม ↶ ย้อนกลับ)")) return; await snapshot("ก่อนล้างทั้งหมด"); const list=data.filter(d=>datesOf(d).length).map(d=>({key:rid(d),name:d.name,dates:"",by:reviewer})); list.forEach(r=>{ reviews[r.key]=Object.assign({},reviews[r.key],{dates:""}); }); render(); api("setDatesMany",[list]).then(()=>toast("ล้างแล้ว")).catch(()=>{ load(); }); };
 function openCard(d){ const R=reviews[rid(d)]||{}, rv=rvOf(d), ph=phasesOf(d), t=TIERS.find(x=>x.k===d.tier); const rank=[...data].sort((a,b)=>(b.f||0)-(a.f||0)).indexOf(d)+1; const hs=histLine(d);
-  $("#kcard").innerHTML=`<button class="kc-x" type="button" id="kc-x" aria-label="ปิด">×</button><div class="kc-top">${avatarEl(d)}<div><h3>${esc(d.name)}</h3><div class="ct">${esc(d.cat||"—")}</div>${codeLabel(d.code)?`<span class="badge code${codeSoft(d.code)?" soft":""}">${esc(codeLabel(d.code))}</span>`:""}${d.artist?` <span class="badge art">ARTIST</span>`:""}</div></div>
+  $("#kcard").innerHTML=`<button class="kc-x" type="button" id="kc-x" aria-label="ปิด">×</button><div class="kc-top">${avatarEl(d)}<div><h3>${esc(d.name)}</h3><div class="ct">${esc(d.cat||"—")}</div>${codeLabel(d.code)?`<span class="badge code${codeSoft(d.code)?" soft":""}">${esc(codeLabel(d.code))}</span>`:""}${false?` <span class="badge art">ARTIST</span>`:""}</div></div>
   <div class="kc-bd"><div class="kc-k"><div><div class="l">ผู้ติดตาม</div><div class="v">${fmtN(d.f)}</div></div><div><div class="l">ระดับ</div><div class="v">${t?t.n:"—"}</div></div><div><div class="l">อันดับ reach</div><div class="v">#${rank}</div></div></div>
   <div class="kc-row">สถานะ: <b>${rv==="pass"?"✓ ยืนยันแล้ว":rv==="fail"?"✗ ตัดออกจากทีม":"อยู่ในทีม (ยังไม่ได้ยืนยัน)"}</b>${R.by?` · โดย ${esc(R.by)}`:""}${R.reason?`<br>เหตุผล: ${esc(R.reason)}`:""}</div>${hs?`<div class="kc-row">ประวัติ: ${esc(hs)}</div>`:""}${d.note?`<div class="kc-row">หมายเหตุ: ${esc(d.note).slice(0,300)}</div>`:""}
   ${inTeam(d)?`<div class="kc-row">ระยะในแผน:<div class="kc-ph">${PHASES.map(p=>`<button type="button" data-p="${p.n}" class="${ph.includes(p.n)?"on":""}" style="--ph:${p.c}">ระยะ ${p.n}</button>`).join("")}</div></div>`:""}
@@ -355,7 +359,7 @@ function rowEl(d,rankOf,reach,max,isNew){
     const st=statusOf(d), rk=rankOf.get(d), rv=rvOf(d), R=reviews[rid(d)]||{}; const row=document.createElement("div"); row.className="row"+(st?" "+st:"")+(rv?" "+rv:"")+(isNew?" sugnew":"");
     const nm=`<a href="#" class="open-card">${esc(d.name)}</a>`;
     row.innerHTML=`<div class="rk${rk<=10?" lead":""}">${d.sug?"★":rk}</div>
-      <div class="who">${avatarEl(d)}<div class="who-t"><div class="nm">${nm}${codeLabel(d.code)?`<span class="badge code${codeSoft(d.code)?" soft":""}" title="${codeSoft(d.code)?"MiDi แนะนำ":"Code: "+esc(d.code)}">${esc(codeLabel(d.code))}</span>`:""}${d.artist?`<span class="badge art">ARTIST</span>`:""}${d.sug?`<span class="badge sug" title="เพิ่มโดย ${esc(d.by)}">เพิ่มใหม่ · ${esc(d.by||"ลูกค้า")}</span>`:""}${st?`<span class="badge ${st}">${st==="new"?"NEW":"EDIT"}</span>`:""}</div><div class="ct" title="${esc(d.cat)}">${esc(d.cat||"—")}</div></div></div>
+      <div class="who">${avatarEl(d)}<div class="who-t"><div class="nm">${nm}${codeLabel(d.code)?`<span class="badge code${codeSoft(d.code)?" soft":""}" title="${codeSoft(d.code)?"MiDi แนะนำ":"Code: "+esc(d.code)}">${esc(codeLabel(d.code))}</span>`:""}${false?`<span class="badge art">ARTIST</span>`:""}${d.sug?`<span class="badge sug" title="เพิ่มโดย ${esc(d.by)}">เพิ่มใหม่ · ${esc(d.by||"ลูกค้า")}</span>`:""}${st?`<span class="badge ${st}">${st==="new"?"NEW":"EDIT"}</span>`:""}</div><div class="ct" title="${esc(d.cat)}">${esc(d.cat||"—")}</div></div></div>
       <div class="trk" title="${fmtN(d.f)} ผู้ติดตาม"><div class="fill" style="width:${(widthOf(d.f,max)*100).toFixed(2)}%;background:${heat(d.f)}"></div></div>
       <div class="val">${fmtN(d.f)}<small>${d.f?Math.round(d.f/reach*1000)/10+"% ของ reach":"ไม่ระบุ"}</small></div>
       <div class="rvw"><span class="rv-lbl ${rv||"wait"}">${rv==="pass"?"✓ ยืนยัน":rv==="fail"?"✗ ตัดออก":"ในทีม"}</span><div class="rv" title="ติ๊กผลพิจารณา"><button type="button" class="pass${rv==="pass"?" on":""}" data-s="pass">✓ ผ่าน</button><button type="button" class="fail${rv==="fail"?" on":""}" data-s="fail">✗ ตัดออก</button></div>${rv&&R.by?`<div class="meta" title="${esc((R.by||"")+(R.reason?" · "+R.reason:""))}"><b>${rv==="fail"?"✗":"✓"} ${esc(R.by)}</b>${R.reason?` · ${esc(R.reason)}`:""}</div>`:""}${histLine(d)?`<div class="meta" title="${esc(histLine(d))}">${esc(histLine(d))}</div>`:""}</div>`;
@@ -454,5 +458,5 @@ $("#adm-btn").onclick=()=>{ $("#amodal").hidden=false; $("#alist").textContent="
 $("#a-close").onclick=()=>{ $("#amodal").hidden=true; }; $("#amodal").addEventListener("click",e=>{ if(e.target.id==="amodal") $("#amodal").hidden=true; });
 /* เริ่มต้น */
 if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
-window.KOL={$,esc,setTab,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB}; // ให้ planmedia.js ใช้
+window.KOL={$,esc,setTab,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB,_dbg:()=>({data,inTeam,autoDates,aiPlan,phaseDays,TL_DAYS,tlPhase})}; // ให้ planmedia.js ใช้
 })();

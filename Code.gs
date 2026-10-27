@@ -4,8 +4,8 @@
  * โค้ดจริงอยู่ใน GitHub: https://github.com/zigzagsolution/kol-approval-board (server.js)
  * แก้ server.js ใน GitHub = มีผลภายใน ~1–2 นาที ไม่ต้อง Deploy ใหม่
  */
-const SERVER_URL = "https://raw.githubusercontent.com/zigzagsolution/kol-approval-board/main/server.js";
-const PAGE_URL   = "https://zigzagsolution.github.io/kol-approval-board/";
+const SERVER_URL = "https://raw.githubusercontent.com/zigzagsolution/kol-board-liberator/main/server.js";
+const PAGE_URL   = "https://zigzagsolution.github.io/kol-board-liberator/";
 
 /** เปิดลิงก์ /exec ตรง ๆ → พาไปหน้าเว็บ · ?action=getData → คืน JSON */
 function doGet(e) {

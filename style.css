@@ -1,8 +1,9 @@
 /* Layout: MIDI digital brand — white ground, charcoal ink, one magenta-red brand accent; bar ramp runs light grey → charcoal → brand red so the top of the ladder reads as the brand mark. Single light theme by choice (brand). */
 :root{
   --bg:#f4f4f6; --paper:#ffffff; --ink:#2b2b2e; --ink2:#4b4b4e; --mute:#8d8d94; --line:#e4e4e8; --track:#ededf0;
-  --brand:#e8194c; --accent:#e8194c; --good:#1f9d63; --warn:#e2a000;
-  --h0:#c9c9ce; --h1:#a9a9b0; --h2:#6f6f75; --h3:#4b4b4e; --h4:#f05a85; --h5:#e8194c;
+  --brand:#0A5BFF; --accent:#0A5BFF; --navy:#0B1052; --good:#1f9d63; --warn:#e2a000;
+  --h0:#c9cfe0; --h1:#a6b3d6; --h2:#6f86c9; --h3:#3fa3ff; --h4:#0A5BFF; --h5:#0B1052;
+  --bg:#f3f6fc; --ink:#0B1052; --ink2:#3a3f66; --line:#dfe5f3; --track:#e9eef9;
   --display:"Chakra Petch","Noto Sans Thai",system-ui,sans-serif; --body:"Noto Sans Thai","Chakra Petch",system-ui,sans-serif;
   color-scheme:light;
 }
@@ -18,9 +19,10 @@ button{font:inherit;cursor:pointer;color:inherit}
   margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 22px calc(-1 * max(16px,env(safe-area-inset-right,0px)));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:0}
 .top .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:12px}
-.logo{height:52px;width:auto;flex:none;margin-right:4px}
+.logo{height:40px;width:auto;flex:none;margin-right:4px}
 .brand{min-width:0;padding-left:14px;border-left:3px solid var(--brand)}
 .brand .eb{font-family:var(--display);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--brand);font-weight:600}
+.btn.primary{background:linear-gradient(135deg,#0A5BFF,#33C1FF);border-color:#0A5BFF}
 .brand h1{font-family:var(--display);font-size:clamp(22px,2.8vw,30px);margin:0;line-height:1.1;font-weight:700;color:var(--ink);letter-spacing:.02em;text-transform:uppercase;text-wrap:balance}
 .brand h1 b{color:var(--brand)}
 .live{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -217,7 +219,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .mix .m .k{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mix .warn-k{color:var(--brand);font-weight:600}
 /* ===== plan ===== */
-.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:14px}
 @media (max-width:760px){.phases{grid-template-columns:1fr}}
 .ph{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-top:4px solid var(--ph)}
 .ph .num{font-family:var(--display);font-size:11px;letter-spacing:.18em;color:var(--ph);font-weight:700}
@@ -323,13 +325,13 @@ body.present .rv-lbl{display:inline-block}
 /* ===== AI head redesign ===== */
 .ai-head{display:block}
 .ai-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
-.ai-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.ai-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:12px}
 @media (max-width:760px){.ai-steps{grid-template-columns:1fr}}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;background:var(--bg);border-radius:12px;padding:10px 12px;border-left:4px solid var(--ph);position:relative}
 .step .k{width:28px;height:28px;border-radius:50%;background:var(--ph);color:#fff;font-family:var(--display);font-weight:700;display:grid;place-items:center;font-size:13px}
 .step b{display:block;font-family:var(--display);font-size:14px;margin-bottom:2px}
 .step span{font-size:12px;color:var(--ink2);line-height:1.45}
-.ai-kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.ai-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:10px}
 .ai-kpi div{border:1px solid var(--line);border-radius:12px;padding:8px 12px;border-top:3px solid var(--ph);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
 .ai-kpi .n{font-family:var(--display);font-weight:700;font-size:22px;line-height:1}.ai-kpi .r{font-family:var(--display);font-weight:700;font-size:16px}.ai-kpi .l{font-size:11px;color:var(--mute)}
 .ai-sum{margin:0;font-size:12px;color:var(--mute)}
@@ -381,7 +383,7 @@ body.present .sc-head .ai-acts{display:none}
 .pw-head{margin-bottom:12px}
 .pw-split{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:10px 0 6px;font-family:var(--display);font-weight:700;font-size:11px;color:#fff}
 .pw-split div{display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
-.pw-split .seg1{background:#6f6f75}.pw-split .seg2{background:#f05a85}.pw-split .seg3{background:var(--brand)}
+.pw-split .seg1{background:#8a8fa8}.pw-split .seg2{background:#3fa3ff}.pw-split .seg3{background:var(--brand)}
 .pw-cap{font-size:13px;color:var(--ink);font-weight:600}
 .pw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 @media (max-width:900px){.pw-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -401,7 +403,7 @@ body.present .sc-head .ai-acts{display:none}
 
 /* ===== post brief ===== */
 .sc .post .st{position:absolute;right:-3px;bottom:-3px;width:10px;height:10px;border-radius:50%;background:var(--mute);box-shadow:0 0 0 2px var(--paper)}
-.st-plan{background:#c9c9ce!important}.st-brief{background:#e2a000!important}.st-draft{background:#f05a85!important}.st-done{background:#1f9d63!important}
+.st-plan{background:#c9c9ce!important}.st-brief{background:#e2a000!important}.st-draft{background:#3fa3ff!important}.st-done{background:#1f9d63!important}
 .modal .card.pcard{max-width:600px;padding:0;overflow:hidden;position:relative}
 .pc-top{display:flex;gap:12px;align-items:center;padding:18px 20px 12px;background:linear-gradient(135deg,color-mix(in srgb,var(--ph) 14%,var(--paper)),var(--paper));border-bottom:3px solid var(--ph)}
 .pc-top .av{width:52px;height:52px}.pc-top h3{font-family:var(--display);margin:0;font-size:18px}.pc-top .d{font-size:13px;color:var(--ink2)}

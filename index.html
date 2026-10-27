@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>KOL Approval Board — MIDI digital</title>
+<title>KOL Approval Board — Liberator × MIDI</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css?v=22">
@@ -11,7 +11,7 @@
 <body>
 <div class="prog" id="prog"><i></i></div>
 <header class="top"><div class="wrap">
-  <img class="logo" src="logo.png" alt="MIDI digital Co., Ltd." width="118" height="66"><div class="brand"><div class="eb">อวดเมืองโคราช · 20–29 พ.ย. 2569</div><h1>KOL <b>Approval</b> Board</h1></div>
+  <img class="logo" src="logo.png" alt="Liberator" width="150" height="40"><div class="brand"><div class="eb" id="hd-sub">KOL สาย IT/Technology · 29 ต.ค. – 20 พ.ย. 2569</div><h1>KOL <b>Approval</b> Board</h1></div>
   <div class="live">
     <span class="pill"><span class="dot" id="dot"></span><span id="status">กำลังเชื่อมต่อ…</span></span>
     <span class="pill" id="stamp">อัปเดตล่าสุด —</span>
@@ -23,8 +23,8 @@
 </div>
 <nav class="tabs wrap" id="tabs">
   <button type="button" class="tab active" data-tab="review">✓ พิจารณา <b id="t-review">0</b></button>
-  <button type="button" class="tab" data-tab="team">★ ทีม <span id="t-target">50</span> คน <b id="t-team">0/50</b></button>
-  <button type="button" class="tab" data-tab="plan">📅 แผน 3 ระยะ <b id="t-plan">0</b></button>
+  <button type="button" class="tab" data-tab="team">★ ทีม <span id="t-target">30</span> คน <b id="t-team">0/30</b></button>
+  <button type="button" class="tab" data-tab="plan">📅 แผน 4 ระยะ <b id="t-plan">0</b></button>
   <button type="button" class="tab" data-tab="sched">🗓 ตารางโพสต์ <b id="t-sched">0</b></button>
 </nav></header>
 
@@ -81,7 +81,7 @@
       </div>
       <div class="tor" id="tor"></div>
     </section>
-    <section class="box"><h2>ช่องในทีม <span class="h-sub">ทีมงาน MIDI คัดมาให้แล้ว · เรียงตาม reach · ว่าง = รอเติม</span></h2><div class="slots" id="slots"></div><div class="spare" id="spare" hidden></div></section>
+    <section class="box"><h2>ช่องในทีม <span class="h-sub">ทีมงาน MIDI คัดมาให้แล้ว (สาย IT/Technology) · เรียงตาม reach · ว่าง = รอเติม</span></h2><div class="slots" id="slots"></div><div class="spare" id="spare" hidden></div></section>
     <section class="band">
       <div class="box"><h2>ระดับผู้ติดตามของทีม</h2><div class="mix" id="mix-tier"></div></div>
       <div class="box"><h2>สมดุลหมวดคอนเทนต์</h2><div class="mix" id="mix-cat"></div></div>
@@ -92,7 +92,7 @@
     <div class="ctl plan-mode"><div class="seg" id="plan-seg"><button type="button" class="active" data-m="manual">✋ จัดเอง</button><button type="button" data-m="ai">✨ MIDI จัดให้</button></div><span class="seg-l" id="plan-who"></span></div>
     <section class="box tl" id="timeline"></section>
     <div id="plan-manual">
-    <p class="plan-note hash">Hashtag กลาง: <b>#อวดเมืองโคราช #อวดเมือง2569 #KBattle2026 #น่าลงทุน #น่าเที่ยว #น่าอยู่</b> · ทุกโพสต์แนบลิงก์/QR รายคนเพื่อแลกสิทธิ์หน้างาน</p>
+    <p class="plan-note hash">Hashtag กลาง: <b id="hash-txt"></b> · ทุกโพสต์แนบลิงก์/โค้ดรายคนเพื่อวัดการดาวน์โหลด-เปิดบัญชี</p>
     <section class="phases" id="phases"></section>
     <section class="box">
       <h2>จัด KOL ลงระยะ <span class="h-sub">ทุกคนในทีม (ยกเว้นที่ตัดออก) · เลือกได้มากกว่า 1 ระยะ</span></h2>
@@ -103,9 +103,10 @@
       <section class="box ai-head">
         <div class="ai-top"><div><h2>✨ แผนที่ AI + ประสบการณ์ MIDI ที่เก็บค่าสำเร็จไว้ แนะนำ</h2><div class="ai-tag">เป็นการนำเสนอแผน — สามารถปรับแก้ไขได้ทุกคน</div></div><div class="ai-acts"><button class="btn primary" type="button" id="ai-apply-all">ใช้แผนนี้ทั้งหมด</button><button class="btn" type="button" id="ai-apply-unset">ใช้เฉพาะคนที่ยังไม่จัด</button></div></div>
         <div class="ai-steps">
-          <div class="step" style="--ph:#6f6f75"><span class="k">1</span><div><b>ปักหมุดวันงาน — "20–29 พ.ย. มาเจอกันที่โคราช"</b><span>ศิลปิน + บัญชี reach สูง บอกวัน-สถานที่-3 ประสบการณ์ให้คนกรุงเทพฯ/ปริมณฑล/ภูมิภาคจำวันได้ · Micro สายเที่ยว/ท้องถิ่น ชวนเพื่อน "จองวันไว้" และนับถอยหลัง · ทุกโพสต์ชี้ไป LINE OA รับสิทธิ์ Early Bird / Korat City Reward</span></div></div>
-          <div class="step" style="--ph:#f05a85"><span class="k">2</span><div><b>ตัดสินใจเดินทาง — ตัดข้ออ้าง "ไปยังไง พักไหน"</b><span>Vlog "โคราชหนึ่งวัน" 4 Pillars + ที่พัก / ที่จอดรถ / เส้นทาง Caravan + แพ็กเกจ ททท. คูปอง 2,000 + Early Bird Pass · ชวนนัดเพื่อนเป็นกลุ่ม ปิดท้ายด้วย "จองวันเสาร์นี้" · วัดจากคลิกแผนที่และยอดลงทะเบียน LINE</span></div></div>
-          <div class="step" style="--ph:#e8194c"><span class="k">3</span><div><b>มาแล้ว → มาต่อ → มาซ้ำ</b><span>คนท้องถิ่น + สายกิน ไลฟ์/Highlight รายวัน "คืนนี้มีอะไร" ให้คนที่ยังไม่มา มาสุดสัปดาห์นี้ · วันธรรมดาผลักไปงานใหญ่ 27–29 (เปิดงาน · รอบชิง · Jennifer Kim) · เช็กอิน 7 จุด + QR รายคนแลกสิทธิ์หน้างาน → วัดคนมาจริง</span></div></div>
+          <div class="step" style="--ph:#8a8fa8"><span class="k">1</span><div><b>Tease — "ถ้า AI ช่วยลงทุน คุณกล้าให้มันทำอะไรบ้าง?"</b><span>สายข่าวเทค + ไลฟ์สไตล์ตั้งคำถามจากปัญหาจริงของนักลงทุน (ข้อมูลเยอะ ตัดสินใจไม่ทัน ไม่มีวินัย) ยังไม่เฉลยฟีเจอร์ · นับถอยหลังวันเปิดตัว · ให้คนติดตามรอ</span></div></div>
+          <div class="step" style="--ph:#3fa3ff"><span class="k">2</span><div><b>Reveal — เปิดตัวฟีเจอร์ AI ทุกช่องใน 48 ชม.</b><span>Mega/Macro สายเทคและการเงินเดโมหน้าจอจริงพร้อมกัน ให้คนเห็นซ้ำ ≥3 ครั้ง · พูดชัดว่า AI ทำอะไร/ไม่ทำอะไร — "AI คิดให้ คุณตัดสินใจ" กรอบความเสี่ยงอยู่ที่ผู้ลงทุน</span></div></div>
+          <div class="step" style="--ph:#0A5BFF"><span class="k">3</span><div><b>Prove — ใช้จริง สอนจริง พูดข้อจำกัดตรง ๆ</b><span>สายความรู้/How-to สอนทีละขั้น · สายรีวิว "ไม่เกินจริง" บอกข้อดี-ข้อจำกัด · ตอบข้อกังวล (AI ผิดได้ไหม ข้อมูลมาจากไหน ต้องมีพอร์ตใหญ่ไหม) — ความน่าเชื่อถือคือตัวแปลงลูกค้าในสินค้าการเงิน</span></div></div>
+          <div class="step" style="--ph:#0B1052"><span class="k">4</span><div><b>Convert — เปิดบัญชี / ลองใช้ ก่อนหมดสิทธิพิเศษ</b><span>Micro/Nano + ไลฟ์สไตล์เล่า use case ในชีวิตประจำวัน · ขั้นตอนเปิดบัญชีสั้น ๆ · โค้ด/สิทธิพิเศษรายคน (วัดผลได้) · รีแคปฟีเจอร์ที่ชอบที่สุด 1 อย่าง</span></div></div>
         </div>
         <div class="ai-kpi" id="ai-kpi"></div>
         <p class="ai-sum" id="ai-sum"></p>
@@ -114,29 +115,29 @@
       <section class="box"><h2>เหตุผลรายคน</h2><div class="ai-list" id="ai-list"></div></section>
     </div>
     <section class="box pr-why" id="pr-why">
-      <div class="pw-head"><h2>ทำไมต้องอัด KOL ก่อนงานให้มาก <span class="h-sub">หลักการ PR / Influencer ที่เอเจนซี่ระดับสากลใช้กับงานอีเวนต์</span></h2>
-        <div class="pw-split" aria-label="สัดส่วนโพสต์ที่แนะนำ"><div class="seg1" style="width:30%">ระยะ 1 · 30%</div><div class="seg2" style="width:35%">ระยะ 2 · 35%</div><div class="seg3" style="width:35%">ระหว่างงาน · 35%</div></div>
-        <div class="pw-cap">เป้าหมาย: ≈65% ของโพสต์ทั้งหมดออกก่อนวันเปิดงาน 20 พ.ย. — เพราะคนตัดสินใจ "มา" ก่อนวันงาน ไม่ใช่ในวันงาน</div>
+      <div class="pw-head"><h2>ทำไมต้องแบ่ง 4 ระยะ Tease → Reveal → Prove → Convert <span class="h-sub">หลัก Product-launch PR ที่เอเจนซี่ระดับสากลใช้กับฟินเทค/แอป</span></h2>
+        <div class="pw-split" aria-label="สัดส่วน reach ที่แนะนำ"><div class="seg1" style="width:22%">Tease · 22%</div><div class="seg2" style="width:30%">Reveal · 30%</div><div class="seg3" style="width:28%;background:#0A5BFF">Prove · 28%</div><div class="seg3" style="width:20%;background:#0B1052">Convert · 20%</div></div>
+        <div class="pw-cap">เป้าหมาย: วันเปิดตัว (4 พ.ย.) ต้องมีคน ≥40% ของทีมโพสต์ใน 48 ชม. — ฟีเจอร์ใหม่ถูกจำได้จาก "วันเดียวที่ทุกคนพูดถึง" ไม่ใช่จากโพสต์กระจายบาง ๆ</div>
       </div>
       <div class="pw-grid">
-        <div class="pw"><b>1 · ระยะตัดสินใจเดินทาง (Decision lead time)</b><span>งาน 10 วันในต่างจังหวัด กลุ่มเป้าหมายหลักคือกรุงเทพฯ/ปริมณฑล/ภูมิภาค ต้องลางาน จองที่พัก นัดเพื่อน ส่วนใหญ่ตัดสินใจล่วงหน้า 7–14 วัน โพสต์ที่ออกในวันงานมาช้าเกินกว่าจะเปลี่ยนแผนคน</span></div>
-        <div class="pw"><b>2 · ความถี่ที่ได้ผล (Effective frequency)</b><span>หลักการสื่อสารการตลาดคลาสสิก: คนต้องเห็นข้อความเดียวกัน ≥3 ครั้งจากหลายแหล่งก่อนจะลงมือ — KOL หลายคนโพสต์ไล่กันในสัปดาห์เดียวกันจึงสร้าง "เห็นทุกที่" (surround effect) ได้ ถ้ากระจายบาง ๆ ตลอดเดือนจะไม่ถึงเกณฑ์</span></div>
-        <div class="pw"><b>3 · อัลกอริทึมมีช่วงหน่วง (Algorithm lag)</b><span>คลิป TikTok/Reels ทำยอดส่วนใหญ่ใน 2–5 วันหลังโพสต์ และยอดค้างได้ถึงสัปดาห์ — โพสต์ 15–19 พ.ย. จึงไปถึงคนตอน 17–24 พ.ย. ตรงจังหวะเปิดงานพอดี ส่วนโพสต์วันเปิดงานจะพีกเมื่องานผ่านไปครึ่งทางแล้ว</span></div>
-        <div class="pw"><b>4 · สร้างความคาดหวังและกระแส (Anticipation & social proof)</b><span>แนว Launch–Sustain ของเอเจนซี่: ศิลปิน + reach สูงเปิดก่อน (บุกสยาม 8 พ.ย.) แล้ว Micro ต่อยอดนับถอยหลัง ให้คนเห็นว่า "คนเริ่มจะไปกันแล้ว" — FOMO ทำงานก่อนงาน ไม่ใช่หลังงาน</span></div>
-        <div class="pw"><b>5 · ระหว่างงาน = เปลี่ยนคนใกล้ ๆ และดึงสุดสัปดาห์ที่สอง</b><span>โพสต์ช่วงงานยังจำเป็นแต่ทำหน้าที่ต่างกัน: ไลฟ์/Highlight เป็นหลักฐานว่างานสนุกจริง (social proof) ดึงคนในโคราชและจังหวัดใกล้ที่ตัดสินใจเร็ว และผลักให้คนมาใหม่/มาซ้ำวันเปิดงาน 27–29 — จึงใช้คนท้องถิ่นและสายกินเป็นหลัก ไม่ต้องใช้ยอดสูง</span></div>
-        <div class="pw"><b>6 · วัดผลทันเวลา (Measure & re-weight)</b><span>แต่ละ KOL มีลิงก์/QR รายคน (ตามแผน PR) — ดูยอดลงทะเบียน LINE หลังสัปดาห์แรกแล้วเทงบ/โพสต์เพิ่มให้คนที่ทำยอดได้ก่อน 19 พ.ย. ถ้ารอวัดตอนงานจะแก้ไม่ทัน</span></div>
+        <div class="pw"><b>1 · Teaser สร้างความอยากรู้ (Curiosity gap)</b><span>คนจำ "คำถาม" ได้ดีกว่า "ประกาศ" — 6 วันก่อนเปิดตัวให้ครีเอเตอร์ตั้งคำถามว่า AI ควรช่วยลงทุนแค่ไหน ทำให้วันเปิดตัวมีคนรอเฉลยอยู่แล้ว และแบรนด์ได้บทสนทนาที่ตรงกับจุดขาย "AI คิดให้ คุณตัดสินใจ"</span></div>
+        <div class="pw"><b>2 · เปิดตัวแบบพร้อมกัน (Launch-day surround)</b><span>หลัก effective frequency: ต้องเห็น ≥3 ครั้งจากหลายแหล่งก่อนลงมือ — Mega/Macro โพสต์ไล่กันใน 48 ชม. สร้าง "เห็นทุกที่" ให้อัลกอริทึม TikTok ดันหัวข้อเดียวกัน ถ้ากระจายทั้งเดือนจะไม่ถึงเกณฑ์</span></div>
+        <div class="pw"><b>3 · การเงินต้องพิสูจน์ก่อนขาย (Trust before conversion)</b><span>สินค้าลงทุนมีต้นทุนความเชื่อใจสูง — How-to และรีวิวที่พูดข้อจำกัดตรง ๆ ช่วงหลังเปิดตัว คือสิ่งที่เปลี่ยน "น่าสนใจ" เป็น "กล้าลอง" และลดคอมเมนต์เชิงลบเรื่อง AI ตัดสินใจแทน</span></div>
+        <div class="pw"><b>4 · อัลกอริทึมมีช่วงหน่วง (Algorithm lag)</b><span>คลิป TikTok ทำยอดส่วนใหญ่ใน 2–5 วันหลังโพสต์ — โพสต์สอนใช้ 10–15 พ.ย. จะไปถึงคนตอน 12–18 พ.ย. ต่อเนื่องเข้าโค้งสุดท้ายพอดี</span></div>
+        <div class="pw"><b>5 · ปิดด้วยเดดไลน์ (Urgency & CTA)</b><span>5 วันสุดท้ายใช้สิทธิพิเศษ/โค้ดรายคนและขั้นตอนเปิดบัญชีที่สั้นที่สุด — Micro/Nano มี engagement สูงกว่าและคอมเมนต์ตอบได้ทัน เหมาะกับการปิดการตัดสินใจมากกว่าบัญชีใหญ่</span></div>
+        <div class="pw"><b>6 · วัดผลรายคนแล้วเทงบซ้ำ (Measure & re-weight)</b><span>ทุกโพสต์มีลิงก์/โค้ดของครีเอเตอร์ — ดูยอดดาวน์โหลด/เปิดบัญชีหลังสัปดาห์เปิดตัว แล้วเพิ่มโพสต์ให้คนที่ทำยอดได้ก่อน 16 พ.ย.</span></div>
       </div>
     </section>
   </div><!-- /plan -->
 
   <div class="page" data-page="sched" hidden>
-    <section class="box sc-head"><div><h2>ตารางโพสต์ 6–29 พ.ย. <span class="h-sub">ลากรูป KOL ไปวางในช่องวัน · วางได้หลายวันต่อคน · กดรูปเพื่อดู/แก้แนวคอนเทนต์ · มือถือ: แตะชื่อแล้วแตะวัน</span></h2><p class="sc-sum" id="sc-sum"></p></div><div class="ai-acts"><button class="btn primary" type="button" id="sc-auto">✨ ใช้วันที่ MIDI วางไว้ (เฉพาะคนที่ยังไม่มีวัน)</button><button class="btn" type="button" id="sc-undo">↶ ย้อนกลับ</button><button class="btn" type="button" id="sc-clear">ล้างทั้งหมด</button></div></section>
+    <section class="box sc-head"><div><h2>ตารางโพสต์ <span id="sc-range"></span> <span class="h-sub">ลากรูป KOL ไปวางในช่องวัน · วางได้หลายวันต่อคน · กดรูปเพื่อดู/แก้แนวคอนเทนต์ · มือถือ: แตะชื่อแล้วแตะวัน</span></h2><p class="sc-sum" id="sc-sum"></p></div><div class="ai-acts"><button class="btn primary" type="button" id="sc-auto">✨ ใช้วันที่ MIDI วางไว้ (เฉพาะคนที่ยังไม่มีวัน)</button><button class="btn" type="button" id="sc-undo">↶ ย้อนกลับ</button><button class="btn" type="button" id="sc-clear">ล้างทั้งหมด</button></div></section>
     <section class="box sc-wrap"><div class="sc" id="sc"></div></section>
     <section class="box"><h2>รายการโพสต์ + แนวคอนเทนต์ <span class="h-sub">MIDI ร่างให้ทุกโพสต์ · กดแถวเพื่อแก้/บันทึก · สีสถานะ: วางแผน · บรีฟแล้ว · ส่งดราฟต์ · โพสต์แล้ว</span></h2><div class="plist" id="plist"></div></section>
   </div><!-- /sched -->
 
   <div class="foot">
-    <span>ข้อมูลอัปเดตอัตโนมัติทุก 30 วินาที · ผลพิจารณาบันทึกทันทีที่กด · ระบบบันทึกการใช้งานเพื่อติดตามการพิจารณา</span><span style="margin-left:auto;font-family:var(--display);color:var(--ink2)">MIDI digital Co., Ltd.</span>
+    <span>ข้อมูลอัปเดตอัตโนมัติทุก 30 วินาที · ผลพิจารณาบันทึกทันทีที่กด · ระบบบันทึกการใช้งานเพื่อติดตามการพิจารณา</span><span style="margin-left:auto;font-family:var(--display);color:var(--ink2)">Liberator × MIDI digital Co., Ltd.</span>
   </div>
 </main>
 <div class="modal" id="modal" hidden><div class="card"><h3>คุณชื่ออะไร?</h3><p>ใส่ชื่อก่อนติ๊กผล เพื่อให้ทีมรู้ว่าใครเป็นผู้พิจารณาแต่ละราย</p><input id="name-in" type="text" placeholder="เช่น คุณเอ ฝ่ายการตลาด" maxlength="60" autocomplete="name"><div class="acts"><button class="btn" id="name-cancel" type="button">ยกเลิก</button><button class="btn primary" id="name-ok" type="button">บันทึกชื่อ</button></div></div></div>
@@ -155,7 +156,7 @@
 <div class="modal" id="umodal" hidden><div class="card" style="max-width:440px"><h3>ย้อนกลับไปเวอร์ชันก่อนหน้า</h3><p>ระบบเก็บสำเนาอัตโนมัติทุกครั้งก่อน "ล้าง" หรือ "ใช้วันที่ MIDI วางไว้" (เก็บล่าสุด 20 ครั้ง) เลือกเวอร์ชันที่จะกู้คืน</p><div class="ulist" id="ulist">กำลังโหลด…</div><div class="acts"><button class="btn" id="u-cancel" type="button">ปิด</button></div></div></div>
 <div class="gate" id="gate" hidden>
   <div class="gc" id="gate-form">
-    <img class="logo" src="logo.png" alt="MIDI digital"><div class="eb">อวดเมืองโคราช · 20–29 พ.ย. 2569</div><h1>KOL <b>Approval</b> Board</h1>
+    <img class="logo" src="logo.png" alt="Liberator"><div class="eb">Liberator · KOL สาย IT/Technology</div><h1>KOL <b>Approval</b> Board</h1>
     <p>บอร์ดนี้เปิดให้เฉพาะผู้ได้รับอนุญาต กรอกชื่อและเบอร์โทร ทีมงาน MIDI จะอนุมัติให้ภายในไม่กี่นาที</p>
     <label for="g-name">ชื่อ–นามสกุล / บริษัท</label><input id="g-name" type="text" maxlength="60" autocomplete="name" placeholder="เช่น คุณเอ · TCEB">
     <label for="g-phone">เบอร์โทร</label><input id="g-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="08x-xxx-xxxx">
@@ -165,7 +166,7 @@
     <div class="foot">MIDI digital Co., Ltd. · ข้อมูลใช้เพื่อยืนยันตัวตนเท่านั้น</div>
   </div>
   <div class="gc" id="gate-staff" hidden>
-    <img class="logo" src="logo.png" alt="MIDI digital"><div class="eb">สำหรับทีมงาน MIDI</div><h1 style="font-size:20px">เข้าใช้งานด้วยรหัส</h1>
+    <img class="logo" src="logo.png" alt="Liberator"><div class="eb">สำหรับทีมงาน MIDI</div><h1 style="font-size:20px">เข้าใช้งานด้วยรหัส</h1>
     <label for="g-code">รหัส 4 หลัก</label><input id="g-code" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
     <label for="g-sname">ชื่อ</label><input id="g-sname" type="text" maxlength="40" placeholder="ชื่อของคุณ">
     <div class="g-err" id="g-serr" hidden></div>
@@ -173,14 +174,14 @@
     <div class="alt"><a href="#" id="g-back">← กลับไปขอเข้าดู</a></div>
   </div>
   <div class="gc wait" id="gate-wait" hidden>
-    <img class="logo" src="logo.png" alt="MIDI digital"><div class="ring"></div><h2>ส่งคำขอแล้ว — รอการอนุมัติ</h2>
+    <img class="logo" src="logo.png" alt="Liberator"><div class="ring"></div><h2>ส่งคำขอแล้ว — รอการอนุมัติ</h2>
     <div class="who" id="g-who"></div>
     <p>ทีมงาน MIDI ได้รับแจ้งทาง LINE แล้ว หน้านี้จะเปิดให้เองทันทีที่อนุมัติ ไม่ต้องรีเฟรช</p>
     <div class="st" id="g-st">ตรวจสถานะอัตโนมัติทุก 10 วินาที</div>
     <div class="foot">ถ้ารอนานกว่า 10 นาที ติดต่อทีมงาน MIDI</div>
   </div>
   <div class="gc wait" id="gate-denied" hidden>
-    <img class="logo" src="logo.png" alt="MIDI digital"><h2>ยังไม่ได้รับอนุญาต</h2><p id="g-dmsg">คำขอนี้ถูกปฏิเสธ หากคิดว่าผิดพลาด ติดต่อทีมงาน MIDI</p>
+    <img class="logo" src="logo.png" alt="Liberator"><h2>ยังไม่ได้รับอนุญาต</h2><p id="g-dmsg">คำขอนี้ถูกปฏิเสธ หากคิดว่าผิดพลาด ติดต่อทีมงาน MIDI</p>
     <button class="btn" id="g-retry" type="button">ขอใหม่</button>
   </div>
 </div>

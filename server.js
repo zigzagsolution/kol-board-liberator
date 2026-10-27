@@ -1,7 +1,9 @@
 /* KOL Approval Board — server logic (Code.gs โหลดไฟล์นี้จาก GitHub → แก้ใน repo แล้วมีผลใน ~1–2 นาที ไม่ต้อง Deploy) */
-const SOURCE_ID   = "1_z2pAuGktR8bAv19tNYt_LRKk9M-p7LgSHQ17k2ytfI"; // ชีต "KOL_KORAT" (มีคอลัมน์ CODE) — ต้องแชร์ให้บัญชีที่รันสคริปต์
+const SOURCE_ID   = "16wVv_Nqns6mftCKEatN_KbkBFlpjVxP6OGbPBerRz6c"; // ชีต Liberator "ข้อมูล KOL สาย IT/Technology" — ต้องแชร์ให้บัญชีที่รันสคริปต์
 const SOURCE_TAB  = "";   // เว้นว่าง = แท็บแรก
-const REVIEW_NAME = "KOL Reviews — อวดเมืองโคราช";
+const REVIEW_NAME = "KOL Reviews — Liberator";
+/* คอลัมน์ที่ห้ามส่งออกไปหน้าเว็บ (ตัดทิ้งฝั่งเซิร์ฟเวอร์) */
+const HIDE_COLS = ["เรท","ราคา","rate","งบ"];
 /* ตัวเลือกเหตุผล "ไม่ผ่าน" — แก้ตรงนี้ได้เลย */
 const REASONS = ["ไม่ตรงสาย / กลุ่มเป้าหมาย", "ภาพลักษณ์ยังไม่เหมาะ", "ยอดผู้ติดตามน้อยเกินไป", "คอนเทนต์ไม่น่าสนใจ", "เคยรับงานแล้วทิ้ง"];
 /* รหัสล้างข้อมูลทดสอบ: พิมพ์คำนี้ในช่อง "ชื่อบัญชี" ของหน้าต่าง "เพิ่ม KOL ใหม่" แล้วบันทึก → ล้าง Reviews/History/Suggestions/Log ทั้งหมด */
@@ -58,7 +60,7 @@ function getData(p) {
   auth_(p);
   const ss = SpreadsheetApp.openById(SOURCE_ID);
   const sh = SOURCE_TAB ? ss.getSheetByName(SOURCE_TAB) : ss.getSheets()[0];
-  const grid = sh.getDataRange().getDisplayValues();
+  const grid = sanitize_(sh.getDataRange().getDisplayValues());
   return { grid: grid, reviews: readReviews_(), suggestions: readSuggestions_(), history: readHistory_(), posts: readPosts_(), reasons: REASONS, at: Date.now() };
 }
 
@@ -147,7 +149,7 @@ function setPost(p) {
 function readPosts_() {
   const ss = reviewSheet_().getParent(); const sh = ss.getSheetByName("Posts"); if (!sh || sh.getLastRow() < 2) return [];
   const vals = sh.getDataRange().getValues(); const out = [];
-  for (let i = 1; i < vals.length; i++) { if (!vals[i][0]) continue; out.push({ key: String(vals[i][0]), kol: String(vals[i][1]), name: String(vals[i][2]), day: Number(vals[i][3]||0), format: String(vals[i][4]||""), brief: String(vals[i][5]||""), status: String(vals[i][6]||"plan"), link: String(vals[i][7]||""), by: String(vals[i][8]||"") }); }
+  for (let i = 1; i < vals.length; i++) { if (!vals[i][0]) continue; out.push({ key: String(vals[i][0]), kol: String(vals[i][1]), name: String(vals[i][2]), day: Number(vals[i][3]||0), format: String(vals[i][4]||""), brief: String(vals[i][5]||""), status: String(vals[i][6]||"plan"), link: String(vals[i][7]||""), by: dstr_(vals[i][8]) }); }
   return out;
 }
 /** สำเนาวันโพสต์ (ก่อนล้าง/ก่อนใช้แผน) — แท็บ Snapshots เก็บล่าสุด 20 ชุด */
@@ -176,7 +178,7 @@ function restoreSnapshot(p) {
 }
 function currentDates_() {
   const sh = reviewSheet_(); const vals = sh.getDataRange().getValues(); const out = {};
-  for (let i = 1; i < vals.length; i++) if (vals[i][0] && String(vals[i][8]||"")) out[String(vals[i][0])] = { name: String(vals[i][1]), dates: String(vals[i][8]) };
+  for (let i = 1; i < vals.length; i++) if (vals[i][0] && dstr_(vals[i][8])) out[String(vals[i][0])] = { name: String(vals[i][1]), dates: String(vals[i][8]) };
   return out;
 }
 /** คำแนะนำ KOL จากลูกค้า {name,link,f,cat,note,by,vid} */
@@ -184,7 +186,7 @@ function addSuggestion(s) {
   if (!s || !s.name) throw new Error("missing name");
   auth_(s);
   if (String(s.name).trim() === RESET_CODE) { resetAll_(); return {ok:true, reset:true}; }
-  if (String(s.name).trim() === "ทดสอบไลน์") { throw new Error("LINE: " + pushLine_("✅ ทดสอบแจ้งเตือนจาก KOL Approval Board โดย " + (s.by||"-"))); }
+  if (String(s.name).trim() === "ทดสอบไลน์") { throw new Error("LINE: " + pushLine_("✅ ทดสอบแจ้งเตือนจาก KOL Board · Liberator โดย " + (s.by||"-"))); }
   const sh = tab_("Suggestions", ["เวลา","ชื่อบัญชี","ลิงก์","ผู้ติดตาม","หมวด","หมายเหตุ","ผู้แนะนำ","visitor"]);
   sh.appendRow([new Date(), String(s.name).slice(0,80), String(s.link||"").slice(0,300), String(s.f||"").slice(0,20), String(s.cat||"").slice(0,80), String(s.note||"").slice(0,300), String(s.by||"").slice(0,60), String(s.vid||"")]);
   return {ok:true};
@@ -200,6 +202,16 @@ function logEvents(events, meta) {
 }
 
 /* ---------- internal ---------- */
+/** วันโพสต์เป็นดัชนีวัน (0 = วันแรก) — ชีตอาจเก็บ "0" เป็นตัวเลข 0 จึงห้ามใช้ ||"" */
+function dstr_(v) { return (v === "" || v == null) ? "" : String(v); }
+/** ตัดคอลัมน์ลับ (เรท/ราคา) และปิดบังเบอร์โทรในทุกช่อง ก่อนส่งให้หน้าเว็บ */
+function sanitize_(grid) {
+  const hdrRow = grid.findIndex(r => r.some(c => /ชื่อ/.test(String(c))));
+  const hdr = hdrRow >= 0 ? grid[hdrRow] : [];
+  const drop = hdr.map((h,i) => HIDE_COLS.some(k => String(h).toLowerCase().indexOf(k.toLowerCase()) >= 0) ? i : -1).filter(i => i >= 0);
+  const phone = /(\+66|0)\d{1,2}[-\s]?\d{3,4}[-\s]?\d{3,4}/g;
+  return grid.map(r => r.filter((_, i) => drop.indexOf(i) < 0).map(c => String(c).replace(phone, "0xx-xxx-xxxx")));
+}
 function resetAll_() {
   const ss = reviewSheet_().getParent();
   ["Reviews","History","Suggestions","Log"].forEach(n => { const sh = ss.getSheetByName(n); if (sh && sh.getLastRow() > 1) sh.deleteRows(2, sh.getLastRow() - 1); });
@@ -246,7 +258,7 @@ function readHistory_() {
 /** แจ้งเตือน LINE เมื่อมี "ไม่ผ่าน" (ทำงานเมื่อใส่ LINE_TOKEN + LINE_TO) */
 function notifyLine_(r) {
   const C = config_(); const APP_URL = C.APP_URL || "";
-  const text = "❌ KOL ไม่ผ่าน\n" + r.name + (r.code ? " [" + r.code + "]" : "") + "\nโดย: " + (r.by||"-") + "\nเหตุผล: " + (r.reason||"-") + (r.extra ? "\n" + r.extra : "") + (APP_URL ? "\n" + APP_URL : "");
+  const text = "❌ [Liberator] KOL ถูกตัดออก\n" + r.name + (r.code ? " [" + r.code + "]" : "") + "\nโดย: " + (r.by||"-") + "\nเหตุผล: " + (r.reason||"-") + (r.extra ? "\n" + r.extra : "") + (APP_URL ? "\n" + APP_URL : "");
   try { pushLine_(text); } catch (e) { /* ไม่ให้การแจ้งเตือนล้มทำให้บันทึกผลล้ม */ }
 }
 /** ส่ง LINE push แล้วคืนผลเป็นข้อความ (บันทึกลงแท็บ LineLog ด้วย) */
@@ -272,7 +284,7 @@ function readReviews_() {
   const out = [];
   for (let i = 1; i < vals.length; i++) {
     if (!vals[i][0]) continue;
-    out.push({ key: String(vals[i][0]), name: String(vals[i][1]), status: String(vals[i][2]), by: String(vals[i][3]), at: vals[i][4] ? new Date(vals[i][4]).getTime() : null, reason: String(vals[i][5]||""), phase: String(vals[i][6]||""), phaseBy: String(vals[i][7]||""), dates: String(vals[i][8]||""), datesBy: String(vals[i][9]||"") });
+    out.push({ key: String(vals[i][0]), name: String(vals[i][1]), status: String(vals[i][2]), by: String(vals[i][3]), at: vals[i][4] ? new Date(vals[i][4]).getTime() : null, reason: String(vals[i][5]||""), phase: String(vals[i][6]||""), phaseBy: String(vals[i][7]||""), dates: dstr_(vals[i][8]), datesBy: String(vals[i][9]||"") });
   }
   return out;
 }

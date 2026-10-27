@@ -1,51 +1,24 @@
-# KOL Approval Board — คู่มือส่งต่อ (อวดเมืองโคราช 2569)
+# KOL Approval Board — Liberator (คู่มือส่งต่อ)
 
-อัปเดต 26 ต.ค. 2569 · MIDI digital Co., Ltd. · ผู้ดูแล: NUENG
+MIDI digital Co., Ltd. · ผู้ดูแล: NUENG · แคมเปญ **"AI คิดให้ คุณตัดสินใจ"** เปิดตัวฟีเจอร์ AI ใหม่ในแอป Liberator · โพสต์ 29 ต.ค. – 20 พ.ย. 2569 · 4 ระยะ Tease → Reveal → Prove → Convert
 
-## ระบบคืออะไร
-บอร์ดให้ลูกค้าคัด KOL 50 คนจากรายชื่อที่ MIDI คัดมาให้ (63 คน) — ทุกคน "อยู่ในทีม" ตั้งแต่แรก ลูกค้าแค่กด **ตัดออก** (และกด ผ่าน เพื่อยืนยันได้) · จัด KOL ลง 3 ระยะ · วางวันโพสต์แบบลากวาง · แนวคอนเทนต์ต่อโพสต์ที่ MIDI ร่างให้ แก้/บันทึกได้
+- หน้าเว็บ (ลูกค้าใช้): https://zigzagsolution.github.io/kol-board-liberator/
+- โค้ด: GitHub `zigzagsolution/kol-board-liberator` (branch `main` = เว็บจริง)
+- ชีตต้นทาง: "ข้อมูล KOL สาย IT/Technology" id `16wVv_Nqns6mftCKEatN_KbkBFlpjVxP6OGbPBerRz6c` (แท็บแรก) — **คอลัมน์ "เรท" ถูกตัดทิ้งฝั่งเซิร์ฟเวอร์ ไม่ส่งไปหน้าเว็บ และเบอร์โทรในทุกช่องถูกปิดบัง** (`sanitize_` ใน server.js)
+- ชีตผล: "KOL Reviews — Liberator" (สร้างอัตโนมัติใน Drive ของบัญชีที่รัน Apps Script)
+- โค้ดเดียวกับบอร์ดอวดเมืองโคราช แต่ **ไม่มี PLAN MEDIA / Nano Week** และทุกอย่างที่เป็นแคมเปญอยู่ใน `config.js` (START, DAYS, PHASES, EVENTS, HASHTAGS, INTENSITY, TARGET) — เปลี่ยนลูกค้าครั้งหน้าแก้ไฟล์นี้ไฟล์เดียว + ธีมใน `style.css` + `logo.png`
 
-- หน้าเว็บ (ลูกค้าใช้): https://zigzagsolution.github.io/kol-approval-board/
-- ลิงก์เดิมที่ลูกค้ามี (script.google.com/…/exec) ยังใช้ได้ → เด้งมาหน้าเว็บอัตโนมัติ
-- โค้ด: GitHub `zigzagsolution/kol-approval-board` (branch `main` = เว็บจริง, `preview-tabs` = ของทดลอง)
-- ชีตต้นทาง: "KOL KORAT" (id `1_z2pAuGktR8bAv19tNYt_LRKk9M-p7LgSHQ17k2ytfI`) — มีคอลัมน์ CODE (PANU / BEE / PRANG)
-- ชีตผล: "KOL Reviews — อวดเมืองโคราช" (สร้างอัตโนมัติใน Drive ของ mididigitalevent@gmail.com) แท็บ Reviews / History / Suggestions / Log / LineLog / Posts / Snapshots
+## ติดตั้งครั้งแรก (ฝั่ง NUENG)
+1. แชร์ชีตต้นทางให้บัญชีที่จะรัน Apps Script (เช่น mididigitalevent@gmail.com) แบบ Viewer
+2. script.google.com → โปรเจกต์ใหม่ → วาง `Code.gs` → Deploy → Web app (Execute as: Me, Who has access: Anyone) → คัดลอก URL `/exec`
+3. ใส่ URL ใน `config.js` → `APP_URL` → push
+4. Script Properties: `LINE_TOKEN`, `LINE_TO` (คั่นด้วย , ได้หลายคน), `APP_URL`
+5. GitHub → Settings → Pages → main / root
 
-## ไฟล์ใน repo
-| ไฟล์ | หน้าที่ | แก้แล้วมีผล |
-|---|---|---|
-| `index.html` `style.css` `app.js` | หน้าเว็บ ทุกแท็บ | 1–2 นาทีหลัง push (GitHub Pages) |
-| `config.js` | `APP_URL` (Apps Script /exec), `TARGET` = 50 | 1–2 นาที |
-| `server.js` | หลังบ้าน: อ่านชีต, บันทึกผล/ระยะ/วัน/โพสต์, LINE, Log, สำเนา | ~1 นาที (Apps Script โหลดจาก GitHub ตอนรัน, cache 60 วิ) |
-| `Code.gs` | ตัวโหลด + API JSON — วางใน Apps Script ครั้งเดียว | ต้อง Deploy ใหม่ (นาน ๆ ครั้ง) |
-| `avatars/*.webp` + `avatars/map.json` | รูปโปรไฟล์ 63 คน จับคู่ด้วยชื่อในชีต | 1–2 นาที |
-| `logo.png` | โลโก้ MIDI | |
+## วันในระบบ
+วันโพสต์เก็บเป็น "ดัชนีวัน" นับจาก `START` (0 = 29 ต.ค.) ไม่ใช่เลขวันที่ — ถ้าเปลี่ยน START ต้องล้างวันโพสต์เก่า
 
-ต้นฉบับรูปโปรไฟล์อยู่ในเครื่อง NUENG: `~/Downloads/KOL 2026/avatars/เลข_ชื่อตามชีต.png`
-
-## หน้าเว็บมีอะไร
-1. **พิจารณา** — รายชื่อเรียงตาม reach แยก Mega/Macro/Mid/Micro/Nano · ปุ่ม ✓ ผ่าน / ✗ ตัดออก (ตัดออกต้องเลือกเหตุผล → LINE แจ้ง NUENG ทันที พร้อมบอกว่าทีมยังพอ 50 หรือขาดกี่คน) · ป้าย Code: PANU = "P'PANU Recommend", ว่าง/BEE = "MiDi" (จาง), PRANG · ปุ่ม "+ เพิ่ม KOL ใหม่" · กดชื่อ/รูป = การ์ดรายคน
-2. **ทีม 50 คน** — วงแหวน, ช่อง 50 ช่อง (เรียง reach, เกิน 50 = สำรอง), เตือนเมื่อตัดจนขาด, Reach เทียบเป้า KOL 5M, คาดคนเข้างาน 1%, เช็ก TOR 6.3.4(3): Micro (5,000+) ≥30 / Nano (1,000–4,999) ≥20 — **รายชื่อปัจจุบันมี Nano แค่ 10 คน**
-3. **แผน 3 ระยะ** — ไทม์ไลน์ 6–29 พ.ย. (ความเข้มที่แนะนำ + หมุดจากแผน PR) · จัดเอง (เลือกได้หลายระยะ) หรือ **✨ MIDI จัดให้** (กติกาอธิบายได้ อิงเด็ค "22 OCT แผนประชาสัมพันธ์": ระยะ 1 ปักหมุดวัน / ระยะ 2 ตัดสินใจเดินทาง / ระยะ 3 มาแล้ว-มาต่อ-มาซ้ำ, อัดก่อนงาน ≈65%) · ส่วนท้าย "ทำไมต้องอัด KOL ก่อนงาน" 6 ข้อ
-4. **ตารางโพสต์** — Gantt 6–29 พ.ย. ลากรูปไปวางวัน · รูปจางเส้นประ = วันที่ MIDI แนะนำ · ปุ่ม "ใช้วันที่ MIDI วางไว้" / ล้างทั้งหมด / ↶ ย้อนกลับ (สำเนา 20 ชุด) · กดรูป = การ์ดโพสต์: รูปแบบ, แนวคอนเทนต์ (MIDI ร่างให้ตามสาย×ระยะ×วัน), สถานะ วางแผน→บรีฟแล้ว→ส่งดราฟต์→โพสต์แล้ว, ลิงก์โพสต์ · รายการโพสต์ใต้ตาราง
-5. **▶ นำเสนอ** — เต็มจอ ซ่อนปุ่มติ๊ก
-
-## คำสั่งลับ (พิมพ์ในช่องชื่อของ "เพิ่ม KOL ใหม่" แล้วบันทึก)
-- `ล้างข้อมูลทดสอบ 2569` → ล้าง Reviews/History/Suggestions/Log (ข้อมูล KOL จากชีตต้นทางไม่หาย)
-- `ทดสอบไลน์` → ส่ง LINE ทดสอบ และโชว์ผล HTTP
-
-## ความลับ / การตั้งค่า
-- LINE token, LINE userId, APP_URL อยู่ใน Apps Script → Script Properties (`LINE_TOKEN`, `LINE_TO`, `APP_URL`) เท่านั้น — ห้ามวางในแชท/ใน repo
-- Apps Script รันใต้บัญชี mididigitalevent@gmail.com (ชีตต้นทางต้องแชร์ให้บัญชีนี้) · Drive connector ของ Claude = info@pratanruay.com
-- GitHub org zigzagsolution ติดตั้งแอป Claude แล้ว (ต้องเพิ่ม repo ใหม่ให้แอปทุกครั้งที่สร้าง repo)
-
-## วิธีสั่งงานในแชทใหม่
-1. บอกว่า "ใช้ repo zigzagsolution/kol-approval-board" → Claude ดึงโค้ดล่าสุดมา
-2. สั่งแก้ได้เลย → Claude แก้ → push → ขึ้นเว็บใน 1–2 นาที (ของใหญ่ให้ทำใน branch `preview-tabs` แล้วส่งภาพตัวอย่างก่อน "ขึ้นเลย" ค่อยรวมเข้า main)
-3. รูปโปรไฟล์ใหม่: วางไฟล์ใน `~/Downloads/KOL 2026/avatars/` แล้วบอก หรือส่งภาพในแชท
-
-## ยังไม่ได้ทำ / ไอเดีย
-- Engagement rate / วิวเฉลี่ย (ต้องเพิ่มคอลัมน์ในชีต) · ราคา/Rate card → cost per reach
-- ส่งออกภาพสรุป "ทีม 50" 1 แผ่น
-- Press Tour 19–20 / 26–28 และ Caravan 3 เส้นทาง ยังไม่ได้ผูกกับ KOL
-- หา Nano (1,000–4,999) เพิ่มอีก ~10 คนให้ครบ TOR
+## คำสั่งลับ (ช่องชื่อใน "เพิ่ม KOL ใหม่")
+- `ล้างข้อมูลทดสอบ 2569` → ล้าง Reviews/History/Suggestions/Log
+- `ทดสอบไลน์` → ส่ง LINE ทดสอบ
+- รหัสทีมงานหน้า gate: `9999`
