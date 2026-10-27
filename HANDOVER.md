@@ -2,7 +2,7 @@
 
 MIDI digital Co., Ltd. · ผู้ดูแล: NUENG · แคมเปญ **"AI คิดให้ คุณตัดสินใจ"** เปิดตัวฟีเจอร์ AI ใหม่ในแอป Liberator · โพสต์ 29 ต.ค. – 20 พ.ย. 2569 · 4 ระยะ Tease → Reveal → Prove → Convert
 
-- หน้าเว็บ (ลูกค้าใช้): https://zigzagsolution.github.io/kol-board-liberator/
+- หน้าเว็บ (ลูกค้าใช้): https://liberator.mididigital.co.th/
 - โค้ด: GitHub `zigzagsolution/kol-board-liberator` (branch `main` = เว็บจริง)
 - ชีตต้นทาง: "ข้อมูล KOL สาย IT/Technology" id `19Y-Vec0IqTksB8NJwZfu4MkLQpy2iMkQrGtm1RqVU8c` (แท็บแรก) — **คอลัมน์ "เรท" ถูกตัดทิ้งฝั่งเซิร์ฟเวอร์ ไม่ส่งไปหน้าเว็บ และเบอร์โทรในทุกช่องถูกปิดบัง** (`sanitize_` ใน server.js)
 - ชีตผล: "KOL Reviews — Liberator" (สร้างอัตโนมัติใน Drive ของบัญชีที่รัน Apps Script)
