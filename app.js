@@ -468,6 +468,44 @@ $("#a-close").onclick=()=>{ $("#amodal").hidden=true; }; $("#amodal").addEventLi
 /* เริ่มต้น */
 if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
 
+
+/* ===== ร่ม + แรงเหวี่ยงข่าว — 2 ดีไซน์: ripple (วงคลื่น) / flow (เส้นทางข่าว) ===== */
+function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella"); if(!U||!el) return; design=design||CFG.UMBRELLA_DESIGN||"ripple"; el.dataset.design=design;
+  const W=U.waves; let cur=0;
+  const panel=i=>{ const w=W[i]; return `<div class="um-panel" style="--c:${w.c}"><div class="um-when">${esc(w.when)}</div><h4>${esc(w.t)}</h4><div class="um-who">${esc(w.who)}</div><p>${esc(w.say)}</p><div class="um-hook">${esc(w.hook)}</div></div>`; };
+  const head=`<div class="um-head"><div class="um-k">ร่มของวันที่ 29 — คำเดียว ทุกคนพูดเหมือนกัน</div><div class="um-word">${esc(U.word)}</div><div class="um-sub">${esc(U.sub)}</div><div class="um-line">“${esc(U.line)}”</div></div>`;
+  let viz="";
+  if(design==="ripple"){
+    const cx=300, cy=300, R=[92,134,172,208,241,272], ang=i=>(-92+i*33)*Math.PI/180;
+    const rings=W.map((w,i)=>{ const a=ang(i), lx=cx+R[i]*Math.cos(a), ly=cy+R[i]*Math.sin(a); const inner=i?R[i-1]:62; const mid=(R[i]+inner)/2;
+      return `<g class="um-ring" data-i="${i}" style="--c:${w.c}"><circle cx="${cx}" cy="${cy}" r="${mid}" class="um-band" stroke-width="${R[i]-inner-2}"/><circle cx="${cx}" cy="${cy}" r="${R[i]}" class="um-c"/><g class="um-lbl" transform="translate(${lx},${ly})"><rect x="-44" y="-13" width="88" height="27" rx="13"/><text class="um-t" y="-1"><tspan>${esc(w.t)}</tspan></text><text class="um-t s" y="10">${esc(w.when)}</text></g></g>`; }).reverse().join("");
+    viz=`<div class="um-viz"><svg viewBox="0 0 600 600" class="um-svg" aria-label="แรงเหวี่ยงข่าว">
+      <defs><radialGradient id="umg" cx="50%" cy="50%"><stop offset="0" stop-color="#e8194c"/><stop offset="1" stop-color="#b3103a"/></radialGradient></defs>
+      ${rings}
+      <circle class="um-pulse" cx="${cx}" cy="${cy}" r="60"/>
+      <g class="um-core" data-i="0"><circle cx="${cx}" cy="${cy}" r="60" fill="url(#umg)"/><text x="${cx}" y="${cy-6}" class="um-core-t">29 ต.ค.</text><text x="${cx}" y="${cy+14}" class="um-core-s">เวทีแถลง</text></g>
+    </svg><div class="um-side" id="um-side">${panel(0)}</div></div>
+    <div class="um-legend">กดวงไหน = ดูว่าช่วงนั้นใครพูดอะไร · วงใกล้กลาง = เร็วและเข้มกว่า · ข่าวเหวี่ยงจากเวทีออกไปถึงวันที่ 20 พ.ย.</div>`;
+  } else {
+    const cols=["29 ต.ค.","30–31","1–8 พ.ย.","9–10 พ.ย.","11–15","16–20"];
+    const POS=[[3,4,5],[3,4,5,6,7],[3,4,5,7]]; // คอลัมน์ของโหนดแต่ละสาย (2 = 29 ต.ค. คือเวที)
+    const lanes=U.lanes.map((l,li)=>`<div class="um-lane-k" style="--c:${l.c};grid-row:${li+2}">${esc(l.k)}</div>`+l.nodes.map((n,ni)=>{ const col=POS[li][ni]||ni+3; return `<div class="um-node" data-i="${col-2}" style="--c:${l.c};grid-column:${col};grid-row:${li+2}">${esc(n)}</div>`; }).join("")).join("");
+    viz=`<div class="um-flow">
+      <div class="um-col-k"></div>${cols.map((c,i)=>`<div class="um-col${i===3?" launch":""}" data-i="${i}" style="grid-column:${i+2};grid-row:1">${c}${i===3?"<small>เปิดใช้จริง</small>":""}${i===0?"<small>เวทีแถลง</small>":""}</div>`).join("")}
+      <div class="um-stage" data-i="0" style="grid-column:2;grid-row:2/5"><b>เวที 29</b><span>ทุกสายเริ่มจากประโยคเดียวกัน</span><i></i></div>
+      ${lanes}
+      <div class="um-merge" style="grid-column:5;grid-row:5"><i></i><b>จุดบรรจบ 9 พ.ย.</b><span>สื่อ + KOL + ช่องแบรนด์ ออกพร้อมกัน = เห็นทุกที่ใน 48 ชม.</span></div>
+      <div class="um-end" style="grid-column:6/8;grid-row:5"><b>ปลายทางเดียว</b><span>ทุกเส้นจบที่หน้าเปิดบัญชี/จองคิว — ไม่มีหน้ารับ = คนหายระหว่างทาง</span></div>
+    </div><div class="um-side" id="um-side">${panel(0)}</div>
+    <div class="um-legend">3 สาย (สื่อ · KOL · ช่องของแบรนด์) แตกจากเวทีเดียวกัน แล้วมาบรรจบวันที่ 9 — กดจุดไหนดูได้ว่าช่วงนั้นใครพูดอะไร</div>`;
+  }
+  el.innerHTML=`<section class="box um" data-design="${design}">${head}${viz}</section>`;
+  const sel=i=>{ cur=i; $("#um-side").innerHTML=panel(i); el.querySelectorAll("[data-i]").forEach(n=>n.classList.toggle("on",+n.dataset.i===i)); };
+  el.querySelectorAll("[data-i]").forEach(n=>{ n.addEventListener("click",()=>sel(+n.dataset.i)); n.addEventListener("mouseenter",()=>{ el.querySelectorAll("[data-i]").forEach(x=>x.classList.toggle("hov",+x.dataset.i===+n.dataset.i)); }); n.addEventListener("mouseleave",()=>el.querySelectorAll(".hov").forEach(x=>x.classList.remove("hov"))); });
+  sel(0);
+  // เล่นเองช้า ๆ จนกว่าจะมีคนกด
+  let auto=setInterval(()=>sel((cur+1)%W.length),4000); el.addEventListener("click",()=>{ clearInterval(auto); auto=null; },{once:true});
+}
 /* ===== หน้ากลยุทธ์ (ข้อมูลจาก strategy.js) ===== */
 function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0; try{ plan=+localStorage.getItem("kol_plan")||0; }catch(e){}
   const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
@@ -489,6 +527,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
       </div>
     </section>`;
   el.innerHTML=`
+    <div id="umbrella"></div>
     <section class="box st-top"><div class="st-k">กลยุทธ์สื่อสาร · PESO × RACE</div><h2 class="st-title">${esc(S.title)}</h2><div class="st-sub">${esc(S.sub)}</div>
       <div class="st-phases">${S.phases.map((p,i)=>`<div style="--ph:${PHASES[i]?PHASES[i].c:"#999"}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
     </section>
@@ -510,9 +549,10 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     </div>
     <section class="box st-cta"><div><b>พร้อมดูรายชื่อ KOL ที่ MIDI คัดให้แล้ว</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก — ตัดออกเฉพาะคนที่ไม่ต้องการ</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL →</button></section>
     <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” ยังไม่ยืนยันกับลูกค้า</p>`;
+  renderUmbrella();
   el.querySelectorAll(".st-seg button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
   $("#st-go").onclick=()=>setTab("review");
 }
 try{ renderStrategy(); }catch(e){ console.error(e); }
-window.KOL={$,esc,setTab,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB,_dbg:()=>({data,inTeam,autoDates,aiPlan,phaseDays,TL_DAYS,tlPhase})}; // ให้ planmedia.js ใช้
+window.KOL={$,esc,setTab,renderUmbrella,logEv,flushLog,api,toast,render,posts:()=>POSTS,reviewer:()=>reviewer,tab:()=>TAB,_dbg:()=>({data,inTeam,autoDates,aiPlan,phaseDays,TL_DAYS,tlPhase})}; // ให้ planmedia.js ใช้
 })();
