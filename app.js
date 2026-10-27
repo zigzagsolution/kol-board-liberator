@@ -130,7 +130,7 @@ function render(){
 }
 /* ===== tabs ===== */
 let TAB="strategy"; try{ TAB=localStorage.getItem("kol_tab")||"strategy"; }catch(e){}
-function setTab(t){ TAB=t; document.body.dataset.tab=t; if(t==="strategy"){ setTimeout(smoothOn,0); } else smoothOff(); document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
+function setTab(t){ TAB=t; document.body.dataset.tab=t; try{ if(t==="strategy"){ setTimeout(smoothOn,0); } else if(typeof smoothOff==="function") smoothOff(); }catch(e){} document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab)); setTab(TAB);
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
@@ -470,8 +470,12 @@ if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ c
 
 
 
+
+/* ป้ายสถานะรายชื่อ: เป็นรายการเสนอ ยังไม่ได้ติดต่อ (แสดงบนทุกหน้าที่มีรายชื่อ) */
+(()=>{ const html=`<div class="notice-list"><span class="nl-ic">!</span><div><b>รายชื่อทั้งหมดเป็น "รายการเสนอ" — ยังไม่ได้ติดต่อ KOL</b><span>MIDI จะเริ่มติดต่อและยืนยันคิว เรท และวันโพสต์ หลังจากที่ท่านคอนเฟิร์มรายชื่อในบอร์ดนี้แล้วเท่านั้น</span></div><em>ขั้นตอน: ท่านคัด → MIDI ติดต่อ → ยืนยันแล้วแจ้งกลับ</em></div>`;
+  document.querySelectorAll('.page[data-page="review"],.page[data-page="team"],.page[data-page="plan"],.page[data-page="sched"]').forEach(p=>p.insertAdjacentHTML("afterbegin",html)); })();
 /* ===== smooth scroll (Lenis) — เฉพาะแท็บกลยุทธ์ ===== */
-let LEN=null;
+var LEN=null;
 function smoothOn(){ if(LEN||!window.Lenis) return; if(matchMedia("(prefers-reduced-motion:reduce)").matches) return; LEN=new Lenis({lerp:.08,wheelMultiplier:.9,smoothWheel:true}); const raf=t=>{ if(!LEN) return; LEN.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf); }
 function smoothOff(){ if(LEN){ LEN.destroy(); LEN=null; } }
 window.addEventListener("load",()=>{ if(TAB==="strategy") smoothOn(); });
@@ -568,7 +572,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         <div class="st-ros sv-c" style="--i:0">${S.pressday.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>
         <div class="st-faq sv-c" style="--i:1"><h3>ถ้าถูกถาม ทุกคนตอบแบบนี้</h3>${S.faq.map(f=>`<div><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div>
       </div>
-      <div class="st-cta sv-c" style="--i:2"><div><b>รายชื่อ KOL ที่ MIDI คัดไว้ให้แล้ว${data.length?" "+data.length+" คน":""}</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก ตัดออกได้เฉพาะคนที่ไม่ต้องการ</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL</button></div>
+      <div class="st-cta sv-c" style="--i:2"><div><b>รายชื่อ KOL ที่ MIDI คัดไว้ให้แล้ว${data.length?" "+data.length+" คน":""}</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก ตัดออกได้เฉพาะคนที่ไม่ต้องการ · เป็นรายการเสนอ ยังไม่ได้ติดต่อ จะติดต่อหลังท่านคอนเฟิร์ม</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL</button></div>
       <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” จะกำหนดร่วมกันก่อนเริ่มแคมเปญ</p>${CRED}
     </section>
     </div>`;
