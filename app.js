@@ -246,7 +246,12 @@ renderTimeline();
 const splitWhy=w=>{ const i=w.indexOf(" — "); return i>0?[w.slice(0,i),w.slice(i+3)]:[w,""]; };
 const chipsHtml=(arr,max)=>`<div class="why-chips">${arr.slice(0,max||99).map(w=>{ const [t,d]=splitWhy(w); const cls=/^ช่วงที่แนะนำ/.test(w)?"when":/^ย้าย|^เพิ่มให้/.test(w)?"mv":""; return `<span class="${cls}" title="${esc(w)}">${esc(cls==="when"?w.replace("ช่วงที่แนะนำ: ","📍 "):t)}</span>`; }).join("")}</div>`;
 let PLAN_MODE="manual";
-$("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ PLAN_MODE=b.dataset.m; $("#plan-seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b)); $("#plan-manual").hidden=PLAN_MODE!=="manual"; $("#plan-ai").hidden=PLAN_MODE!=="ai"; logEv("planmode",PLAN_MODE); render(); });
+/* "MIDI จัดให้" ล็อกไว้ — ต้องได้รหัสจากฝ่ายขาย (config: AI_CODE) */
+const AI_CODE=String(CFG.AI_CODE||"mididigital09"); let AI_OPEN=false;
+function askAI(then){ const m=$("#aigate"); if(!m) return then(); m.hidden=false; const inp=$("#ag-code"); inp.value=""; $("#ag-err").hidden=true; setTimeout(()=>inp.focus(),50);
+  const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
+  $("#ag-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#ag-cancel").onclick=()=>{ m.hidden=true; }; }
+$("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.m==="ai"&&!AI_OPEN){ askAI(()=>b.click()); return; } PLAN_MODE=b.dataset.m; $("#plan-seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b)); $("#plan-manual").hidden=PLAN_MODE!=="manual"; $("#plan-ai").hidden=PLAN_MODE!=="ai"; logEv("planmode",PLAN_MODE); render(); });
 function renderAI(passed){
   if(PLAN_MODE!=="ai") return; if(!passed.length){ $("#ai-sum").textContent="ยังไม่มี KOL ในทีม"; $("#ai-kpi").innerHTML=""; $("#ai-phases").innerHTML=""; $("#ai-list").innerHTML=""; return; }
   const {pick,total}=aiPlan(passed); const rows=Object.values(pick);

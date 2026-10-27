@@ -103,7 +103,7 @@
   </div><!-- /team -->
 
   <div class="page" data-page="plan" hidden>
-    <div class="ctl plan-mode"><div class="seg" id="plan-seg"><button type="button" class="active" data-m="manual">✋ จัดเอง</button><button type="button" data-m="ai">✨ MIDI จัดให้</button></div><span class="seg-l" id="plan-who"></span></div>
+    <div class="ctl plan-mode"><div class="seg" id="plan-seg"><button type="button" class="active" data-m="manual">✋ จัดเอง</button><button type="button" data-m="ai">✨ MIDI จัดให้ <span class="lock">🔒</span></button></div><span class="seg-l" id="plan-who"></span></div>
     <section class="box tl" id="timeline"></section>
     <div id="plan-manual">
     <p class="plan-note hash">Hashtag กลาง: <b id="hash-txt"></b> · ทุกโพสต์แนบลิงก์/โค้ดรายคนเพื่อวัดการดาวน์โหลด-เปิดบัญชี</p>
@@ -168,6 +168,15 @@
 <div class="acts"><button class="btn" id="r-cancel" type="button">ยกเลิก</button><button class="btn primary" id="r-ok" type="button">ตัดออกจากทีม</button></div></div></div>
 <div class="modal" id="pmodal" hidden><div class="card pcard" id="pcard"></div></div>
 <div class="modal" id="umodal" hidden><div class="card" style="max-width:440px"><h3>ย้อนกลับไปเวอร์ชันก่อนหน้า</h3><p>ระบบเก็บสำเนาอัตโนมัติทุกครั้งก่อน "ล้าง" หรือ "ใช้วันที่ MIDI วางไว้" (เก็บล่าสุด 20 ครั้ง) เลือกเวอร์ชันที่จะกู้คืน</p><div class="ulist" id="ulist">กำลังโหลด…</div><div class="acts"><button class="btn" id="u-cancel" type="button">ปิด</button></div></div></div>
+<div class="modal" id="aigate" hidden><div class="card" style="max-width:420px;text-align:center">
+  <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd." style="height:44px;margin-bottom:8px">
+  <div style="font-family:var(--display);font-size:11px;letter-spacing:.2em;color:#e8194c;font-weight:700">MIDI จัดให้ · ส่วนพิเศษ</div>
+  <h3 style="margin:4px 0 6px">โปรดติดต่อ Sale ของ MIDI</h3>
+  <p style="margin:0 0 14px;font-size:13px;color:var(--ink2);line-height:1.6">แผนที่ระบบ MIDI จัดให้ เปิดให้เฉพาะลูกค้าที่ได้รับรหัสจากฝ่ายขาย<br>ถ้ามีรหัสแล้ว ใส่ด้านล่างเพื่อเปิดดูได้ทันที</p>
+  <input id="ag-code" type="password" autocomplete="off" placeholder="รหัสจาก Sale" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:16px;text-align:center">
+  <div class="g-err" id="ag-err" hidden>รหัสไม่ถูกต้อง — ติดต่อ Sale ของ MIDI</div>
+  <div class="acts" style="margin-top:14px"><button class="btn" id="ag-cancel" type="button">ปิด</button><button class="btn primary" id="ag-ok" type="button">เปิดดูแผน</button></div>
+</div></div>
 <div class="modal" id="tgate" hidden><div class="card" style="max-width:380px;text-align:center">
   <img class="logo" src="logo-midi.png" alt="MIDI digital Co., Ltd." style="height:44px;margin-bottom:8px">
   <h3 style="margin:0 0 4px">ใส่รหัสเพื่อเปิดหน้า <span id="tg-name"></span></h3>
@@ -215,7 +224,7 @@
 <script src="lenis.min.js"></script>
 <script src="strategy.js?v=6"></script>
 <script src="umbrella.js?v=5"></script>
-<script src="config.js?v=6"></script>
-<script src="app.js?v=35"></script>
+<script src="config.js?v=7"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>

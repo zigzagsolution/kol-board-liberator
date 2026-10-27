@@ -721,3 +721,13 @@ html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!
 body.present .notice-list{display:none}
 @media (prefers-reduced-motion:reduce){.nl-ic{animation:none}}
 #tgate .card{border-top:5px solid #e8194c}#tgate .btn.primary{background:#e8194c;border-color:#e8194c}
+
+/* plan mode switch — prominent */
+.plan-mode .seg{border:0;background:transparent;gap:10px;overflow:visible}
+.plan-mode .seg button{border-radius:999px;padding:12px 22px;font-size:15px;font-family:var(--display);font-weight:700;border:2px solid var(--line);background:var(--paper);color:var(--ink2);box-shadow:0 4px 14px rgba(11,16,82,.06);transition:all .25s}
+.plan-mode .seg button:hover{transform:translateY(-1px);border-color:var(--navy)}
+.plan-mode .seg button.active{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 10px 26px rgba(11,16,82,.28)}
+.plan-mode .seg button[data-m="ai"]{background:linear-gradient(135deg,#0A5BFF,#00c2ff);border-color:transparent;color:#fff;box-shadow:0 10px 26px rgba(10,91,255,.35)}
+.plan-mode .seg button[data-m="ai"].active{background:linear-gradient(135deg,#0B1052,#0A5BFF)}
+.plan-mode .seg button .lock{font-size:12px;margin-left:4px;opacity:.9}
+#aigate .card{border-top:5px solid #e8194c}#aigate .btn.primary{background:#e8194c;border-color:#e8194c}
