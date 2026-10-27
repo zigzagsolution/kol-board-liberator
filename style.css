@@ -502,3 +502,10 @@ body.present .hero{margin-top:12px}
 .tab:hover:not(.active){color:#fff}
 .tab.active{background:var(--mb);color:#fff;box-shadow:none}
 .tab.active b{background:#fff;color:var(--mb)}
+
+/* gate = MIDI brand ทั้งหน้า (ก่อนเข้าถึงลูกค้า) */
+.gate{--brand:#e8194c;--accent:#e8194c;--ink:#2b2b2e;--ink2:#4b4b4e;--line:#e4e4e8;--bg:#f4f4f6;color:var(--ink);background:radial-gradient(1200px 600px at 50% -10%,#fde6ec,#f4f4f6)}
+.gate .gc{border-top-color:#e8194c;box-shadow:0 20px 60px rgba(43,43,46,.12)}
+.gate .gc .logo{height:60px}
+.gate .btn.primary{background:#e8194c;border-color:#e8194c;color:#fff}
+.gate .ring{border-top-color:#e8194c}
