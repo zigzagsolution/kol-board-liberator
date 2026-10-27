@@ -25,7 +25,7 @@
   <button type="button" class="tab" data-tab="strategy">🎯 กลยุทธ์</button>
   <button type="button" class="tab active" data-tab="review">✓ พิจารณา <b id="t-review">0</b></button>
   <button type="button" class="tab" data-tab="team">★ ทีม <span id="t-target">30</span> คน <b id="t-team">0/30</b></button>
-  <button type="button" class="tab" data-tab="plan">📅 แผน 4 ระยะ 🔒 <b id="t-plan">0</b></button>
+  <button type="button" class="tab" data-tab="plan">📅 แผน 4 ระยะ <b id="t-plan">0</b> <span class="lk">🔒 Sale</span></button>
   <button type="button" class="tab" data-tab="sched">🗓 ตารางโพสต์ <b id="t-sched">0</b></button>
 </nav></header>
 
@@ -103,7 +103,7 @@
   </div><!-- /team -->
 
   <div class="page" data-page="plan" hidden>
-    <div class="ctl plan-mode"><div class="seg" id="plan-seg"><button type="button" class="active" data-m="manual">✋ จัดเอง</button><button type="button" data-m="ai">✨ MIDI จัดให้ <span class="lock">🔒</span></button></div><span class="seg-l" id="plan-who"></span></div>
+    <div class="ctl plan-mode"><div class="seg" id="plan-seg"><button type="button" class="active" data-m="manual">✋ จัดเอง</button><button type="button" data-m="ai">✨ MIDI จัดให้ <span class="lk">🔒 Sale</span></button></div><span class="seg-l" id="plan-who"></span></div>
     <section class="box tl" id="timeline"></section>
     <div id="plan-manual">
     <p class="plan-note hash">Hashtag กลาง: <b id="hash-txt"></b> · ทุกโพสต์แนบลิงก์/โค้ดรายคนเพื่อวัดการดาวน์โหลด-เปิดบัญชี</p>
@@ -145,7 +145,7 @@
   </div><!-- /plan -->
 
   <div class="page" data-page="sched" hidden>
-    <section class="box sc-head"><div><h2>ตารางโพสต์ <span id="sc-range"></span> <span class="h-sub">ลากรูป KOL ไปวางในช่องวัน · วางได้หลายวันต่อคน · กดรูปเพื่อดู/แก้แนวคอนเทนต์ · มือถือ: แตะชื่อแล้วแตะวัน</span></h2><p class="sc-sum" id="sc-sum"></p></div><div class="ai-acts"><button class="btn primary" type="button" id="sc-auto">✨ ใช้วันที่ MIDI วางไว้ 🔒</button><button class="btn" type="button" id="sc-undo">↶ ย้อนกลับ</button><button class="btn" type="button" id="sc-clear">ล้างทั้งหมด</button></div></section>
+    <section class="box sc-head"><div><h2>ตารางโพสต์ <span id="sc-range"></span> <span class="h-sub">ลากรูป KOL ไปวางในช่องวัน · วางได้หลายวันต่อคน · กดรูปเพื่อดู/แก้แนวคอนเทนต์ · มือถือ: แตะชื่อแล้วแตะวัน</span></h2><p class="sc-sum" id="sc-sum"></p></div><div class="ai-acts"><button class="btn primary" type="button" id="sc-auto">✨ ใช้วันที่ MIDI วางไว้ <span class="lk">🔒 Sale</span></button><button class="btn" type="button" id="sc-undo">↶ ย้อนกลับ</button><button class="btn" type="button" id="sc-clear">ล้างทั้งหมด</button></div></section>
     <section class="box sc-wrap"><div class="sc" id="sc"></div></section>
     <section class="box"><h2>รายการโพสต์ + แนวคอนเทนต์ <span class="h-sub">MIDI ร่างให้ทุกโพสต์ · กดแถวเพื่อแก้/บันทึก · สีสถานะ: วางแผน · บรีฟแล้ว · ส่งดราฟต์ · โพสต์แล้ว</span></h2><div class="plist" id="plist"></div></section>
   </div><!-- /sched -->
@@ -227,6 +227,6 @@
 <script src="strategy.js?v=6"></script>
 <script src="umbrella.js?v=5"></script>
 <script src="config.js?v=8"></script>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>

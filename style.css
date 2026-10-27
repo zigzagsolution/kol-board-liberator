@@ -740,3 +740,10 @@ body.present .notice-list{display:none}
 .st-lockcard .btn.primary{background:#e8194c;border-color:#e8194c;white-space:nowrap;font-family:var(--display);font-weight:700;padding:11px 18px}
 @media (max-width:760px){.st-lockcard{grid-template-columns:1fr}}
 .st-rail a.locked{color:var(--mute);opacity:.7}.st-rail a em{margin-left:auto;font-size:11px;font-style:normal}
+
+/* 🔒 Sale badge — ทุกจุดที่ต้องใช้รหัสจาก Sale */
+.lk{display:inline-block;background:#e8194c;color:#fff;border-radius:999px;padding:1px 8px;font-size:10px;font-family:var(--display);font-weight:700;letter-spacing:.02em;vertical-align:middle;margin-left:4px;white-space:nowrap;font-style:normal}
+.tab .lk{background:#fff;color:#e8194c}.tab.active .lk{background:#fff;color:#e8194c}
+.plan-mode .seg button .lk,#sc-auto .lk{background:#fff;color:#e8194c}
+.st-seg2 button .lk{margin-left:6px}.st-rail a .lk{margin-left:auto}
+.gc h1{font-size:21px}

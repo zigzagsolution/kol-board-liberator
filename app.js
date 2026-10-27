@@ -556,13 +556,13 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     </section>`;
   const ch=[["hero","Strategy วันงาน"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
   el.innerHTML=`
-    <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}" class="${i?"locked":""}"><i></i><span>${esc(c[1])}</span>${i?'<em>🔒</em>':""}</a>`).join("")}<b class="st-rail-line"></b></nav>
+    <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}" class="${i?"locked":""}"><i></i><span>${esc(c[1])}</span>${i?'<em class="lk">🔒 Sale</em>':""}</a>`).join("")}<b class="st-rail-line"></b></nav>
     <div class="st-body">
     <div class="st-hero sv" id="st-hero"><div id="umbrella"></div>
       <div class="st-phases">${S.phases.map((p,i)=>`<div class="sv-c" style="--ph:${PHASES[i]?PHASES[i].c:"#999"};--i:${i}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
       ${CRED}
     </div>
-    <div class="st-lockcard" id="st-lockcard"><div class="st-lock-ic">🔒</div><div><b>เนื้อหาส่วนที่เหลือเปิดให้เฉพาะลูกค้าที่ได้รับรหัสจาก Sale</b><span>11 วันระหว่างทาง · คนไทยกับแอปลงทุน · แผน A/B · ภาพใหญ่ · วันแถลงข่าว — ติดต่อ Sale ของ MIDI เพื่อรับรหัส</span></div><button class="btn primary" type="button" id="st-unlock">ใส่รหัสจาก Sale</button></div>
+    <div class="st-lockcard" id="st-lockcard"><div class="st-lock-ic">🔒</div><div><b>เนื้อหาส่วนที่เหลือเปิดให้เฉพาะลูกค้าที่ได้รับรหัสจาก Sale <span class="lk">🔒 Sale</span></b><span>11 วันระหว่างทาง · คนไทยกับแอปลงทุน · แผน A/B · ภาพใหญ่ · วันแถลงข่าว — ติดต่อ Sale ของ MIDI เพื่อรับรหัส</span></div><button class="btn primary" type="button" id="st-unlock">ใส่รหัสจาก Sale</button></div>
     <div id="st-locked" hidden>
     <section class="st-sec sv" id="st-gap"><h2 class="st-h">${esc(S.gap.h)}</h2><p class="st-lead">${esc(S.gap.p)}</p>
       <div class="st-steps">${S.gap.rules.map((r,i)=>`<div class="st-step sv-c" style="--i:${i}"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>${CRED}</section>
@@ -578,7 +578,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         </div>
       </div>${CRED}</section>
     <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
-      <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}${i?' <span class="lock">🔒 รหัสจาก Sale</span>':""}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
+      <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}${i?' <span class="lk">🔒 Sale</span>':""}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
       <div class="st-decide">${S.decide.map((d,i)=>`<div class="sv-c" style="--i:${i}"><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
       <div id="st-plan-body">${planHtml(S.plans[plan])}</div>${CRED}</section>
     <section class="st-sec sv" id="st-peso"><h2 class="st-h">KOL อยู่ตรงไหนของภาพใหญ่</h2>
