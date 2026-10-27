@@ -1,6 +1,6 @@
 /* ตั้งค่าบอร์ด — แก้ไฟล์นี้ไฟล์เดียวเมื่อเปลี่ยนแคมเปญ/ลูกค้า */
 window.KOL_CONFIG = {
-  APP_URL: "",                 // URL ของ Apps Script Web app (ลงท้าย /exec)
+  APP_URL: "https://script.google.com/macros/s/AKfycbzBRLBpnqMcBPMpctnKcMzwklFXj9tYIEz85kRZMDHMVOHpDGtm1T4qQ6QXmxS0R3L1/exec",                 // URL ของ Apps Script Web app (ลงท้าย /exec)
   TARGET: 30,                  // เป้าจำนวน KOL ในทีม
   CLIENT: "Liberator",
   CAMPAIGN: "AI คิดให้ คุณตัดสินใจ",
