@@ -130,7 +130,7 @@ function render(){
 }
 /* ===== tabs ===== */
 let TAB="strategy"; try{ TAB=localStorage.getItem("kol_tab")||"strategy"; }catch(e){}
-function setTab(t){ TAB=t; document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
+function setTab(t){ TAB=t; document.body.dataset.tab=t; document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab)); setTab(TAB);
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
@@ -510,47 +510,63 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
 function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0; try{ plan=+localStorage.getItem("kol_plan")||0; }catch(e){}
   const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
   const planHtml=P=>`
-    <section class="box st-plan" style="--ph:${P.id==="A"?"#0A5BFF":"#0B1052"}">
-      <div class="st-plan-h"><div><div class="st-k">${esc(P.name)}</div><h3>${esc(P.big)}</h3><div class="st-tag">${esc(P.tag)}</div></div></div>
-      <p class="st-why">${esc(P.why)}</p>
-      <div class="st-grid3">${P.offer.map(o=>`<div class="st-card"><b>${esc(o[0])}</b><span>${esc(o[1])}</span>${o[2]?`<small>${esc(o[2])}</small>`:""}</div>`).join("")}</div>
-      <div class="st-head">พาดหัวที่อยากให้สื่อใช้</div><div class="st-headline">“${esc(P.headline)}”</div>
-      <div class="st-head">CEO พูดอะไรบนเวที 29 ต.ค. (ลำดับ ~13 นาที)</div>
-      <ol class="st-ceo">${P.ceo.map(c=>`<li><b>${esc(c[0])}</b><span>${esc(c[1])}</span></li>`).join("")}</ol>
-      <div class="st-head">ใครพูดอะไร เมื่อไร</div>
-      <div class="st-voices">${P.voices.map(v=>`<div class="st-v"><b>${esc(v[0])}</b><span>${esc(v[1])}</span><small>${esc(v[2])}</small></div>`).join("")}</div>
-      <div class="st-head">สัดส่วนน้ำหนัก 4 ระยะ</div>
-      <div class="pw-split st-split">${P.share.map((s,i)=>`<div style="width:${s}%;background:${PHASES[i]?PHASES[i].c:"#999"}">ระยะ ${i+1} · ${s}%</div>`).join("")}</div>
-      <div class="st-grid2">
-        <div><div class="st-head">KPI</div><div class="st-list">${P.kpi.map(k=>`<div class="st-kpi"><b>${esc(k[0])}</b><span>${esc(k[1])}</span>${k[2]?`<em>${esc(k[2])}</em>`:""}</div>`).join("")}</div></div>
-        <div><div class="st-head">ความเสี่ยง → วิธีรับมือ</div><div class="st-list">${P.risks.map(r=>`<div class="st-risk"><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></div>
+    <section class="st-pcard in" style="--ph:${P.id==="A"?"#0A5BFF":"#0B1052"}">
+      <div class="st-plan-top"><small>${esc(P.name)}</small><h3>${esc(P.big)}</h3><p>${esc(P.why)}</p></div>
+      <div class="st-plan-in">
+        <h4>ข้อเสนอที่ใช้ในแผนนี้</h4>
+        <div class="st-offer">${P.offer.map((o,i)=>`<div><b>${esc(o[0])}</b><span>${esc(o[1])}</span>${o[2]?`<small>${esc(o[2])}</small>`:""}</div>`).join("")}</div>
+        <h4>พาดหัวที่อยากให้สื่อใช้</h4><div class="st-headline">${esc(P.headline)}</div>
+        <h4>CEO พูดอะไรบนเวที 29 ต.ค. — ราว 13 นาที</h4>
+        <ol class="st-ceo">${P.ceo.map(c=>`<li><b>${esc(c[0])}</b><span>${esc(c[1])}</span></li>`).join("")}</ol>
+        <h4>ใครพูดอะไร เมื่อไร</h4>
+        <div class="st-relay">${P.voices.map((v,i)=>`<div style="--i:${i}"><em>${esc(v[2])}</em><b>${esc(v[0])}</b><span>${esc(v[1])}</span></div>`).join("")}</div>
+        <h4>น้ำหนักของแต่ละช่วง</h4>
+        <div class="st-share">${P.share.map((s,i)=>`<div style="flex:${s};background:${PHASES[i]?PHASES[i].c:"#999"}"><b>${s}%</b><small>${esc(S.phases[i]?S.phases[i][0]:"")}</small></div>`).join("")}</div>
+        <div class="st-two">
+          <div><h4>วัดผลจากอะไร</h4><div class="st-kpis">${P.kpi.map(k=>`<div><b>${esc(k[0])}</b><span>${esc(k[1])}</span>${k[2]?`<em>${esc(k[2])}</em>`:""}</div>`).join("")}</div></div>
+          <div><h4>ถ้าเกิดเรื่องนี้ เราทำยังไง</h4><div class="st-risks">${P.risks.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></div>
+        </div>
       </div>
     </section>`;
+  const ch=[["hero","ร่มคำเดียว"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
   el.innerHTML=`
-    <div id="umbrella"></div>
-    <section class="box st-top"><div class="st-k">กลยุทธ์สื่อสาร · PESO × RACE</div><h2 class="st-title">${esc(S.title)}</h2><div class="st-sub">${esc(S.sub)}</div>
-      <div class="st-phases">${S.phases.map((p,i)=>`<div style="--ph:${PHASES[i]?PHASES[i].c:"#999"}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
-    </section>
-    <section class="box st-gap"><h3>${esc(S.gap.h)}</h3><p>${esc(S.gap.p)}</p><div class="st-grid4">${S.gap.rules.map((r,i)=>`<div class="st-rule"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></section>
-    <section class="box"><h2>${esc(S.insight.h)}</h2><div class="st-grid4">${S.insight.cards.map(c=>`<div class="st-card"><b>${esc(c[0])}</b><span>${esc(c[1])}</span>${c[2]?`<small>${esc(c[2])}</small>`:""}</div>`).join("")}</div></section>
-    <div class="band st-band">
-      <section class="box"><h2>${esc(S.product.h)}</h2><div class="st-say"><div><div class="st-head ok">✓ พูดแบบนี้</div><ul>${li(S.product.say)}</ul></div><div><div class="st-head no">✗ ห้ามพูด</div><ul>${li(S.product.dont)}</ul></div></div></section>
-      <section class="box"><h2>กลุ่มเป้าหมาย 3 กลุ่ม — แต่ละกลุ่มต้องได้ยินอะไร</h2><div class="st-aud">${S.audiences.map(a=>`<div><b>${esc(a[0])}</b><small>${esc(a[1])}</small><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div></section>
+    <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}"><i></i><span>${esc(c[1])}</span></a>`).join("")}<b class="st-rail-line"></b></nav>
+    <div class="st-body">
+    <div class="st-hero sv" id="st-hero"><div id="umbrella"></div>
+      <div class="st-phases">${S.phases.map((p,i)=>`<div class="sv-c" style="--ph:${PHASES[i]?PHASES[i].c:"#999"};--i:${i}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
     </div>
-    <section class="box st-choose"><h2>เลือกทิศทางการเปิดตัว <span class="h-sub">กดเพื่อดูรายละเอียดแต่ละแผน — เลือกทำทั้งคู่ได้</span></h2>
-      <div class="seg st-seg">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}">${esc(p.name)}</button>`).join("")}</div>
-      <div class="st-decide">${S.decide.map(d=>`<div><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
+    <section class="st-sec sv" id="st-gap"><h2 class="st-h">${esc(S.gap.h)}</h2><p class="st-lead">${esc(S.gap.p)}</p>
+      <div class="st-steps">${S.gap.rules.map((r,i)=>`<div class="st-step sv-c" style="--i:${i}"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></section>
+    <section class="st-sec sv" id="st-insight"><h2 class="st-h">${esc(S.insight.h)}</h2>
+      <div class="st-quotes">${S.insight.cards.map((c,i)=>`<div class="st-q sv-c" style="--i:${i}"><b>${esc(c[0])}</b><span>${esc(c[1])}</span>${c[2]?`<small>${esc(c[2])}</small>`:""}</div>`).join("")}</div>
+      <div class="st-two">
+        <div class="st-say sv-c" style="--i:4"><h3>${esc(S.product.h)}</h3><div class="st-say-g"><div><div class="st-ok">พูดแบบนี้</div><ul>${li(S.product.say)}</ul></div><div><div class="st-no">ไม่พูด</div><ul>${li(S.product.dont)}</ul></div></div></div>
+        <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มที่เราคุยด้วย และแต่ละกลุ่มต้องได้ยินอะไร</h3>${S.audiences.map(a=>`<div class="st-a"><div class="st-a-k"><b>${esc(a[0])}</b><small>${esc(a[1])}</small></div><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
+      </div></section>
+    <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
+      <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
+      <div class="st-decide">${S.decide.map((d,i)=>`<div class="sv-c" style="--i:${i}"><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
+      <div id="st-plan-body">${planHtml(S.plans[plan])}</div></section>
+    <section class="st-sec sv" id="st-peso"><h2 class="st-h">KOL อยู่ตรงไหนของภาพใหญ่</h2>
+      <div class="st-peso">${S.peso.map((p,i)=>`<div class="sv-c${p[0]==="Shared"?" hi":""}" style="--i:${i}"><b>${esc(p[0])}</b><span>${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join("")}</div></section>
+    <section class="st-sec sv" id="st-day"><h2 class="st-h">วันแถลงข่าว 29 ต.ค. นาทีต่อนาที</h2>
+      <div class="st-two">
+        <div class="st-ros sv-c" style="--i:0">${S.pressday.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>
+        <div class="st-faq sv-c" style="--i:1"><h3>ถ้าถูกถาม ทุกคนตอบแบบนี้</h3>${S.faq.map(f=>`<div><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div>
+      </div>
+      <div class="st-cta sv-c" style="--i:2"><div><b>รายชื่อ KOL ที่ MIDI คัดไว้ให้แล้ว${data.length?" "+data.length+" คน":""}</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก ตัดออกได้เฉพาะคนที่ไม่ต้องการ</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL</button></div>
+      <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” จะกำหนดร่วมกันก่อนเริ่มแคมเปญ</p>
     </section>
-    <div id="st-plan-body">${planHtml(S.plans[plan])}</div>
-    <section class="box"><h2>PESO — KOL อยู่ตรงไหนของภาพใหญ่</h2><div class="st-grid4">${S.peso.map(p=>`<div class="st-card${p[0]==="Shared"?" hi":""}"><b>${esc(p[0])}</b><span>${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join("")}</div></section>
-    <div class="band st-band">
-      <section class="box"><h2>Run-of-show งานแถลงข่าว 29 ต.ค.</h2><div class="st-ros">${S.pressday.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></section>
-      <section class="box"><h2>FAQ — คำตอบเดียวกันทุกคน</h2><div class="st-faq">${S.faq.map(f=>`<div><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div></section>
-    </div>
-    <section class="box st-cta"><div><b>พร้อมดูรายชื่อ KOL ที่ MIDI คัดให้แล้ว</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก — ตัดออกเฉพาะคนที่ไม่ต้องการ</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL →</button></section>
-    <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” ยังไม่ยืนยันกับลูกค้า</p>`;
+    </div>`;
+  // reveal on scroll + rail
+  const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add("in"); } }),{threshold:.12,rootMargin:"0px 0px -8% 0px"});
+  el.querySelectorAll(".sv").forEach(n=>io.observe(n));
+  const secs=[...el.querySelectorAll("[id^='st-']")].filter(n=>/^st-(hero|gap|insight|plan|peso|day)$/.test(n.id));
+  const io2=new IntersectionObserver(es=>{ es.forEach(x=>{ if(x.isIntersecting){ el.querySelectorAll(".st-rail a").forEach(a=>a.classList.toggle("on",a.dataset.ch===x.target.id.replace("st-",""))); } }); },{rootMargin:"-40% 0px -50% 0px"});
+  secs.forEach(n=>io2.observe(n));
+  el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); const t=$(a.getAttribute("href")); if(t) window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-90,behavior:"smooth"}); });
   renderUmbrella();
-  el.querySelectorAll(".st-seg button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
+  el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
   $("#st-go").onclick=()=>setTab("review");
 }
 try{ renderStrategy(); }catch(e){ console.error(e); }
