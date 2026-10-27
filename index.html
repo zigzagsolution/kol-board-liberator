@@ -22,6 +22,7 @@
   </div>
 </div>
 <nav class="tabs wrap" id="tabs">
+  <button type="button" class="tab" data-tab="strategy">🎯 กลยุทธ์</button>
   <button type="button" class="tab active" data-tab="review">✓ พิจารณา <b id="t-review">0</b></button>
   <button type="button" class="tab" data-tab="team">★ ทีม <span id="t-target">30</span> คน <b id="t-team">0/30</b></button>
   <button type="button" class="tab" data-tab="plan">📅 แผน 4 ระยะ <b id="t-plan">0</b></button>
@@ -35,13 +36,14 @@
       <div class="hero-t">
         <div class="hero-k">แคมเปญเปิดตัวฟีเจอร์ AI</div>
         <h2 class="hero-h" id="hero-name">AI คิดให้ คุณตัดสินใจ</h2>
-        <div class="hero-s" id="hero-sub">KOL สาย IT/Technology · โพสต์ 29 ต.ค. – 20 พ.ย. 2569 · 4 ระยะ</div>
+        <div class="hero-s" id="hero-sub">แถลงข่าว 29 ต.ค. · ใช้ได้จริง 9 พ.ย. · KOL โพสต์ถึง 20 พ.ย. 2569 · 4 ระยะ</div>
       </div>
     </div>
     <div class="hero-r" id="hero-phases"></div>
     <div class="hero-cd" id="hero-cd"></div>
   </section>
   <div class="msg" id="msg" hidden></div>
+  <div class="page" data-page="strategy" id="strategy" hidden></div>
   <div class="page" data-page="review">
   <section class="band">
     <div class="box">
@@ -115,10 +117,10 @@
       <section class="box ai-head">
         <div class="ai-top"><div><h2>✨ แผนที่ AI + ประสบการณ์ MIDI ที่เก็บค่าสำเร็จไว้ แนะนำ</h2><div class="ai-tag">เป็นการนำเสนอแผน — สามารถปรับแก้ไขได้ทุกคน</div></div><div class="ai-acts"><button class="btn primary" type="button" id="ai-apply-all">ใช้แผนนี้ทั้งหมด</button><button class="btn" type="button" id="ai-apply-unset">ใช้เฉพาะคนที่ยังไม่จัด</button></div></div>
         <div class="ai-steps">
-          <div class="step" style="--ph:#8a8fa8"><span class="k">1</span><div><b>Tease — "ถ้า AI ช่วยลงทุน คุณกล้าให้มันทำอะไรบ้าง?"</b><span>สายข่าวเทค + ไลฟ์สไตล์ตั้งคำถามจากปัญหาจริงของนักลงทุน (ข้อมูลเยอะ ตัดสินใจไม่ทัน ไม่มีวินัย) ยังไม่เฉลยฟีเจอร์ · นับถอยหลังวันเปิดตัว · ให้คนติดตามรอ</span></div></div>
-          <div class="step" style="--ph:#3fa3ff"><span class="k">2</span><div><b>Reveal — เปิดตัวฟีเจอร์ AI ทุกช่องใน 48 ชม.</b><span>Mega/Macro สายเทคและการเงินเดโมหน้าจอจริงพร้อมกัน ให้คนเห็นซ้ำ ≥3 ครั้ง · พูดชัดว่า AI ทำอะไร/ไม่ทำอะไร — "AI คิดให้ คุณตัดสินใจ" กรอบความเสี่ยงอยู่ที่ผู้ลงทุน</span></div></div>
-          <div class="step" style="--ph:#0A5BFF"><span class="k">3</span><div><b>Prove — ใช้จริง สอนจริง พูดข้อจำกัดตรง ๆ</b><span>สายความรู้/How-to สอนทีละขั้น · สายรีวิว "ไม่เกินจริง" บอกข้อดี-ข้อจำกัด · ตอบข้อกังวล (AI ผิดได้ไหม ข้อมูลมาจากไหน ต้องมีพอร์ตใหญ่ไหม) — ความน่าเชื่อถือคือตัวแปลงลูกค้าในสินค้าการเงิน</span></div></div>
-          <div class="step" style="--ph:#0B1052"><span class="k">4</span><div><b>Convert — เปิดบัญชี / ลองใช้ ก่อนหมดสิทธิพิเศษ</b><span>Micro/Nano + ไลฟ์สไตล์เล่า use case ในชีวิตประจำวัน · ขั้นตอนเปิดบัญชีสั้น ๆ · โค้ด/สิทธิพิเศษรายคน (วัดผลได้) · รีแคปฟีเจอร์ที่ชอบที่สุด 1 อย่าง</span></div></div>
+          <div class="step" style="--ph:#8a8fa8"><span class="k">1</span><div><b>Announce — แถลงข่าว 29 ต.ค.</b><span>สายข่าวเทค/การเงินรายงานการแถลงภายใน 24 ชม. · ข้อความเดียวกันทุกช่อง "ใช้ได้จริง 9 พ.ย. — สมัคร/เปิดบัญชีไว้ก่อนได้สิทธิ์ก่อน" · ยังไม่โชว์ฟีเจอร์เต็ม</span></div></div>
+          <div class="step" style="--ph:#3fa3ff"><span class="k">2</span><div><b>Build-up — เปลี่ยน "รอ" เป็น "จอง"</b><span>สายความรู้สอน AI/MCP ช่วยลงทุนยังไง-ไม่ช่วยอะไร · ไลฟ์สไตล์ตั้งคำถามชีวิตนักลงทุน · นับถอยหลัง · ทุกโพสต์ชี้ไปสมัคร beta / เปิดบัญชีก่อน 9 พ.ย. · รีวิวแอปปัจจุบันที่ใช้ได้เลย</span></div></div>
+          <div class="step" style="--ph:#0A5BFF"><span class="k">3</span><div><b>Launch & Prove — 9 พ.ย. ทุกช่องใน 48 ชม.</b><span>Mega/Macro เดโมหน้าจอจริงพร้อมกัน (surround ≥3 ครั้ง) · ตามด้วย How-to ทีละขั้น · รีวิว "ไม่เกินจริง" บอกข้อดี-ข้อจำกัด · ตอบข้อกังวลเรื่องความปลอดภัยและ AI ผิดได้ไหม</span></div></div>
+          <div class="step" style="--ph:#0B1052"><span class="k">4</span><div><b>Convert — เปิดบัญชี / ใช้จริง</b><span>Micro/Nano + ไลฟ์สไตล์เล่า use case ในชีวิตประจำวัน · โค้ด/สิทธิ์รายคน (วัดผลได้) · ชวนเพื่อน · รีแคปฟีเจอร์ที่ชอบที่สุด 1 อย่าง</span></div></div>
         </div>
         <div class="ai-kpi" id="ai-kpi"></div>
         <p class="ai-sum" id="ai-sum"></p>
@@ -127,12 +129,12 @@
       <section class="box"><h2>เหตุผลรายคน</h2><div class="ai-list" id="ai-list"></div></section>
     </div>
     <section class="box pr-why" id="pr-why">
-      <div class="pw-head"><h2>ทำไมต้องแบ่ง 4 ระยะ Tease → Reveal → Prove → Convert <span class="h-sub">หลัก Product-launch PR ที่เอเจนซี่ระดับสากลใช้กับฟินเทค/แอป</span></h2>
-        <div class="pw-split" aria-label="สัดส่วน reach ที่แนะนำ"><div class="seg1" style="width:22%">Tease · 22%</div><div class="seg2" style="width:30%">Reveal · 30%</div><div class="seg3" style="width:28%;background:#0A5BFF">Prove · 28%</div><div class="seg3" style="width:20%;background:#0B1052">Convert · 20%</div></div>
-        <div class="pw-cap">เป้าหมาย: วันเปิดตัว (4 พ.ย.) ต้องมีคน ≥40% ของทีมโพสต์ใน 48 ชม. — ฟีเจอร์ใหม่ถูกจำได้จาก "วันเดียวที่ทุกคนพูดถึง" ไม่ใช่จากโพสต์กระจายบาง ๆ</div>
+      <div class="pw-head"><h2>ทำไมต้องแบ่ง 4 ระยะ Announce → Build-up → Launch & Prove → Convert <span class="h-sub">หลัก Product-launch PR ที่เอเจนซี่ระดับสากลใช้กับฟินเทค/แอป</span></h2>
+        <div class="pw-split" aria-label="สัดส่วน reach ที่แนะนำ"><div class="seg1" style="width:15%">Announce · 15%</div><div class="seg2" style="width:25%">Build-up · 25%</div><div class="seg3" style="width:40%;background:#0A5BFF">Launch & Prove · 40%</div><div class="seg3" style="width:20%;background:#0B1052">Convert · 20%</div></div>
+        <div class="pw-cap">เป้าหมาย: วันเปิดใช้จริง (9 พ.ย.) ต้องมีคน ≥40% ของทีมโพสต์ใน 48 ชม. — ฟีเจอร์ใหม่ถูกจำได้จาก "วันเดียวที่ทุกคนพูดถึง" ไม่ใช่จากโพสต์กระจายบาง ๆ</div>
       </div>
       <div class="pw-grid">
-        <div class="pw"><b>1 · Teaser สร้างความอยากรู้ (Curiosity gap)</b><span>คนจำ "คำถาม" ได้ดีกว่า "ประกาศ" — 6 วันก่อนเปิดตัวให้ครีเอเตอร์ตั้งคำถามว่า AI ควรช่วยลงทุนแค่ไหน ทำให้วันเปิดตัวมีคนรอเฉลยอยู่แล้ว และแบรนด์ได้บทสนทนาที่ตรงกับจุดขาย "AI คิดให้ คุณตัดสินใจ"</span></div>
+        <div class="pw"><b>1 · Teaser สร้างความอยากรู้ (Curiosity gap)</b><span>คนจำ "คำถาม" ได้ดีกว่า "ประกาศ" — 11 วันระหว่างแถลงข่าวกับวันเปิดใช้ ให้ครีเอเตอร์ตั้งคำถามว่า AI ควรช่วยลงทุนแค่ไหน และชวนจองสิทธิ์ ทำให้วันเปิดใช้มีคนรออยู่แล้ว และแบรนด์ได้บทสนทนาที่ตรงกับจุดขาย "AI คิดให้ คุณตัดสินใจ"</span></div>
         <div class="pw"><b>2 · เปิดตัวแบบพร้อมกัน (Launch-day surround)</b><span>หลัก effective frequency: ต้องเห็น ≥3 ครั้งจากหลายแหล่งก่อนลงมือ — Mega/Macro โพสต์ไล่กันใน 48 ชม. สร้าง "เห็นทุกที่" ให้อัลกอริทึม TikTok ดันหัวข้อเดียวกัน ถ้ากระจายทั้งเดือนจะไม่ถึงเกณฑ์</span></div>
         <div class="pw"><b>3 · การเงินต้องพิสูจน์ก่อนขาย (Trust before conversion)</b><span>สินค้าลงทุนมีต้นทุนความเชื่อใจสูง — How-to และรีวิวที่พูดข้อจำกัดตรง ๆ ช่วงหลังเปิดตัว คือสิ่งที่เปลี่ยน "น่าสนใจ" เป็น "กล้าลอง" และลดคอมเมนต์เชิงลบเรื่อง AI ตัดสินใจแทน</span></div>
         <div class="pw"><b>4 · อัลกอริทึมมีช่วงหน่วง (Algorithm lag)</b><span>คลิป TikTok ทำยอดส่วนใหญ่ใน 2–5 วันหลังโพสต์ — โพสต์สอนใช้ 10–15 พ.ย. จะไปถึงคนตอน 12–18 พ.ย. ต่อเนื่องเข้าโค้งสุดท้ายพอดี</span></div>
@@ -202,7 +204,8 @@
 <div class="ov" id="ov" hidden><div class="ring" style="--p:0"><i id="ov-p">0%</i></div><div class="lb" id="ov-l">กำลังโหลดข้อมูล…</div></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="config.js?v=1"></script>
-<script src="app.js?v=21"></script>
+<script src="strategy.js?v=1"></script>
+<script src="config.js?v=2"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>
