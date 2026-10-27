@@ -229,7 +229,14 @@ function renderTimeline(){ const el=$("#timeline"); if(!el||el.dataset.done) ret
   TL_EV.forEach((e,i)=>{ const p=PHASES[tlPhase(e.d)-1]; const nxt=TL_EV[i+2]?TL_EV[i+2].d:DAYS; const span=Math.max(2,Math.min(6,nxt-e.d,DAYS-e.d)); cells.push(`<div class="tl-ev" style="--ph:${p.c};grid-column:${e.d+1}/span ${span};grid-row:${4+(i%2)}"><div class="pin"><b>${esc(e.t)}</b>${esc(e.s||"")}</div></div>`); });
   el.innerHTML=`<h2>ไทม์ไลน์ ${esc(dLabel(0))} – ${esc(dLabel(DAYS-1))} <span class="h-sub">แถบสูง = ช่วงที่ควรเน้นโพสต์ · หมุด = จังหวะสำคัญของแคมเปญ</span></h2><div class="tl-grid" style="grid-template-columns:repeat(${DAYS},minmax(0,1fr))">${cells.join("")}</div><div class="tl-legend"><span><i></i>เน้นมาก: วันเปิดตัว + สัปดาห์สอนใช้ + โค้งสุดท้าย</span><span><i class="lo"></i>เบา: ช่วง Teaser</span><span>ตัวหนา = เสาร์–อาทิตย์</span></div>`; }
 renderTimeline();
-(()=>{ const a=$("#hash-txt"); if(a) a.textContent=HASHTAGS; const b=$("#sc-range"); if(b) b.textContent=dLabel(0)+" – "+dLabel(DAYS-1); const c=$("#hd-sub"); if(c&&CFG.SUB) c.textContent=CFG.SUB; })();
+(()=>{ const el=$("#hero-phases"); if(el){ const t0=new Date(); const td=TL_DAYS.find(i=>DAY(i).toDateString()===t0.toDateString()); const cur=td!=null?tlPhase(td):0;
+    el.innerHTML=PHASES.map(p=>`<div class="hp${+p.n===cur?" now":""}" style="--ph:${p.c}"><i></i><b>${esc(p.title.split("—")[0].trim())}</b><small>${esc(rangeLabel(p))}</small></div>`).join("");
+    const cd=$("#hero-cd"); const launch=TL_EV.find(e=>/เปิดตัว/.test(e.t)); const days=(a,b)=>Math.round((b-a)/864e5); const t=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
+    const parts=[]; const s=days(t,DAY(0)); if(s>0) parts.push(`<span>เริ่มแคมเปญใน <b>${s}</b> วัน</span>`); else parts.push(`<span>แคมเปญเริ่มแล้ว · วันที่ <b>${Math.min(DAYS,-s+1)}</b>/${DAYS}</span>`);
+    if(launch){ const l=days(t,DAY(launch.d)); parts.push(l>0?`<span>${esc(launch.t)} อีก <b>${l}</b> วัน (${dLabel(launch.d)})</span>`:`<span>${esc(launch.t)} · ${dLabel(launch.d)}${l===0?" · <b>วันนี้</b>":""}</span>`); }
+    const e=days(t,DAY(DAYS-1)); if(e>=0) parts.push(`<span>สิ้นสุด ${dLabel(DAYS-1)} · เหลือ <b>${e}</b> วัน</span>`);
+    cd.innerHTML=parts.join(""); if(CFG.CAMPAIGN) $("#hero-name").textContent=CFG.CAMPAIGN; }
+  const a=$("#hash-txt"); if(a) a.textContent=HASHTAGS; const b=$("#sc-range"); if(b) b.textContent=dLabel(0)+" – "+dLabel(DAYS-1); const c=$("#hd-sub"); if(c&&CFG.SUB) c.textContent=CFG.SUB; })();
 const splitWhy=w=>{ const i=w.indexOf(" — "); return i>0?[w.slice(0,i),w.slice(i+3)]:[w,""]; };
 const chipsHtml=(arr,max)=>`<div class="why-chips">${arr.slice(0,max||99).map(w=>{ const [t,d]=splitWhy(w); const cls=/^ช่วงที่แนะนำ/.test(w)?"when":/^ย้าย|^เพิ่มให้/.test(w)?"mv":""; return `<span class="${cls}" title="${esc(w)}">${esc(cls==="when"?w.replace("ช่วงที่แนะนำ: ","📍 "):t)}</span>`; }).join("")}</div>`;
 let PLAN_MODE="manual";

@@ -462,3 +462,26 @@ body.present .sc-head .ai-acts{display:none}
 .req.done{opacity:.6}.req .tag{font-size:11px;font-family:var(--display);font-weight:700;color:var(--good);white-space:nowrap}.req .tag.no{color:var(--mute)}
 .alist .gh{font-family:var(--display);font-weight:700;font-size:12px;color:var(--mute);padding:4px 2px 0}
 .adm-btn.hot{background:var(--brand);color:#fff;animation:bl 1.4s ease-in-out infinite}.adm-btn.hot b{background:#fff;color:var(--brand)}
+
+/* ===== Hero: Liberator campaign band ===== */
+.hero{position:relative;overflow:hidden;border-radius:18px;margin:0 0 18px;padding:22px 26px;color:#fff;
+  background:radial-gradient(900px 300px at 85% -40%,rgba(0,246,200,.35),transparent 60%),radial-gradient(600px 260px at 10% 120%,rgba(10,91,255,.9),transparent 60%),linear-gradient(120deg,#0B1052 0%,#0E2A8C 55%,#0A5BFF 100%);
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px 28px;align-items:center;box-shadow:0 14px 40px rgba(11,16,82,.22)}
+.hero::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 44px);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero-l{display:flex;align-items:center;gap:22px;min-width:0}
+.hero-logo{height:96px;width:auto;flex:none;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
+.hero-k{font-family:var(--display);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#7ff3dc;font-weight:600}
+.hero-h{font-family:var(--display);font-size:clamp(24px,3.2vw,36px);line-height:1.1;margin:4px 0 6px;font-weight:700;letter-spacing:.01em;text-wrap:balance}
+.hero-s{font-size:13px;color:rgba(255,255,255,.78)}
+.hero-r{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0}
+.hero-r .hp{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 10px 9px;min-width:0;backdrop-filter:blur(6px)}
+.hero-r .hp b{display:block;font-family:var(--display);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-r .hp small{display:block;font-size:11px;color:rgba(255,255,255,.72);margin-top:2px}
+.hero-r .hp i{display:block;height:4px;border-radius:2px;background:var(--ph);margin-bottom:8px;box-shadow:0 0 12px var(--ph)}
+.hero-r .hp.now{background:rgba(255,255,255,.16);border-color:rgba(127,243,220,.6)}
+.hero-cd{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:rgba(255,255,255,.85)}
+.hero-cd span{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.18);border-radius:999px;padding:5px 12px}
+.hero-cd span b{color:#7ff3dc;font-family:var(--display);font-size:14px}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding:18px}.hero-logo{height:64px}.hero-r{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.present .hero{margin-top:12px}
