@@ -731,3 +731,4 @@ body.present .notice-list{display:none}
 .plan-mode .seg button[data-m="ai"].active{background:linear-gradient(135deg,#0B1052,#0A5BFF)}
 .plan-mode .seg button .lock{font-size:12px;margin-left:4px;opacity:.9}
 #aigate .card{border-top:5px solid #e8194c}#aigate .btn.primary{background:#e8194c;border-color:#e8194c}
+.st-seg2 button .lock{display:inline-block;margin-left:6px;background:#e8194c;color:#fff;border-radius:999px;padding:1px 8px;font-size:10px;letter-spacing:0}

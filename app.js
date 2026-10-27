@@ -204,14 +204,15 @@ function aiPlan(passed){
   const order=[...passed].sort((a,b)=>(b.f||0)-(a.f||0)); const idx=PHASES.map((_,i)=>i);
   order.forEach(d=>{ const o=out.get(d.key); const ranked=[...idx].sort((i,j)=>o.sc[j]-o.sc[i]||sum[i]-sum[j]); let i=ranked[0];
     if(sum[i]+(d.f||0)>target[i]*1.3 && o.sc[ranked[1]]>=o.sc[i]-2){ i=ranked[1]; o.why[i].push("ย้ายมาระยะนี้เพื่อบาลานซ์ reach ระหว่างระยะ"); }
-    const ph=[String(i+1)]; const j=ranked.find(k=>k!==i&&o.sc[k]>=3&&o.sc[k]>=o.sc[i]-1); if(j!=null) ph.push(String(j+1));
-    sum[i]+=(d.f||0); pick[d.key]={d,ph:ph.sort(),whyP:o.why,why:ph.map(p=>o.why[+p-1]).flat().filter((v,k,a)=>a.indexOf(v)===k)}; });
+    const ph=[String(i+1)]; // 1 คน = 1 โพสต์ = 1 ระยะ
+    sum[i]+=(d.f||0); pick[d.key]={d,ph,whyP:o.why,why:(o.why[i]||[]).filter((v,k,a)=>a.indexOf(v)===k)}; });
   // วันเปิดตัว (ระยะ 2) ต้องมีคนอย่างน้อย 40% ของทีม — surround effect
   if(NP>=2){ const want=Math.round(passed.length*0.4); const have=()=>Object.values(pick).filter(x=>x.ph.includes("2")).length;
     const c=Object.values(pick).filter(x=>!x.ph.includes("2")).sort((a,b)=>out.get(b.d.key).sc[1]-out.get(a.d.key).sc[1]);
-    for(const x of c){ if(have()>=want) break; x.ph.push("2"); x.ph.sort(); const w="ร่วมวันเปิดตัว — หลายช่องโพสต์ไล่กันใน 48 ชม. ให้คนเห็นซ้ำ ≥3 ครั้ง"; x.whyP[1].push(w); x.why.push(w); } }
+    for(const x of c){ if(have()>=want) break; x.ph=["2"]; const w="ย้ายมาวันเปิดใช้ — หลายช่องโพสต์ไล่กันใน 48 ชม. ให้คนเห็นซ้ำ ≥3 ครั้ง"; x.whyP[1].push(w); x.why=[w]; } }
   // ทุกระยะมีอย่างน้อย 3 คน
-  idx.forEach(i=>{ const have=Object.values(pick).filter(x=>x.ph.includes(String(i+1))).length; if(have<3&&passed.length>=3*NP){ Object.values(pick).sort((a,b)=>out.get(b.d.key).sc[i]-out.get(a.d.key).sc[i]).filter(x=>!x.ph.includes(String(i+1))).slice(0,3-have).forEach(x=>{ x.ph.push(String(i+1)); x.ph.sort(); const w="เพิ่มให้ระยะที่ "+(i+1)+" มีคนครบขั้นต่ำ"; x.whyP[i].push(w); x.why.push(w); }); } });
+  idx.forEach(i=>{ const have=()=>Object.values(pick).filter(x=>x.ph.includes(String(i+1))).length; if(have()<3&&passed.length>=3*NP){ const crowded=()=>idx.reduce((m,k)=>Object.values(pick).filter(x=>x.ph[0]===String(k+1)).length>Object.values(pick).filter(x=>x.ph[0]===String(m+1)).length?k:m,0);
+      Object.values(pick).sort((a,b)=>out.get(b.d.key).sc[i]-out.get(a.d.key).sc[i]).filter(x=>!x.ph.includes(String(i+1))&&+x.ph[0]-1===crowded()).slice(0,3-have()).forEach(x=>{ x.ph=[String(i+1)]; const w="ย้ายมาระยะที่ "+(i+1)+" ให้แต่ละระยะมีคนครบ"; x.whyP[i].push(w); x.why=[w]; }); } });
   return {pick,sum,total};
 }
 /* ===== ปฏิทินแคมเปญ: วัน = ดัชนี 0..DAYS-1 นับจาก START ===== */
@@ -259,7 +260,7 @@ function renderAI(passed){
   const diff=rows.filter(x=>{ const cur=phasesOf(x.d).join(","); return cur&&cur!==x.ph.join(","); }).length, unset=rows.filter(x=>!phasesOf(x.d).length).length;
   $("#ai-kpi").innerHTML=PHASES.map((p,i)=>`<div style="--ph:${p.c}"><span class="n">${cnt[i]}</span><span class="l">KOL</span><span class="r">${fmtN(sum[i])}</span><span class="l">reach · ${Math.round(sum[i]/total*100)}%</span></div>`).join("");
   const launchN=rows.filter(x=>x.ph.includes("2")).length;
-  $("#ai-sum").textContent=`จัด ${rows.length} คน · reach รวม ${fmtN(total)} · ร่วมวันเปิดตัว ${launchN} คน (${Math.round(launchN/rows.length*100)}%)${unset?` · ยังไม่จัดเอง ${unset} คน`:""}${diff?` · ต่างจากที่จัดเองอยู่ ${diff} คน`:""}`;
+  $("#ai-sum").textContent=`จัด ${rows.length} คน · 1 คน 1 โพสต์ · reach รวม ${fmtN(total)} · ร่วมวันเปิดตัว ${launchN} คน (${Math.round(launchN/rows.length*100)}%)${unset?` · ยังไม่จัดเอง ${unset} คน`:""}${diff?` · ต่างจากที่จัดเองอยู่ ${diff} คน`:""}`;
   $("#ai-phases").innerHTML=PHASES.map(p=>{ const list=rows.filter(x=>x.ph.includes(p.n)).sort((a,b)=>(b.d.f||0)-(a.d.f||0)); const reach=list.reduce((s,x)=>s+(x.d.f||0),0);
     return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(rangeLabel(p))}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="who-l">${list.map(x=>{ const s=avSrc(x.d); return `<div class="wl" data-k="${esc(x.d.key)}">${s?`<img src="${s}" alt="">`:`<span class="f">${iniOf(x.d)}</span>`}<div><b>${esc(x.d.name)} <span class="sub">${fmtN(x.d.f)}</span></b>${chipsHtml([...new Set(x.whyP[+p.n-1]||[])],3)}</div></div>`; }).join("")}</div></div>`; }).join("");
   $("#ai-phases").querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>{ const d=data.find(x=>x.key===el.dataset.k); if(d) openCard(d); });
@@ -353,6 +354,7 @@ function autoDates(all){ const load={}; all.forEach(d=>datesOf(d).forEach(x=>loa
   all.filter(d=>!datesOf(d).length).sort((a,b)=>(b.f||0)-(a.f||0)).forEach(d=>{ let ph=phasesOf(d); if(!ph.length&&AIP[d.key]) ph=AIP[d.key].ph; const ds=[]; const f=d.f||0;
     ph.forEach(n=>{ const days=phaseDays(n); if(!days.length) return; if(+n===2&&f>=3e5) ds.push(days.includes(L)?L:days[0]); else if(+n===2) ds.push(pickDay(days.filter(x=>x>=L).concat(days))); else ds.push(pickDay(days)); });
     if(!ph.length) ds.push(pickDay(phaseDays(Math.min(3,NP))));
+    if(CFG.ONE_POST!==false) ds.splice(1); // 1 คน 1 โพสต์
     out.push({key:rid(d),name:d.name,dates:[...new Set(ds)].sort((a,b)=>a-b).join(","),by:reviewer}); });
   return out; }
 function snapshot(label){ const snap={}; data.forEach(d=>{ const ds=datesOf(d); if(ds.length) snap[rid(d)]={name:d.name,dates:ds.join(",")}; }); if(!Object.keys(snap).length) return Promise.resolve(); return api("snapshotDates",[{by:reviewer,label,snap}]).catch(()=>{}); }
@@ -529,7 +531,7 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
 }
 /* ===== หน้ากลยุทธ์ (ข้อมูลจาก strategy.js) ===== */
 const CRED=`<div class="st-cred">ดึงจากความคิดของบริษัทมีดีดิจิทัล จากการวิเคราะห์ด้วยระบบภายในของบริษัท</div>`;
-function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0; try{ plan=+localStorage.getItem("kol_plan")||0; }catch(e){}
+function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0;
   const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
   const planHtml=P=>`
     <section class="st-pcard in" style="--ph:${P.id==="A"?"#0A5BFF":"#0B1052"}">
@@ -573,7 +575,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         </div>
       </div>${CRED}</section>
     <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
-      <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
+      <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}${i?' <span class="lock">🔒 รหัสจาก Sale</span>':""}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
       <div class="st-decide">${S.decide.map((d,i)=>`<div class="sv-c" style="--i:${i}"><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
       <div id="st-plan-body">${planHtml(S.plans[plan])}</div>${CRED}</section>
     <section class="st-sec sv" id="st-peso"><h2 class="st-h">KOL อยู่ตรงไหนของภาพใหญ่</h2>
@@ -599,7 +601,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
   (()=>{ const r=$("#st-age"); if(!r) return; const pick=v=>{ v=+v; const i=v<30?0:v<40?1:2; el.querySelectorAll(".st-p").forEach(p=>p.classList.toggle("on",+p.dataset.a===i)); el.querySelectorAll(".st-age-bands i").forEach(b=>b.classList.toggle("on",+b.dataset.a===i)); const bb=$("#st-age-b"); bb.querySelector("b").textContent=v; bb.style.left=((v-20)/30*100)+"%"; };
     r.addEventListener("input",()=>pick(r.value)); el.querySelectorAll(".st-p").forEach(p=>p.onclick=()=>{ r.value=[26,36,44][+p.dataset.a]; pick(r.value); }); pick(r.value);
     let t=0; const auto=setInterval(()=>{ if(!$("#st-age")) return clearInterval(auto); t=(t+1)%3; r.value=[26,36,44][t]; pick(r.value); },3500); r.addEventListener("pointerdown",()=>clearInterval(auto),{once:true}); })();
-  el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); $("#st-plan-body").querySelectorAll("[data-n]").forEach(countUp);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
+  el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ if(+b.dataset.i===1&&!AI_OPEN){ askAI(()=>b.click()); return; } plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); $("#st-plan-body").querySelectorAll("[data-n]").forEach(countUp);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
   $("#st-go").onclick=()=>gotoTab("review");
 }
 try{ renderStrategy(); }catch(e){ console.error(e); }
