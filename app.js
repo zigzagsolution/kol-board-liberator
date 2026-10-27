@@ -250,7 +250,7 @@ let PLAN_MODE="manual";
 /* "MIDI จัดให้" ล็อกไว้ — ต้องได้รหัสจากฝ่ายขาย (config: AI_CODE) */
 const AI_CODE=String(CFG.AI_CODE||"mididigital09"); let AI_OPEN=false;
 function askAI(then){ const m=$("#aigate"); if(!m) return then(); m.hidden=false; const inp=$("#ag-code"); inp.value=""; $("#ag-err").hidden=true; setTimeout(()=>inp.focus(),50);
-  const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
+  const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ const lk=$("#st-locked"); if(lk&&lk.hidden){ lk.hidden=false; $("#st-lockcard").hidden=true; document.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); } }catch(e){} try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
   $("#ag-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#ag-cancel").onclick=()=>{ m.hidden=true; }; }
 $("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.m==="ai"&&!AI_OPEN){ askAI(()=>b.click()); return; } PLAN_MODE=b.dataset.m; $("#plan-seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b)); $("#plan-manual").hidden=PLAN_MODE!=="manual"; $("#plan-ai").hidden=PLAN_MODE!=="ai"; logEv("planmode",PLAN_MODE); render(); });
 function renderAI(passed){
@@ -555,12 +555,14 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     </section>`;
   const ch=[["hero","Strategy วันงาน"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
   el.innerHTML=`
-    <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}"><i></i><span>${esc(c[1])}</span></a>`).join("")}<b class="st-rail-line"></b></nav>
+    <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}" class="${i?"locked":""}"><i></i><span>${esc(c[1])}</span>${i?'<em>🔒</em>':""}</a>`).join("")}<b class="st-rail-line"></b></nav>
     <div class="st-body">
     <div class="st-hero sv" id="st-hero"><div id="umbrella"></div>
       <div class="st-phases">${S.phases.map((p,i)=>`<div class="sv-c" style="--ph:${PHASES[i]?PHASES[i].c:"#999"};--i:${i}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
       ${CRED}
     </div>
+    <div class="st-lockcard" id="st-lockcard"><div class="st-lock-ic">🔒</div><div><b>เนื้อหาส่วนที่เหลือเปิดให้เฉพาะลูกค้าที่ได้รับรหัสจาก Sale</b><span>11 วันระหว่างทาง · คนไทยกับแอปลงทุน · แผน A/B · ภาพใหญ่ · วันแถลงข่าว — ติดต่อ Sale ของ MIDI เพื่อรับรหัส</span></div><button class="btn primary" type="button" id="st-unlock">ใส่รหัสจาก Sale</button></div>
+    <div id="st-locked" hidden>
     <section class="st-sec sv" id="st-gap"><h2 class="st-h">${esc(S.gap.h)}</h2><p class="st-lead">${esc(S.gap.p)}</p>
       <div class="st-steps">${S.gap.rules.map((r,i)=>`<div class="st-step sv-c" style="--i:${i}"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>${CRED}</section>
     <section class="st-sec sv" id="st-insight"><h2 class="st-h">${esc(S.insight.h)}</h2>
@@ -588,6 +590,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
       <div class="st-cta sv-c" style="--i:2"><div><b>รายชื่อ KOL ที่ MIDI คัดไว้ให้แล้ว${data.length?" "+data.length+" คน":""}</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก ตัดออกได้เฉพาะคนที่ไม่ต้องการ · เป็นรายการเสนอ ยังไม่ได้คอนเฟิร์มรายละเอียดกับ KOL จะบรีฟหลังท่านคอนเฟิร์ม</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL</button></div>
       <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” จะกำหนดร่วมกันก่อนเริ่มแคมเปญ</p>${CRED}
     </section>
+    </div>
     </div>`;
   // reveal on scroll + rail
   const countUp=n=>{ const to=+n.dataset.n||0, t0=performance.now(); const step=t=>{ const k=Math.min(1,(t-t0)/900), e=1-Math.pow(1-k,3); n.textContent=Math.round(to*e)+"%"; if(k<1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
@@ -596,7 +599,10 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
   const secs=[...el.querySelectorAll("[id^='st-']")].filter(n=>/^st-(hero|gap|insight|plan|peso|day)$/.test(n.id));
   const io2=new IntersectionObserver(es=>{ es.forEach(x=>{ if(x.isIntersecting){ el.querySelectorAll(".st-rail a").forEach(a=>a.classList.toggle("on",a.dataset.ch===x.target.id.replace("st-",""))); } }); },{rootMargin:"-40% 0px -50% 0px"});
   secs.forEach(n=>io2.observe(n));
-  el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); const t=$(a.getAttribute("href")); const top=t?t.getBoundingClientRect().top+window.scrollY-90:0; if(LEN) LEN.scrollTo(top,{duration:1.2}); else window.scrollTo({top,behavior:"smooth"}); });
+  const unlock=()=>{ $("#st-locked").hidden=false; $("#st-lockcard").hidden=true; el.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); el.querySelectorAll("#st-locked .sv").forEach(n=>{ io.unobserve(n); io.observe(n); }); };
+  if(AI_OPEN) unlock();
+  $("#st-unlock").onclick=()=>askAI(unlock);
+  el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); if(a.classList.contains("locked")){ askAI(()=>{ unlock(); setTimeout(()=>a.click(),150); }); return; } const t=$(a.getAttribute("href")); const top=t?t.getBoundingClientRect().top+window.scrollY-90:0; if(LEN) LEN.scrollTo(top,{duration:1.2}); else window.scrollTo({top,behavior:"smooth"}); });
   renderUmbrella();
   (()=>{ const r=$("#st-age"); if(!r) return; const pick=v=>{ v=+v; const i=v<30?0:v<40?1:2; el.querySelectorAll(".st-p").forEach(p=>p.classList.toggle("on",+p.dataset.a===i)); el.querySelectorAll(".st-age-bands i").forEach(b=>b.classList.toggle("on",+b.dataset.a===i)); const bb=$("#st-age-b"); bb.querySelector("b").textContent=v; bb.style.left=((v-20)/30*100)+"%"; };
     r.addEventListener("input",()=>pick(r.value)); el.querySelectorAll(".st-p").forEach(p=>p.onclick=()=>{ r.value=[26,36,44][+p.dataset.a]; pick(r.value); }); pick(r.value);
