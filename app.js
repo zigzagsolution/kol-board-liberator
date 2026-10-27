@@ -36,14 +36,16 @@ function parseRows(csv){
   const rows=parseCSV(csv); const out=[]; let group="", col=null, codeCol=null;
   for(const r of rows){ const a=(r[0]||"").trim();
     if(codeCol==null){ r.forEach((h,i)=>{ if(/^\s*(code|รหัส)\s*$/i.test(h||"")) codeCol=i; }); }
-    if(a==="ลำดับ"){ col={}; r.forEach((h,i)=>{h=(h||"").trim(); if(/ชื่อ/.test(h))col.name=i; else if(/หมวด/.test(h))col.cat=i; else if(/ติดตาม/.test(h))col.f=i; else if(/ลิ้?งก์|link/i.test(h)){col.link=i;col.link2=i+1;} else if(/หมายเหตุ/.test(h))col.note=i; else if(/rate|เรท/i.test(h))col.rate=i; else if(/^code$|รหัส/i.test(h))col.code=i;}); if(col.code==null&&codeCol!=null) col.code=codeCol; continue; }
+    if(a==="ลำดับ"){ col={}; r.forEach((h,i)=>{h=(h||"").trim(); if(/ชื่อ/.test(h))col.name=i; else if(/หมวด/.test(h))col.cat=i; else if(/ติดตาม/.test(h))col.f=i; else if(/ลิ้?งก์|link/i.test(h)){col.link=i;} else if(/หมายเหตุ/.test(h))col.note=i; else if(/rate|เรท/i.test(h))col.rate=i; else if(/^code$|รหัส/i.test(h))col.code=i;}); if(col.code==null&&codeCol!=null) col.code=codeCol; continue; }
     if(!col) continue;
     if(a && !/^\d+$/.test(a) && !(r[1]||"").trim()){ group=a; continue; }
     if(!/^\d+$/.test(a)) continue;
     const g=i=>i==null?"":(r[i]||"");
     const name=g(col.name).replace(/\s+/g," ").trim(); if(!name) continue;
-    const l1=g(col.link).trim(), l2=g(col.link2).trim(); const link=/^https?:/.test(l2)?l2:/^https?:/.test(l1)?l1:(l2||l1);
-    const it={idx:+a, group, name, cat:g(col.cat).replace(/\s+/g," ").trim(), fRaw:g(col.f).trim(), link, note:g(col.note).trim(), code:g(col.code).replace(/[^A-Za-z0-9ก-๙_\-]/g,"").replace(/^[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]+/,"").trim().toUpperCase()};
+    /* ลิงก์: คอลัมน์ "ลิ้งก์ช่อง" + คอลัมน์ย่อยถัดไป (Facebook / TikTok / YouTube…) จนถึง "หมายเหตุ" — ใช้ TikTok ก่อน แล้ว FB แล้ว YouTube */
+    const lend=col.note!=null&&col.note>col.link?col.note:r.length; const links=[]; for(let i=col.link;i<lend;i++){ const v=g(i).trim(); if(/^https?:/.test(v)) links.push(v); }
+    const link=links.find(v=>/tiktok/i.test(v))||links.find(v=>/facebook|fb\.com/i.test(v))||links[0]||g(col.link).trim();
+    const it={idx:+a, group, name, cat:g(col.cat).replace(/\s+/g," ").trim(), fRaw:g(col.f).trim(), link, links, note:g(col.note).trim(), code:g(col.code).replace(/[^A-Za-z0-9ก-๙_\-]/g,"").replace(/^[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]+/,"").trim().toUpperCase()};
     it.f=num(it.fRaw); it.tier=tierOf(it.f); it.url=linkOf(it.link); it.artist=/ศิลปิน/.test(group); it.key=it.name.toLowerCase();
     it.h=hash([it.cat,it.fRaw,it.link,it.note,it.code].join("|")); out.push(it);
   } return out;
