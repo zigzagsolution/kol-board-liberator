@@ -507,6 +507,7 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
   let auto=setInterval(()=>sel((cur+1)%W.length),design==="flow"?2600:4000); el.addEventListener("click",()=>{ clearInterval(auto); auto=null; },{once:true});
 }
 /* ===== หน้ากลยุทธ์ (ข้อมูลจาก strategy.js) ===== */
+const CRED=`<div class="st-cred">ดึงจากความคิดของบริษัทมีดีดิจิทัล จากการวิเคราะห์ด้วยระบบภายในของบริษัท</div>`;
 function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0; try{ plan=+localStorage.getItem("kol_plan")||0; }catch(e){}
   const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
   const planHtml=P=>`
@@ -526,6 +527,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
           <div><h4>วัดผลจากอะไร</h4><div class="st-kpis">${P.kpi.map(k=>`<div><b>${esc(k[0])}</b><span>${esc(k[1])}</span>${k[2]?`<em>${esc(k[2])}</em>`:""}</div>`).join("")}</div></div>
           <div><h4>ถ้าเกิดเรื่องนี้ เราทำยังไง</h4><div class="st-risks">${P.risks.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></div>
         </div>
+        ${CRED}
       </div>
     </section>`;
   const ch=[["hero","ร่มคำเดียว"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
@@ -534,28 +536,29 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     <div class="st-body">
     <div class="st-hero sv" id="st-hero"><div id="umbrella"></div>
       <div class="st-phases">${S.phases.map((p,i)=>`<div class="sv-c" style="--ph:${PHASES[i]?PHASES[i].c:"#999"};--i:${i}"><b>${esc(p[0])}</b><small>${esc(p[1])}</small><span>${esc(p[2])}</span></div>`).join("")}</div>
+      ${CRED}
     </div>
     <section class="st-sec sv" id="st-gap"><h2 class="st-h">${esc(S.gap.h)}</h2><p class="st-lead">${esc(S.gap.p)}</p>
-      <div class="st-steps">${S.gap.rules.map((r,i)=>`<div class="st-step sv-c" style="--i:${i}"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></section>
+      <div class="st-steps">${S.gap.rules.map((r,i)=>`<div class="st-step sv-c" style="--i:${i}"><i>${i+1}</i><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>${CRED}</section>
     <section class="st-sec sv" id="st-insight"><h2 class="st-h">${esc(S.insight.h)}</h2>
       <div class="st-quotes">${S.insight.cards.map((c,i)=>`<div class="st-q sv-c" style="--i:${i}"><b>${esc(c[0])}</b><span>${esc(c[1])}</span>${c[2]?`<small>${esc(c[2])}</small>`:""}</div>`).join("")}</div>
       <div class="st-two">
         <div class="st-say sv-c" style="--i:4"><h3>${esc(S.product.h)}</h3><div class="st-say-g"><div><div class="st-ok">พูดแบบนี้</div><ul>${li(S.product.say)}</ul></div><div><div class="st-no">ไม่พูด</div><ul>${li(S.product.dont)}</ul></div></div></div>
         <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มที่เราคุยด้วย และแต่ละกลุ่มต้องได้ยินอะไร</h3>${S.audiences.map(a=>`<div class="st-a"><div class="st-a-k"><b>${esc(a[0])}</b><small>${esc(a[1])}</small></div><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
-      </div></section>
+      </div>${CRED}</section>
     <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
       <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
       <div class="st-decide">${S.decide.map((d,i)=>`<div class="sv-c" style="--i:${i}"><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
-      <div id="st-plan-body">${planHtml(S.plans[plan])}</div></section>
+      <div id="st-plan-body">${planHtml(S.plans[plan])}</div>${CRED}</section>
     <section class="st-sec sv" id="st-peso"><h2 class="st-h">KOL อยู่ตรงไหนของภาพใหญ่</h2>
-      <div class="st-peso">${S.peso.map((p,i)=>`<div class="sv-c${p[0]==="Shared"?" hi":""}" style="--i:${i}"><b>${esc(p[0])}</b><span>${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join("")}</div></section>
+      <div class="st-peso">${S.peso.map((p,i)=>`<div class="sv-c${p[0]==="Shared"?" hi":""}" style="--i:${i}"><b>${esc(p[0])}</b><span>${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join("")}</div>${CRED}</section>
     <section class="st-sec sv" id="st-day"><h2 class="st-h">วันแถลงข่าว 29 ต.ค. นาทีต่อนาที</h2>
       <div class="st-two">
         <div class="st-ros sv-c" style="--i:0">${S.pressday.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div>
         <div class="st-faq sv-c" style="--i:1"><h3>ถ้าถูกถาม ทุกคนตอบแบบนี้</h3>${S.faq.map(f=>`<div><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div>
       </div>
       <div class="st-cta sv-c" style="--i:2"><div><b>รายชื่อ KOL ที่ MIDI คัดไว้ให้แล้ว${data.length?" "+data.length+" คน":""}</b><span>ทุกคนอยู่ในทีมตั้งแต่แรก ตัดออกได้เฉพาะคนที่ไม่ต้องการ</span></div><button class="btn primary" type="button" id="st-go">ดูรายชื่อ KOL</button></div>
-      <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” จะกำหนดร่วมกันก่อนเริ่มแคมเปญ</p>
+      <p class="st-src">อ้างอิง: ${S.sources.map(s=>`<a href="${esc(s[1])}" target="_blank" rel="noopener">${esc(s[0])}</a>`).join(" · ")} · ตัวเลขที่ติดป้าย “ประมาณการ” จะกำหนดร่วมกันก่อนเริ่มแคมเปญ</p>${CRED}
     </section>
     </div>`;
   // reveal on scroll + rail

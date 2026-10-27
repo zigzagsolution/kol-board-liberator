@@ -685,3 +685,7 @@ body.present .um-legend{display:none}
 body.present .st-cta,body.present .st-rail{display:none}
 
 body[data-tab="strategy"] #hero{display:none}
+.st-cred{font-size:10.5px;color:var(--mute);opacity:.75;margin-top:16px;font-style:italic;letter-spacing:.01em}
+.st-cred::before{content:"";display:inline-block;width:14px;height:1px;background:var(--mute);vertical-align:middle;margin-right:8px;opacity:.7}
+.st-hero .st-cred{color:rgba(255,255,255,.55)}.st-hero .st-cred::before{background:rgba(255,255,255,.4)}
+.st-pcard .st-cred{margin-top:18px}
