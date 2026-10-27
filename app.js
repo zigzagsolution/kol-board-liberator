@@ -130,7 +130,7 @@ function render(){
 }
 /* ===== tabs ===== */
 let TAB="strategy"; try{ TAB=localStorage.getItem("kol_tab")||"strategy"; }catch(e){}
-function setTab(t){ TAB=t; document.body.dataset.tab=t; document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
+function setTab(t){ TAB=t; document.body.dataset.tab=t; if(t==="strategy"){ setTimeout(smoothOn,0); } else smoothOff(); document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t)); document.querySelectorAll(".page").forEach(p=>p.hidden=p.dataset.page!==t); try{localStorage.setItem("kol_tab",t);}catch(e){} try{ logEv("tab",t); }catch(e){} if(t==="sched"&&typeof renderSched==="function"&&data.length) renderSched(teamList([...data].sort((a,b)=>(b.f||0)-(a.f||0))).all); }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab)); setTab(TAB);
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
@@ -469,6 +469,12 @@ $("#a-close").onclick=()=>{ $("#amodal").hidden=true; }; $("#amodal").addEventLi
 if(ACCESS&&ACCESS.vid===VID){ gateOpen(); } else { gateShow("gate-form"); try{ const q=JSON.parse(localStorage.getItem("kol_gate_req")||"null"); if(q){ $("#g-name").value=q.name||""; $("#g-phone").value=q.phone||""; api("accessStatus",[{vid:VID}]).then(r=>{ if(r&&r.status==="approved"){ gateSave({vid:VID,name:r.name||q.name,phone:q.phone,admin:!!r.admin,at:Date.now()}); gateOpen(); } else if(r&&r.status==="pending") gateWait(q.name,q.phone); }).catch(()=>{}); } }catch(e){} }
 
 
+
+/* ===== smooth scroll (Lenis) — เฉพาะแท็บกลยุทธ์ ===== */
+let LEN=null;
+function smoothOn(){ if(LEN||!window.Lenis) return; if(matchMedia("(prefers-reduced-motion:reduce)").matches) return; LEN=new Lenis({lerp:.08,wheelMultiplier:.9,smoothWheel:true}); const raf=t=>{ if(!LEN) return; LEN.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf); }
+function smoothOff(){ if(LEN){ LEN.destroy(); LEN=null; } }
+window.addEventListener("load",()=>{ if(TAB==="strategy") smoothOn(); });
 /* ===== ร่ม + แรงเหวี่ยงข่าว — 2 ดีไซน์: ripple (วงคลื่น) / flow (เส้นทางข่าว) ===== */
 function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella"); if(!U||!el) return; design=design||CFG.UMBRELLA_DESIGN||"ripple"; el.dataset.design=design;
   const W=U.waves; let cur=0;
@@ -522,7 +528,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         <h4>ใครพูดอะไร เมื่อไร</h4>
         <div class="st-relay">${P.voices.map((v,i)=>`<div style="--i:${i}"><em>${esc(v[2])}</em><b>${esc(v[0])}</b><span>${esc(v[1])}</span></div>`).join("")}</div>
         <h4>น้ำหนักของแต่ละช่วง</h4>
-        <div class="st-share">${P.share.map((s,i)=>`<div style="flex:${s};background:${PHASES[i]?PHASES[i].c:"#999"}"><b>${s}%</b><small>${esc(S.phases[i]?S.phases[i][0]:"")}</small></div>`).join("")}</div>
+        <div class="st-share">${P.share.map((s,i)=>`<div style="flex:${s};background:${PHASES[i]?PHASES[i].c:"#999"}"><b data-n="${s}">0%</b><small>${esc(S.phases[i]?S.phases[i][0]:"")}</small></div>`).join("")}</div>
         <div class="st-two">
           <div><h4>วัดผลจากอะไร</h4><div class="st-kpis">${P.kpi.map(k=>`<div><b>${esc(k[0])}</b><span>${esc(k[1])}</span>${k[2]?`<em>${esc(k[2])}</em>`:""}</div>`).join("")}</div></div>
           <div><h4>ถ้าเกิดเรื่องนี้ เราทำยังไง</h4><div class="st-risks">${P.risks.map(r=>`<div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div>`).join("")}</div></div>
@@ -562,14 +568,15 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
     </section>
     </div>`;
   // reveal on scroll + rail
-  const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add("in"); } }),{threshold:.12,rootMargin:"0px 0px -8% 0px"});
+  const countUp=n=>{ const to=+n.dataset.n||0, t0=performance.now(); const step=t=>{ const k=Math.min(1,(t-t0)/900), e=1-Math.pow(1-k,3); n.textContent=Math.round(to*e)+"%"; if(k<1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
+  const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add("in"); x.target.querySelectorAll("[data-n]:not(.done)").forEach(n=>{ n.classList.add("done"); countUp(n); }); } }),{threshold:.12,rootMargin:"0px 0px -8% 0px"});
   el.querySelectorAll(".sv").forEach(n=>io.observe(n));
   const secs=[...el.querySelectorAll("[id^='st-']")].filter(n=>/^st-(hero|gap|insight|plan|peso|day)$/.test(n.id));
   const io2=new IntersectionObserver(es=>{ es.forEach(x=>{ if(x.isIntersecting){ el.querySelectorAll(".st-rail a").forEach(a=>a.classList.toggle("on",a.dataset.ch===x.target.id.replace("st-",""))); } }); },{rootMargin:"-40% 0px -50% 0px"});
   secs.forEach(n=>io2.observe(n));
-  el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); const t=$(a.getAttribute("href")); if(t) window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-90,behavior:"smooth"}); });
+  el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); const t=$(a.getAttribute("href")); const top=t?t.getBoundingClientRect().top+window.scrollY-90:0; if(LEN) LEN.scrollTo(top,{duration:1.2}); else window.scrollTo({top,behavior:"smooth"}); });
   renderUmbrella();
-  el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
+  el.querySelectorAll(".st-seg2 button").forEach(b=>b.onclick=()=>{ plan=+b.dataset.i; el.querySelectorAll(".st-seg2 button").forEach(x=>x.classList.toggle("active",x===b)); $("#st-plan-body").innerHTML=planHtml(S.plans[plan]); $("#st-plan-body").querySelectorAll("[data-n]").forEach(countUp);  try{localStorage.setItem("kol_plan",plan);}catch(e){} try{ logEv("plan",S.plans[plan].id); }catch(e){} });
   $("#st-go").onclick=()=>setTab("review");
 }
 try{ renderStrategy(); }catch(e){ console.error(e); }
