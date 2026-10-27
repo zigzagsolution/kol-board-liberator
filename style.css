@@ -485,3 +485,22 @@ body.present .sc-head .ai-acts{display:none}
 .hero-cd span b{color:#7ff3dc;font-family:var(--display);font-size:14px}
 @media (max-width:860px){.hero{grid-template-columns:1fr;padding:18px}.hero-logo{height:64px}.hero-r{grid-template-columns:repeat(2,minmax(0,1fr))}}
 body.present .hero{margin-top:12px}
+
+/* ===== Liberator header theme: navy top bar, glass pills, gradient active tab ===== */
+.top{background:linear-gradient(100deg,#070c3a 0%,#0B1052 45%,#0E2A8C 100%);box-shadow:0 1px 0 rgba(255,255,255,.08),0 10px 30px rgba(11,16,82,.18);color:#fff}
+.top .logo{height:44px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
+.brand{border-left:3px solid #7ff3dc}
+.brand .eb{color:#7ff3dc}
+.brand h1{color:#fff}
+.brand h1 b{background:linear-gradient(90deg,#3fa3ff,#00f6c8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.top .pill{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:rgba(255,255,255,.85)}
+.top .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+.top .btn:hover{border-color:#7ff3dc}
+.top .btn.present-btn,.top .btn.adm-btn{background:#fff;color:var(--navy);border-color:#fff}
+.top .dot.on{background:#00f6c8}
+.tab{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.14)}
+.tab b{background:rgba(255,255,255,.14);color:#fff}
+.tab:hover:not(.active){background:rgba(255,255,255,.14);color:#fff}
+.tab.active{background:linear-gradient(135deg,#0A5BFF,#00c2ff);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(10,91,255,.45)}
+.tab.active b{background:#fff;color:var(--brand)}
+.hero{margin-top:-6px;border-top-left-radius:18px;border-top-right-radius:18px}
