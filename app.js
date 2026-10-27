@@ -479,7 +479,7 @@ window.addEventListener("load",()=>{ if(TAB==="strategy") smoothOn(); });
 function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella"); if(!U||!el) return; design=design||CFG.UMBRELLA_DESIGN||"ripple"; el.dataset.design=design;
   const W=U.waves; let cur=0;
   const panel=i=>{ const w=W[i]; return `<div class="um-panel" style="--c:${w.c}"><div class="um-when">${esc(w.when)}</div><h4>${esc(w.t)}</h4><div class="um-who">${esc(w.who)}</div><p>${esc(w.say)}</p><div class="um-hook">${esc(w.hook)}</div></div>`; };
-  const head=`<div class="um-head"><div class="um-k">ร่มของวันที่ 29 — คำเดียว ทุกคนพูดเหมือนกัน</div><div class="um-word">${esc(U.word)}</div><div class="um-sub">${esc(U.sub)}</div><div class="um-line">“${esc(U.line)}”</div></div>`;
+  const head=`<div class="um-head"><div class="um-k">Strategy วันงาน · 29 ต.ค. · คอนเทนต์ที่ควรมีในงาน</div><div class="um-word">${esc(U.word)}</div><div class="um-sub">${esc(U.sub)}</div><div class="um-line"><small>ประโยคหลักที่ควรมีในงาน</small>“${esc(U.line)}”</div></div>`;
   let viz="";
   if(design==="ripple"){
     const cx=300, cy=300, R=[92,134,172,208,241,272], ang=i=>(-92+i*33)*Math.PI/180;
@@ -503,7 +503,7 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
       <div class="um-merge" style="grid-column:5;grid-row:5"><i></i><b>จุดบรรจบ 9 พ.ย.</b><span>สื่อ + KOL + ช่องแบรนด์ ออกพร้อมกัน = เห็นทุกที่ใน 48 ชม.</span></div>
       <div class="um-end" style="grid-column:6/8;grid-row:5"><b>ปลายทางเดียว</b><span>ทุกเส้นจบที่หน้าเปิดบัญชี/จองคิว — ไม่มีหน้ารับ = คนหายระหว่างทาง</span></div>
     </div><div class="um-side" id="um-side">${panel(0)}</div>
-    <div class="um-legend">3 สาย (สื่อ · KOL · ช่องของแบรนด์) แตกจากเวทีเดียวกัน แล้วมาบรรจบวันที่ 9 — กดจุดไหนดูได้ว่าช่วงนั้นใครพูดอะไร</div>`;
+    <div class="um-legend">แต่ละจุดคือคอนเทนต์ที่ MIDI เสนอให้มี — 3 สาย (สื่อ · KOL · ช่องของแบรนด์) แตกจากเวทีเดียวกัน แล้วมาบรรจบวันที่ 9 · กดจุดไหนดูได้ว่าช่วงนั้นใครพูดอะไร</div>`;
   }
   el.innerHTML=`<section class="box um" data-design="${design}">${head}${viz}</section>`;
   const sel=i=>{ cur=i; $("#um-side").innerHTML=panel(i); el.querySelectorAll("[data-i]").forEach(n=>n.classList.toggle("on",+n.dataset.i===i)); };
@@ -536,7 +536,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         ${CRED}
       </div>
     </section>`;
-  const ch=[["hero","ร่มคำเดียว"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
+  const ch=[["hero","Strategy วันงาน"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
   el.innerHTML=`
     <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}"><i></i><span>${esc(c[1])}</span></a>`).join("")}<b class="st-rail-line"></b></nav>
     <div class="st-body">
@@ -550,7 +550,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
       <div class="st-quotes">${S.insight.cards.map((c,i)=>`<div class="st-q sv-c" style="--i:${i}"><b>${esc(c[0])}</b><span>${esc(c[1])}</span>${c[2]?`<small>${esc(c[2])}</small>`:""}</div>`).join("")}</div>
       <div class="st-two">
         <div class="st-say sv-c" style="--i:4"><h3>${esc(S.product.h)}</h3><div class="st-say-g"><div><div class="st-ok">พูดแบบนี้</div><ul>${li(S.product.say)}</ul></div><div><div class="st-no">ไม่พูด</div><ul>${li(S.product.dont)}</ul></div></div></div>
-        <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มที่เราคุยด้วย และแต่ละกลุ่มต้องได้ยินอะไร</h3>${S.audiences.map(a=>`<div class="st-a"><div class="st-a-k"><b>${esc(a[0])}</b><small>${esc(a[1])}</small></div><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
+        <div class="st-aud sv-c" style="--i:5"><h3>3 กลุ่มเป้าหมาย และสิ่งที่แต่ละกลุ่มต้องได้ยิน</h3>${S.audiences.map(a=>`<div class="st-a"><div class="st-a-k"><b>${esc(a[0])}</b><small>${esc(a[1])}</small></div><q>${esc(a[2])}</q><em>${esc(a[3])}</em></div>`).join("")}</div>
       </div>${CRED}</section>
     <section class="st-sec sv" id="st-plan"><h2 class="st-h">เลือกทิศทางวันเปิดตัว</h2><p class="st-lead">สองทางที่ไปได้ ดูได้ทั้งคู่ แล้วค่อยตัดสินใจว่าจะเอาทางไหน หรือเอาทั้งสอง</p>
       <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
