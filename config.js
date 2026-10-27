@@ -4,7 +4,7 @@ window.KOL_CONFIG = {
   TARGET: 30,                  // เป้าจำนวน KOL ในทีม
   CLIENT: "Liberator",
   CAMPAIGN: "AI คิดให้ คุณตัดสินใจ",
-  UMBRELLA_DESIGN: "ripple",        // "ripple" = วงคลื่น · "flow" = เส้นทางข่าว 3 สาย
+  UMBRELLA_DESIGN: "flow",          // "ripple" = วงคลื่น · "flow" = เส้นทางข่าว 3 สาย
   HEAD: "Liberator · 29 ต.ค. – 20 พ.ย. 2569",   // ข้อความเล็กเหนือชื่อบอร์ด (หัว = แบรนด์ MIDI)
   START: "2026-10-29", DAYS: 23,  // ช่วงวันที่โพสต์ (รวมวันสุดท้าย)
   HASHTAGS: "#Liberator #AIคิดให้คุณตัดสินใจ #InvestmentForEveryone #LiberatorAI",

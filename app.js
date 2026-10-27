@@ -504,7 +504,7 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
   el.querySelectorAll("[data-i]").forEach(n=>{ n.addEventListener("click",()=>sel(+n.dataset.i)); n.addEventListener("mouseenter",()=>{ el.querySelectorAll("[data-i]").forEach(x=>x.classList.toggle("hov",+x.dataset.i===+n.dataset.i)); }); n.addEventListener("mouseleave",()=>el.querySelectorAll(".hov").forEach(x=>x.classList.remove("hov"))); });
   sel(0);
   // เล่นเองช้า ๆ จนกว่าจะมีคนกด
-  let auto=setInterval(()=>sel((cur+1)%W.length),4000); el.addEventListener("click",()=>{ clearInterval(auto); auto=null; },{once:true});
+  let auto=setInterval(()=>sel((cur+1)%W.length),design==="flow"?2600:4000); el.addEventListener("click",()=>{ clearInterval(auto); auto=null; },{once:true});
 }
 /* ===== หน้ากลยุทธ์ (ข้อมูลจาก strategy.js) ===== */
 function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S||!el||el.dataset.done) return; el.dataset.done=1; let plan=0; try{ plan=+localStorage.getItem("kol_plan")||0; }catch(e){}

@@ -578,7 +578,21 @@ body.present .st-cta{display:none}
 .um-lane-k{grid-column:1;font-size:12px;font-weight:700;color:var(--c);padding-right:4px;line-height:1.3}
 .um-node{background:color-mix(in srgb,var(--c) 10%,var(--paper));border:1.5px solid var(--c);color:var(--ink);border-radius:999px;padding:7px 8px;font-size:11.5px;text-align:center;cursor:pointer;position:relative;transition:all .2s;line-height:1.3;min-width:0}
 .um-node.on,.um-node.hov{background:var(--c);color:#fff;transform:translateY(-2px);box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent)}
-.um-node::before{content:"";position:absolute;left:-9px;top:50%;width:8px;border-top:2px dashed var(--c);opacity:.7}
+.um-node::before{content:"";position:absolute;left:-10px;top:calc(50% - 1px);width:10px;height:2px;background:repeating-linear-gradient(90deg,var(--c) 0 4px,transparent 4px 7px);background-size:7px 2px;animation:umdash .6s linear infinite;opacity:.8}
+.um-node.on{animation:umpop .45s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes umpop{0%{transform:scale(.92)}60%{transform:scale(1.06) translateY(-2px)}100%{transform:translateY(-2px)}}
+@keyframes umdash{to{background-position:7px 0}}
+.um-flow{position:relative}
+.um-flow::before{content:"";position:absolute;left:132px;right:0;top:44px;height:2px;background:linear-gradient(90deg,#e8194c,#3fa3ff 45%,#0A5BFF 60%,#0B1052);opacity:.35;background-size:200% 100%;animation:umflow 3s linear infinite}
+@keyframes umflow{from{background-position:0 0}to{background-position:-200% 0}}
+.um-col.on::after{content:"";position:absolute;left:0;right:0;top:100%;height:260px;background:linear-gradient(180deg,color-mix(in srgb,#e8194c 10%,transparent),transparent);pointer-events:none}
+.um-col{position:relative}
+.um-stage{animation:umstage 2.4s ease-in-out infinite}
+@keyframes umstage{0%,100%{box-shadow:0 0 0 0 rgba(232,25,76,.35)}50%{box-shadow:0 0 0 12px rgba(232,25,76,0)}}
+.um-merge{animation:ummerge 2.4s ease-in-out infinite}
+@keyframes ummerge{0%,100%{box-shadow:0 0 0 0 rgba(10,91,255,.3)}50%{box-shadow:0 0 0 10px rgba(10,91,255,0)}}
+.um-side{position:relative}.um-side::before{content:"";position:absolute;left:24px;top:-10px;border:7px solid transparent;border-bottom-color:var(--bg)}
+@media (prefers-reduced-motion:reduce){.um-node::before,.um-flow::before,.um-stage,.um-merge,.um-node.on{animation:none}}
 .um-merge{border:2px dashed #0A5BFF;border-radius:12px;padding:8px 10px;font-size:11px;color:var(--ink2);position:relative;background:color-mix(in srgb,#0A5BFF 5%,var(--paper));line-height:1.35}.um-merge b{display:block;font-family:var(--display);color:#0A5BFF;font-size:12px}.um-merge i{position:absolute;left:50%;top:-12px;width:2px;height:10px;background:#0A5BFF}
 .um-end{background:var(--navy);color:#fff;border-radius:12px;padding:8px 12px;font-size:11px;line-height:1.35}.um-end b{display:block;font-family:var(--display);font-size:12px}
 .um[data-design="flow"] .um-side{margin-top:14px}
