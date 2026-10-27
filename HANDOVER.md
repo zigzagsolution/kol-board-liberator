@@ -4,7 +4,7 @@ MIDI digital Co., Ltd. · ผู้ดูแล: NUENG · แคมเปญ **"
 
 - หน้าเว็บ (ลูกค้าใช้): https://zigzagsolution.github.io/kol-board-liberator/
 - โค้ด: GitHub `zigzagsolution/kol-board-liberator` (branch `main` = เว็บจริง)
-- ชีตต้นทาง: "ข้อมูล KOL สาย IT/Technology" id `16wVv_Nqns6mftCKEatN_KbkBFlpjVxP6OGbPBerRz6c` (แท็บแรก) — **คอลัมน์ "เรท" ถูกตัดทิ้งฝั่งเซิร์ฟเวอร์ ไม่ส่งไปหน้าเว็บ และเบอร์โทรในทุกช่องถูกปิดบัง** (`sanitize_` ใน server.js)
+- ชีตต้นทาง: "ข้อมูล KOL สาย IT/Technology" id `19Y-Vec0IqTksB8NJwZfu4MkLQpy2iMkQrGtm1RqVU8c` (แท็บแรก) — **คอลัมน์ "เรท" ถูกตัดทิ้งฝั่งเซิร์ฟเวอร์ ไม่ส่งไปหน้าเว็บ และเบอร์โทรในทุกช่องถูกปิดบัง** (`sanitize_` ใน server.js)
 - ชีตผล: "KOL Reviews — Liberator" (สร้างอัตโนมัติใน Drive ของบัญชีที่รัน Apps Script)
 - โค้ดเดียวกับบอร์ดอวดเมืองโคราช แต่ **ไม่มี PLAN MEDIA / Nano Week** และทุกอย่างที่เป็นแคมเปญอยู่ใน `config.js` (START, DAYS, PHASES, EVENTS, HASHTAGS, INTENSITY, TARGET) — เปลี่ยนลูกค้าครั้งหน้าแก้ไฟล์นี้ไฟล์เดียว + ธีมใน `style.css` + `logo.png`
 

@@ -1,5 +1,5 @@
 /* KOL Approval Board — server logic (Code.gs โหลดไฟล์นี้จาก GitHub → แก้ใน repo แล้วมีผลใน ~1–2 นาที ไม่ต้อง Deploy) */
-const SOURCE_ID   = "16wVv_Nqns6mftCKEatN_KbkBFlpjVxP6OGbPBerRz6c"; // ชีต Liberator "ข้อมูล KOL สาย IT/Technology" — ต้องแชร์ให้บัญชีที่รันสคริปต์
+const SOURCE_ID   = "19Y-Vec0IqTksB8NJwZfu4MkLQpy2iMkQrGtm1RqVU8c"; // ชีต Liberator "ข้อมูล KOL สาย IT/Technology" — ต้องแชร์ให้บัญชีที่รันสคริปต์
 const SOURCE_TAB  = "";   // เว้นว่าง = แท็บแรก
 const REVIEW_NAME = "KOL Reviews — Liberator";
 /* คอลัมน์ที่ห้ามส่งออกไปหน้าเว็บ (ตัดทิ้งฝั่งเซิร์ฟเวอร์) */
