@@ -236,7 +236,7 @@ renderTimeline();
     if(launch){ const l=days(t,DAY(launch.d)); parts.push(l>0?`<span>${esc(launch.t)} อีก <b>${l}</b> วัน (${dLabel(launch.d)})</span>`:`<span>${esc(launch.t)} · ${dLabel(launch.d)}${l===0?" · <b>วันนี้</b>":""}</span>`); }
     const e=days(t,DAY(DAYS-1)); if(e>=0) parts.push(`<span>สิ้นสุด ${dLabel(DAYS-1)} · เหลือ <b>${e}</b> วัน</span>`);
     cd.innerHTML=parts.join(""); if(CFG.CAMPAIGN) $("#hero-name").textContent=CFG.CAMPAIGN; }
-  const a=$("#hash-txt"); if(a) a.textContent=HASHTAGS; const b=$("#sc-range"); if(b) b.textContent=dLabel(0)+" – "+dLabel(DAYS-1); const c=$("#hd-sub"); if(c&&CFG.SUB) c.textContent=CFG.SUB; })();
+  const a=$("#hash-txt"); if(a) a.textContent=HASHTAGS; const b=$("#sc-range"); if(b) b.textContent=dLabel(0)+" – "+dLabel(DAYS-1); const c=$("#hd-sub"); if(c&&CFG.HEAD) c.textContent=CFG.HEAD; })();
 const splitWhy=w=>{ const i=w.indexOf(" — "); return i>0?[w.slice(0,i),w.slice(i+3)]:[w,""]; };
 const chipsHtml=(arr,max)=>`<div class="why-chips">${arr.slice(0,max||99).map(w=>{ const [t,d]=splitWhy(w); const cls=/^ช่วงที่แนะนำ/.test(w)?"when":/^ย้าย|^เพิ่มให้/.test(w)?"mv":""; return `<span class="${cls}" title="${esc(w)}">${esc(cls==="when"?w.replace("ช่วงที่แนะนำ: ","📍 "):t)}</span>`; }).join("")}</div>`;
 let PLAN_MODE="manual";
