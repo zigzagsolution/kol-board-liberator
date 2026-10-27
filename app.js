@@ -251,7 +251,7 @@ let PLAN_MODE="manual";
 /* "MIDI จัดให้" ล็อกไว้ — ต้องได้รหัสจากฝ่ายขาย (config: AI_CODE) */
 const AI_CODE=String(CFG.AI_CODE||"mididigital09"); let AI_OPEN=false;
 function askAI(then){ const m=$("#aigate"); if(!m) return then(); m.hidden=false; const inp=$("#ag-code"); inp.value=""; $("#ag-err").hidden=true; setTimeout(()=>inp.focus(),50);
-  const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ const lk=$("#st-locked"); if(lk&&lk.hidden){ lk.hidden=false; $("#st-lockcard").hidden=true; document.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); } }catch(e){} try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
+  const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ render(); }catch(e){} try{ const lk=$("#st-locked"); if(lk&&lk.hidden){ lk.hidden=false; $("#st-lockcard").hidden=true; document.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); } }catch(e){} try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
   $("#ag-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#ag-cancel").onclick=()=>{ m.hidden=true; }; }
 $("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.m==="ai"&&!AI_OPEN){ askAI(()=>b.click()); return; } PLAN_MODE=b.dataset.m; $("#plan-seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b)); $("#plan-manual").hidden=PLAN_MODE!=="manual"; $("#plan-ai").hidden=PLAN_MODE!=="ai"; logEv("planmode",PLAN_MODE); render(); });
 function renderAI(passed){
@@ -292,11 +292,11 @@ function renderSched(all){ const el=$("#sc"); if(!el||$("#tabs .tab.active").dat
     list.forEach(d=>{ const ds=datesOf(d), ph=phasesOf(d); const src=avSrc(d); const ini=iniOf(d);
       h+=`<div class="who${SC_SEL===d.key?" sel":""}" draggable="true" data-k="${esc(d.key)}" title="ลากไปวางในช่องวัน หรือแตะเพื่อเลือก">${src?`<div class="av"><img src="${src}" alt=""></div>`:`<div class="av av-txt">${ini}</div>`}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="f">${fmtN(d.f)}${ph.length?` · ระยะ ${ph.join(",")}`:""}</div></div><span class="n">${ds.length?ds.length+" โพสต์":""}</span></div>`;
       TL_DAYS.forEach(x=>{ const dow=DAY(x).getDay(); const inPh=ph.length?ph.includes(String(tlPhase(x))):false; const has=ds.includes(x);
-        const sug=!ds.length&&(SUG[rid(d)]||[]).includes(x);
+        const sug=AI_OPEN&&!ds.length&&(SUG[rid(d)]||[]).includes(x); // วันที่ MIDI แนะนำ (จาง) แสดงเฉพาะเมื่อปลดล็อกด้วยรหัส Sale
         h+=`<div class="cell${dow===0||dow===6?" we":""}${inPh&&!has?" rec":""}" data-k="${esc(d.key)}" data-d="${x}" style="--ph:${c}">${has?`<div class="post" draggable="true" data-k="${esc(d.key)}" data-d="${x}" title="${esc(d.name)} · ${dLabel(x)} — กดเพื่อดู/แก้แนวคอนเทนต์" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}<span class="st st-${postOf(d,x).status}"></span></div>`:sug?`<div class="post sug" data-sug="1" title="MIDI แนะนำ ${dLabel(x)} — กดเพื่อยืนยัน หรือลากรูปไปวันอื่น" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}</div>`:""}</div>`; }); }); });
   el.style.gridTemplateColumns=`176px repeat(${DAYS},minmax(0,1fr))`; el.innerHTML=h;
   const withDates=all.filter(d=>datesOf(d).length).length, posts=Object.values(tot).reduce((s,t)=>s+t.n,0);
-  $("#sc-sum").textContent=`กำหนดวันแล้ว ${withDates}/${all.length} คน · รวม ${posts} โพสต์ · รูปจาง ๆ เส้นประ = วันที่ MIDI แนะนำ (กดเพื่อยืนยัน หรือลากไปวันอื่น) · ขีดสีใต้ช่อง = วันในระยะของคนนั้น`;
+  $("#sc-sum").textContent=`กำหนดวันแล้ว ${withDates}/${all.length} คน · รวม ${posts} โพสต์${AI_OPEN?" · รูปจาง ๆ เส้นประ = วันที่ MIDI แนะนำ (กดเพื่อยืนยัน หรือลากไปวันอื่น)":""} · ขีดสีใต้ช่อง = วันในระยะของคนนั้น`;
   // drag & drop
   let drag=null;
   el.querySelectorAll(".who,.post").forEach(n=>{ n.addEventListener("dragstart",e=>{ drag={k:n.dataset.k,from:n.dataset.d?+n.dataset.d:null}; e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain",n.dataset.k); }catch(_){} n.classList.add("ghost"); }); n.addEventListener("dragend",()=>n.classList.remove("ghost")); });
