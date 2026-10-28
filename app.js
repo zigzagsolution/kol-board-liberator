@@ -137,7 +137,7 @@ function askTabCode(t){ const m=$("#tgate"); if(!m) return setTab(t); m.hidden=f
   const ok=()=>{ const v=inp.value.trim(); if(TAB_CODES.includes(v)){ m.hidden=true; try{ logEv("tabcode",t); }catch(e){} setTab(t); } else { $("#tg-err").hidden=false; inp.select(); } };
   $("#tg-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#tg-cancel").onclick=()=>{ m.hidden=true; }; }
 const SALES_TABS=(CFG.SALES_TABS||["plan"]); // แท็บที่ต้องใช้รหัสจาก Sale
-function gotoTab(t){ if(t==="strategy") return setTab(t); if(SALES_TABS.includes(t)){ if(AI_OPEN) return setTab(t); return askAI(()=>setTab(t)); } askTabCode(t); }
+function gotoTab(t){ if(t==="strategy") return setTab(t); if(ACCESS&&ACCESS.admin){ AI_OPEN=true; return setTab(t); } if(SALES_TABS.includes(t)){ if(AI_OPEN) return setTab(t); return askAI(()=>setTab(t)); } askTabCode(t); }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>gotoTab(b.dataset.tab)); setTab(TAB);
 $("#present").onclick=()=>{ const on=document.body.classList.toggle("present"); $("#present").textContent=on?"✕ ออกจากนำเสนอ":"▶ นำเสนอ"; if(on&&document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); if(!on&&document.fullscreenElement) document.exitFullscreen().catch(()=>{}); logEv("present",on?"on":"off"); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("present")) $("#present").click(); });
@@ -250,7 +250,7 @@ const chipsHtml=(arr,max)=>`<div class="why-chips">${arr.slice(0,max||99).map(w=
 let PLAN_MODE="manual";
 /* "MIDI จัดให้" ล็อกไว้ — ต้องได้รหัสจากฝ่ายขาย (config: AI_CODE) */
 const AI_CODE=String(CFG.AI_CODE||"mididigital09"); let AI_OPEN=false;
-function askAI(then){ const m=$("#aigate"); if(!m) return then(); m.hidden=false; const inp=$("#ag-code"); inp.value=""; $("#ag-err").hidden=true; setTimeout(()=>inp.focus(),50);
+function askAI(then){ if(ACCESS&&ACCESS.admin){ AI_OPEN=true; return then(); } const m=$("#aigate"); if(!m) return then(); m.hidden=false; const inp=$("#ag-code"); inp.value=""; $("#ag-err").hidden=true; setTimeout(()=>inp.focus(),50);
   const ok=()=>{ if(inp.value.trim()===AI_CODE){ AI_OPEN=true; m.hidden=true; try{ render(); }catch(e){} try{ const lk=$("#st-locked"); if(lk&&lk.hidden){ lk.hidden=false; $("#st-lockcard").hidden=true; document.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); } }catch(e){} try{ logEv("aicode","ok"); }catch(e){} then(); } else { $("#ag-err").hidden=false; inp.select(); try{ logEv("aicode","fail"); }catch(e){} } };
   $("#ag-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); if(e.key==="Escape") m.hidden=true; }; $("#ag-cancel").onclick=()=>{ m.hidden=true; }; }
 $("#plan-seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.m==="ai"&&!AI_OPEN){ askAI(()=>b.click()); return; } PLAN_MODE=b.dataset.m; $("#plan-seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b)); $("#plan-manual").hidden=PLAN_MODE!=="manual"; $("#plan-ai").hidden=PLAN_MODE!=="ai"; logEv("planmode",PLAN_MODE); render(); });
@@ -453,7 +453,7 @@ $("#refresh").onclick=()=>{ prog.manual=true; load(); }; showName(); skeleton(8)
 let ACCESS=null; try{ ACCESS=JSON.parse(localStorage.getItem("kol_access")||"null"); }catch(e){}
 const isAdmin=()=>!!(ACCESS&&ACCESS.admin);
 function gateShow(id){ ["gate-form","gate-staff","gate-wait","gate-denied"].forEach(x=>$("#"+x).hidden=x!==id); $("#gate").hidden=false; }
-function gateOpen(){ ovSet(0,false); clearInterval(prog.t); setStatus("",""); $("#gate").hidden=true; if(ACCESS&&ACCESS.name&&!reviewer){ reviewer=ACCESS.name; try{localStorage.setItem("kol_reviewer",reviewer);}catch(e){} showName(); } $("#adm-btn").hidden=!isAdmin(); load(); setInterval(()=>{ if(!document.hidden) load(); },30000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); }); if(isAdmin()) { admCount(); setInterval(admCount,30000); } }
+function gateOpen(){ ovSet(0,false); clearInterval(prog.t); setStatus("",""); $("#gate").hidden=true; if(ACCESS&&ACCESS.admin){ AI_OPEN=true; try{ document.querySelectorAll(".lk").forEach(x=>x.textContent="🔓 Admin"); const lk=$("#st-locked"); if(lk&&lk.hidden){ lk.hidden=false; $("#st-lockcard").hidden=true; document.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); } }catch(e){} } if(ACCESS&&ACCESS.name&&!reviewer){ reviewer=ACCESS.name; try{localStorage.setItem("kol_reviewer",reviewer);}catch(e){} showName(); } $("#adm-btn").hidden=!isAdmin(); load(); setInterval(()=>{ if(!document.hidden) load(); },30000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); }); if(isAdmin()) { admCount(); setInterval(admCount,30000); } }
 function gateSave(a){ ACCESS=a; try{ localStorage.setItem("kol_access",JSON.stringify(a)); }catch(e){} }
 let gatePoll=null;
 function gateWait(name,phone){ gateShow("gate-wait"); $("#g-who").textContent=`👤 ${name} · ${phone}`; clearInterval(gatePoll); let n=0;
