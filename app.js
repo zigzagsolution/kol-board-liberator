@@ -14,6 +14,7 @@ const CFG=window.KOL_CONFIG||{};
 const TARGET=Number(CFG.TARGET)||50;
 const PHASES=CFG.PHASES||[{n:"1",title:"ระยะ 1",d:"",from:0,to:6,c:"#8a8fa8",goal:"",brief:""},{n:"2",title:"ระยะ 2",d:"",from:7,to:13,c:"#3fa3ff",goal:"",brief:""},{n:"3",title:"ระยะ 3",d:"",from:14,to:20,c:"#0A5BFF",goal:"",brief:""}];
 const NP=PHASES.length;
+const ROLES=Object.assign(NP>=5?{warm:0,announce:1,build:2,launch:3,convert:4}:{announce:0,build:1,launch:2,convert:3},CFG.ROLES||{}); const RP=k=>Math.min(NP-1,ROLES[k]==null?0:ROLES[k]); const LP=String(RP("launch")+1);
 const HASHTAGS=CFG.HASHTAGS||"";
 const KOL_REACH_TARGET=Number(CFG.REACH_TARGET)||0, KOL_VISIT_TARGET=Number(CFG.VISIT_TARGET)||0;
 const TOR_MICRO_MIN=Number(CFG.TOR_MICRO_MIN)||0, TOR_NANO_MIN=Number(CFG.TOR_NANO_MIN)||0;
@@ -187,31 +188,31 @@ function renderPlan(sorted){
 /* กติกา MIDI จัดให้ — แคมเปญเปิดตัวฟีเจอร์ AI ของแอปลงทุน: 1 Tease · 2 Reveal · 3 Prove · 4 Convert */
 function aiPlan(passed){
   const total=passed.reduce((s,d)=>s+(d.f||0),0); const out=new Map(); const Z=()=>PHASES.map(()=>0), ZZ=()=>PHASES.map(()=>[]);
-  const P=(n)=>Math.min(NP-1,n); // ดัชนีระยะ (กัน config ที่มีน้อยกว่า 4 ระยะ)
+  const W=RP("warm"), A=RP("announce"), B=RP("build"), L=RP("launch"), C=RP("convert"); const hasW=ROLES.warm!=null&&NP>=5;
   passed.forEach(d=>{ const sc=Z(), why=ZZ(); const txt=(d.name+" "+d.cat); const f=d.f||0;
-    const add=(i,n,w)=>{ i=P(i); sc[i]+=n; why[i].push(w); };
-    if(f>=1e6) add(1,4,"Mega "+fmtN(f)+" — เดโมวันเปิดตัวให้คนเห็นวงกว้าง"); else if(f>=3e5){ add(1,3,"Macro "+fmtN(f)+" — reach สูง เหมาะวันเปิดตัว"); add(0,1,"Teaser ก่อนเปิดตัว — ปูกระแส"); } else if(f>=1e5) add(2,2,"Macro ระดับกลาง — สอนใช้จริง/เปรียบเทียบ");
-    if(RX.news.test(txt)){ add(0,3,"สายข่าวเทค — Teaser \"AI กำลังมา\" + นับถอยหลัง"); add(1,2,"รายงานวันเปิดตัวแบบข่าว"); }
-    if(RX.edu.test(txt)){ add(2,4,"สายความรู้/เทคนิค — How-to ใช้ AI วิเคราะห์หุ้นทีละขั้น"); add(1,1,"อธิบายฟีเจอร์วันเปิดตัว"); }
-    if(RX.review.test(txt)){ add(2,3,"สายรีวิว — รีวิวตรง ๆ ไม่เกินจริง ข้อดี/ข้อจำกัด"); add(3,2,"สรุปรีวิว + CTA ลองใช้"); }
-    if(RX.fin.test(txt)){ add(1,3,"สายการเงิน/ลงทุน — เปิดตัวอย่างน่าเชื่อถือ อธิบายกรอบความเสี่ยง"); add(3,3,"ปิดการตัดสินใจ — เคสจริง + ขั้นตอนเปิดบัญชี"); }
-    if(RX.life.test(txt)){ add(0,2,"ไลฟ์สไตล์ — ตั้งคำถามชีวิตนักลงทุนมือใหม่"); add(3,3,"use case ในชีวิตประจำวัน — CTA ดาวน์โหลด"); }
-    if(RX.host.test(txt)) add(1,2,"พิธีกร/นักพูด — เล่าภาพใหญ่วันเปิดตัว");
-    if(RX.mobile.test(txt)) add(2,2,"สายมือถือ/แอป — เดโมในแอปจริง");
-    if(f<5e4) add(3,2,"Micro/Nano — ลิงก์/โค้ดรายคน วัดการเปิดบัญชี");
-    if(!sc.some(Boolean)) add(2,1,"ทั่วไป — ใส่ช่วงสอนใช้เพื่อเสริมความถี่");
+    const add=(i,n,w)=>{ sc[i]+=n; why[i].push(w); };
+    if(f>=1e6) add(L,4,"Mega "+fmtN(f)+" — เดโมวันเปิดใช้ให้คนเห็นวงกว้าง"); else if(f>=3e5){ add(L,3,"Macro "+fmtN(f)+" — reach สูง เหมาะวันเปิดใช้"); add(A,1,"รายงานวันแถลง — ปูกระแส"); } else if(f>=1e5) add(B,2,"Macro ระดับกลาง — เล่าฟีเจอร์ทีละตัว/เปรียบเทียบ");
+    if(RX.news.test(txt)){ add(A,4,"สายข่าวเทค — รายงานการแถลงใน 24 ชม. + \"ใช้ได้ 9 พ.ย. สมัครไว้ก่อน\""); add(B,2,"คลื่น News Intelligence — ให้ AI อ่านข่าวแทน"); }
+    if(RX.edu.test(txt)){ if(hasW) add(W,3,"สายความรู้ — Warm-up พูดประเด็น AI กับการลงทุน ยังไม่พูดแบรนด์"); add(B,3,"คลื่น Trading Alert — How-to \"AI เตือน คุณตัดสินใจ\""); add(L,1,"สอนใช้จริงสัปดาห์เปิด"); }
+    if(RX.review.test(txt)){ add(L,3,"สายรีวิว — รีวิวตรง ๆ หลังเปิดใช้ ข้อดี/ข้อจำกัด"); add(C,2,"สรุปรีวิว + CTA เปิดบัญชี"); }
+    if(RX.fin.test(txt)){ if(hasW) add(W,2,"สายการเงิน — ตั้งคำถาม \"ตลาดไทยซบ เงินโลกไปหา AI\" ก่อนแถลง"); add(B,3,"คลื่น Portfolio Advisory — จัดพอร์ตแบบมีกรอบ"); add(L,2,"เปิดใช้อย่างน่าเชื่อถือ อธิบายกรอบความเสี่ยง"); }
+    if(RX.life.test(txt)){ add(C,3,"ไลฟ์สไตล์ — use case ในชีวิตจริง + CTA เปิดบัญชี"); add(B,1,"นับถอยหลังแบบไม่ขาย"); }
+    if(RX.host.test(txt)) add(L,2,"พิธีกร/นักพูด — เล่าภาพใหญ่วันเปิดใช้");
+    if(RX.mobile.test(txt)) add(B,2,"สายมือถือ/แอป — เดโมในแอปจริง");
+    if(f<5e4) add(C,2,"Micro/Nano — ลิงก์/โค้ดรายคน วัดการเปิดบัญชี");
+    if(!sc.some(Boolean)) add(B,1,"ทั่วไป — ใส่ช่วง Build-up เพื่อเสริมความถี่");
     out.set(d.key,{d,sc,why}); });
-  const share=NP===4?[.22,.30,.28,.20]:PHASES.map(()=>1/NP); const target=share.map(x=>x*total); const sum=Z(); const pick={};
+  const share=(Array.isArray(CFG.SHARE)&&CFG.SHARE.length===NP)?CFG.SHARE.map(x=>x/100):PHASES.map(()=>1/NP); const target=share.map(x=>x*total); const sum=Z(); const pick={};
   const order=[...passed].sort((a,b)=>(b.f||0)-(a.f||0)); const idx=PHASES.map((_,i)=>i);
   order.forEach(d=>{ const o=out.get(d.key); const ranked=[...idx].sort((i,j)=>o.sc[j]-o.sc[i]||sum[i]-sum[j]); let i=ranked[0];
     if(sum[i]+(d.f||0)>target[i]*1.3 && o.sc[ranked[1]]>=o.sc[i]-2){ i=ranked[1]; o.why[i].push("ย้ายมาระยะนี้เพื่อบาลานซ์ reach ระหว่างระยะ"); }
     const ph=[String(i+1)]; // 1 คน = 1 โพสต์ = 1 ระยะ
     sum[i]+=(d.f||0); pick[d.key]={d,ph,whyP:o.why,why:(o.why[i]||[]).filter((v,k,a)=>a.indexOf(v)===k)}; });
-  // วันเปิดตัว (ระยะ 2) ต้องมีคนอย่างน้อย 40% ของทีม — surround effect
-  if(NP>=2){ const want=Math.round(passed.length*0.4); const have=()=>Object.values(pick).filter(x=>x.ph.includes("2")).length;
-    const c=Object.values(pick).filter(x=>!x.ph.includes("2")).sort((a,b)=>out.get(b.d.key).sc[1]-out.get(a.d.key).sc[1]);
-    for(const x of c){ if(have()>=want) break; x.ph=["2"]; const w="ย้ายมาวันเปิดใช้ — หลายช่องโพสต์ไล่กันใน 48 ชม. ให้คนเห็นซ้ำ ≥3 ครั้ง"; x.whyP[1].push(w); x.why=[w]; } }
-  // ทุกระยะมีอย่างน้อย 3 คน
+  // วันเปิดใช้ต้องมีคนอย่างน้อย 40% ของทีม — surround effect
+  { const want=Math.round(passed.length*0.4); const have=()=>Object.values(pick).filter(x=>x.ph.includes(LP)).length;
+    const c=Object.values(pick).filter(x=>!x.ph.includes(LP)).sort((a,b)=>out.get(b.d.key).sc[L]-out.get(a.d.key).sc[L]);
+    for(const x of c){ if(have()>=want) break; x.ph=[LP]; const w="ย้ายมาวันเปิดใช้ — หลายช่องโพสต์ไล่กันใน 48 ชม. ให้คนเห็นซ้ำ ≥3 ครั้ง"; x.whyP[L].push(w); x.why=[w]; } }
+  // ทุกระยะมีอย่างน้อย 3 คน (ย้ายจากระยะที่แน่นสุด)
   idx.forEach(i=>{ const have=()=>Object.values(pick).filter(x=>x.ph.includes(String(i+1))).length; if(have()<3&&passed.length>=3*NP){ const crowded=()=>idx.reduce((m,k)=>Object.values(pick).filter(x=>x.ph[0]===String(k+1)).length>Object.values(pick).filter(x=>x.ph[0]===String(m+1)).length?k:m,0);
       Object.values(pick).sort((a,b)=>out.get(b.d.key).sc[i]-out.get(a.d.key).sc[i]).filter(x=>!x.ph.includes(String(i+1))&&+x.ph[0]-1===crowded()).slice(0,3-have()).forEach(x=>{ x.ph=[String(i+1)]; const w="ย้ายมาระยะที่ "+(i+1)+" ให้แต่ละระยะมีคนครบ"; x.whyP[i].push(w); x.why=[w]; }); } });
   return {pick,sum,total};
@@ -237,7 +238,9 @@ function renderTimeline(){ const el=$("#timeline"); if(!el||el.dataset.done) ret
   TL_EV.forEach((e,i)=>{ const p=PHASES[tlPhase(e.d)-1]; const nxt=TL_EV[i+2]?TL_EV[i+2].d:DAYS; const span=Math.max(2,Math.min(6,nxt-e.d,DAYS-e.d)); cells.push(`<div class="tl-ev" style="--ph:${p.c};grid-column:${e.d+1}/span ${span};grid-row:${4+(i%2)}"><div class="pin"><b>${esc(e.t)}</b>${esc(e.s||"")}</div></div>`); });
   el.innerHTML=`<h2>ไทม์ไลน์ ${esc(dLabel(0))} – ${esc(dLabel(DAYS-1))} <span class="h-sub">แถบสูง = ช่วงที่ควรเน้นโพสต์ · หมุด = จังหวะสำคัญของแคมเปญ</span></h2><div class="tl-grid" style="grid-template-columns:repeat(${DAYS},minmax(0,1fr))">${cells.join("")}</div><div class="tl-legend"><span><i></i>เน้นมาก: วันเปิดตัว + สัปดาห์สอนใช้ + โค้งสุดท้าย</span><span><i class="lo"></i>เบา: ช่วง Teaser</span><span>ตัวหนา = เสาร์–อาทิตย์</span></div>`; }
 renderTimeline();
-(()=>{ const el=$("#hero-phases"); if(el){ const t0=new Date(); const td=TL_DAYS.find(i=>DAY(i).toDateString()===t0.toDateString()); const cur=td!=null?tlPhase(td):0;
+(()=>{ const st=$("#ai-steps"); if(st) st.innerHTML=PHASES.map(p=>`<div class="step" style="--ph:${p.c}"><span class="k">${p.n}</span><div><b>${esc(p.title)}</b><span>${esc(p.goal)}</span></div></div>`).join("");
+  const sp=$("#pw-split"); if(sp&&Array.isArray(CFG.SHARE)&&CFG.SHARE.length===NP){ sp.innerHTML=CFG.SHARE.map((s,i)=>`<div style="width:${s}%;background:${PHASES[i].c}">${esc(PHASES[i].title.split("—")[0].trim())} · ${s}%</div>`).join(""); const L=PHASES[RP("launch")]; $("#pw-cap").textContent=`เป้าหมาย: วันเปิดใช้จริง (${dLabel(L.from)}) ต้องมีคน ≥40% ของทีมโพสต์ใน 48 ชม. — ฟีเจอร์ใหม่ถูกจำได้จาก "วันเดียวที่ทุกคนพูดถึง" ไม่ใช่โพสต์กระจายบาง ๆ · ช่วงก่อนแถลงใช้น้ำหนักน้อย เพราะวันแถลงยังเลื่อนได้`; }
+  const el=$("#hero-phases"); if(el){ const t0=new Date(); const td=TL_DAYS.find(i=>DAY(i).toDateString()===t0.toDateString()); const cur=td!=null?tlPhase(td):0;
     el.innerHTML=PHASES.map(p=>`<div class="hp${+p.n===cur?" now":""}" style="--ph:${p.c}"><i></i><b>${esc(p.title.split("—")[0].trim())}</b><small>${esc(rangeLabel(p))}</small></div>`).join("");
     const cd=$("#hero-cd"); const launch=TL_EV.find(e=>e.launch); const days=(a,b)=>Math.round((b-a)/864e5); const t=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
     const parts=[]; const s=days(t,DAY(0)); if(s>0) parts.push(`<span>เริ่มแคมเปญใน <b>${s}</b> วัน</span>`); else parts.push(`<span>แคมเปญเริ่มแล้ว · วันที่ <b>${Math.min(DAYS,-s+1)}</b>/${DAYS}</span>`);
@@ -260,7 +263,7 @@ function renderAI(passed){
   const cnt=PHASES.map(p=>rows.filter(x=>x.ph.includes(p.n)).length), sum=PHASES.map(p=>rows.filter(x=>x.ph.includes(p.n)).reduce((s,x)=>s+(x.d.f||0),0));
   const diff=rows.filter(x=>{ const cur=phasesOf(x.d).join(","); return cur&&cur!==x.ph.join(","); }).length, unset=rows.filter(x=>!phasesOf(x.d).length).length;
   $("#ai-kpi").innerHTML=PHASES.map((p,i)=>`<div style="--ph:${p.c}"><span class="n">${cnt[i]}</span><span class="l">KOL</span><span class="r">${fmtN(sum[i])}</span><span class="l">reach · ${Math.round(sum[i]/total*100)}%</span></div>`).join("");
-  const launchN=rows.filter(x=>x.ph.includes("2")).length;
+  const launchN=rows.filter(x=>x.ph.includes(LP)).length;
   $("#ai-sum").textContent=`จัด ${rows.length} คน · 1 คน 1 โพสต์ · reach รวม ${fmtN(total)} · ร่วมวันเปิดตัว ${launchN} คน (${Math.round(launchN/rows.length*100)}%)${unset?` · ยังไม่จัดเอง ${unset} คน`:""}${diff?` · ต่างจากที่จัดเองอยู่ ${diff} คน`:""}`;
   $("#ai-phases").innerHTML=PHASES.map(p=>{ const list=rows.filter(x=>x.ph.includes(p.n)).sort((a,b)=>(b.d.f||0)-(a.d.f||0)); const reach=list.reduce((s,x)=>s+(x.d.f||0),0);
     return `<div class="ph" style="--ph:${p.c}"><div class="num">ระยะที่ ${p.n}</div><h3>${esc(p.title)}</h3><div class="d">${esc(rangeLabel(p))}</div><div class="brief">📝 ${esc(p.brief||"")}</div><div class="kpi"><div><b>${list.length}</b>KOL</div><div><b>${fmtN(reach)}</b>reach</div></div><div class="who-l">${list.map(x=>{ const s=avSrc(x.d); return `<div class="wl" data-k="${esc(x.d.key)}">${s?`<img src="${s}" alt="">`:`<span class="f">${iniOf(x.d)}</span>`}<div><b>${esc(x.d.name)} <span class="sub">${fmtN(x.d.f)}</span></b>${chipsHtml([...new Set(x.whyP[+p.n-1]||[])],3)}</div></div>`; }).join("")}</div></div>`; }).join("");
@@ -307,24 +310,25 @@ function renderSched(all){ const el=$("#sc"); if(!el||$("#tabs .tab.active").dat
   el.querySelectorAll(".who").forEach(w=>w.addEventListener("click",()=>{ SC_SEL=SC_SEL===w.dataset.k?null:w.dataset.k; el.querySelectorAll(".who").forEach(x=>x.classList.toggle("sel",x.dataset.k===SC_SEL)); if(SC_SEL) toast("แตะช่องวันเพื่อวาง "+(data.find(x=>x.key===SC_SEL)||{}).name); }));
 }
 /* ===== แนวคอนเทนต์ที่ MIDI ร่างให้ต่อโพสต์ ===== */
-function briefFor(d,day){ const p=tlPhase(day), txt=d.name+" "+d.cat, f=d.f||0; const news=RX.news.test(txt), edu=RX.edu.test(txt), review=RX.review.test(txt), fin=RX.fin.test(txt), life=RX.life.test(txt), host=RX.host.test(txt); const launch=TL_EV.find(e=>e.launch); const L=launch?launch.d:(PHASES[1]?PHASES[1].from:0); const left=Math.max(0,L-day);
-  const cta="ปิดท้าย: \"ลองเองได้ในแอป Liberator\" + ลิงก์/โค้ดของตัวเอง (วัดผลรายคน) · ย้ำว่า AI ช่วยคิด คนตัดสินใจ ความเสี่ยงอยู่ที่ผู้ลงทุน";
-  let fmt=p===1?FORMATS[0]:p===2?FORMATS[0]:p===3?FORMATS[1]:FORMATS[0], b="";
-  if(p===1){ if(news) b=`Teaser ข่าว "Liberator กำลังปล่อยฟีเจอร์ AI" — เล่าสิ่งที่รู้ + ตั้งคำถามให้คนเดา นับถอยหลัง ${left} วัน`;
-    else if(fin) b=`ตั้งคำถามกับคนดู: "ถ้า AI ช่วยลงทุน คุณกล้าให้มันทำอะไรบ้าง?" เล่าจุดเจ็บของนักลงทุน (ข้อมูลเยอะ ตัดสินใจไม่ทัน ไม่มีวินัย) + บอกว่า ${left} วันจะมีคำตอบ`;
-    else if(life) b=`สถานการณ์จริง: อยากเริ่มลงทุนแต่ไม่รู้จะดูอะไร — ทิ้งท้าย "อีก ${left} วันมีตัวช่วย" ไม่ต้องบอกชื่อฟีเจอร์`;
-    else b=`Teaser สั้น 15–30 วิ: โชว์ปัญหาการลงทุนที่ AI น่าจะช่วยได้ + นับถอยหลัง ${left} วัน + #AIคิดให้คุณตัดสินใจ`; }
-  else if(p===2){ if(f>=3e5||host) b=`คลิปเปิดตัว 60 วิ: เดโมหน้าจอจริง 1 เคส (ถามคำถามเกี่ยวกับหุ้น → AI สรุป/วิเคราะห์ → คนตัดสินใจ) + พูดชัดว่า AI ไม่ได้ลงทุนแทน`;
-    else if(edu) b=`อธิบายฟีเจอร์ AI แบบเข้าใจง่าย: ทำอะไรได้ 3 อย่าง ไม่ทำอะไร 1 อย่าง + ลองใช้ให้ดู 1 ขั้นตอน`;
-    else if(fin) b=`เปิดตัวในมุมนักลงทุน: ใช้ AI ช่วยคัดกรอง/อ่านงบ/สรุปข่าว แล้วเทียบกับที่เคยทำเอง ใช้เวลาต่างกันแค่ไหน`;
-    else b=`แกะกล่องฟีเจอร์ AI ใหม่ในแอป Liberator — เดโม 1 ฟีเจอร์ที่ว้าวที่สุด จบด้วย "ลองเองได้แล้ววันนี้"`; }
-  else if(p===3){ if(edu) b=`How-to ทีละขั้น: ใช้ AI ใน Liberator วิเคราะห์หุ้น 1 ตัวตั้งแต่ต้นจนจบ (ถาม → อ่านผล → ตั้งเงื่อนไขความเสี่ยง) พร้อมทริค 3 ข้อ`;
-    else if(review) b=`รีวิวตรง ๆ หลังใช้ 1 สัปดาห์: ชอบ 3 ข้อ ข้อจำกัด 2 ข้อ ใครเหมาะ/ไม่เหมาะ — ความน่าเชื่อถือสำคัญกว่าขาย`;
+function briefFor(d,day){ const p=tlPhase(day)-1, txt=d.name+" "+d.cat, f=d.f||0; const news=RX.news.test(txt), edu=RX.edu.test(txt), review=RX.review.test(txt), fin=RX.fin.test(txt), life=RX.life.test(txt), host=RX.host.test(txt); const launch=TL_EV.find(e=>e.launch); const Ld=launch?launch.d:(PHASES[RP("launch")]||{}).from||0; const left=Math.max(0,Ld-day);
+  const role=p===RP("warm")&&NP>=5?"warm":p===RP("announce")?"announce":p===RP("build")?"build":p===RP("launch")?"launch":"convert";
+  const cta="ปิดท้าย: \"ฟรีค่าคอมเหมือนเดิม + มี AI ช่วยคิด — ลองเองได้ในแอป Liberator\" + ลิงก์/โค้ดของตัวเอง · ย้ำว่า AI ช่วยคิด คนตัดสินใจ";
+  let fmt=role==="launch"?FORMATS[1]:FORMATS[0], b="";
+  if(role==="warm"){ b=edu||fin?`พูดประเด็น ไม่พูดแบรนด์: "ตลาดหุ้นไทยซบ เงินโลกไหลไปหา AI — แล้วคนไทยธรรมดาจะใช้ AI ช่วยลงทุนได้แค่ไหน?" เล่าแบบความรู้ ตั้งคำถามทิ้งท้าย ห้ามเอ่ยชื่อ Liberator ชื่อฟีเจอร์ หรือวันที่`:`เล่าปัญหาจริงของคนอยากลงทุน (ข้อมูลเยอะ ตัดสินใจไม่ทัน กลัวโดนหลอก) ยังไม่เฉลยทางออก ไม่เอ่ยชื่อแบรนด์`; return {format:fmt,brief:b+"\nเหตุผล: ถ้าวันแถลงเลื่อน คลิปนี้ก็ยังใช้ได้ เพราะไม่ได้สัญญาอะไร\n"+HASHTAGS.split(" ").filter(h=>!/Liberator/i.test(h)).join(" ")}; }
+  if(role==="announce"){ b=news?`รายงานการแถลงภายใน 24 ชม.: เกิดอะไรขึ้นบนเวที · 3 ฟีเจอร์ชื่ออะไร ทำอะไร · ใช้ได้จริง 9 พ.ย. · สมัคร Early Access ได้วันนี้ — คลิปสั้นถ่ายหน้างานออกคืนนั้น`:`สรุปข่าวแถลงในมุมของช่อง: สิ่งที่น่าสนใจที่สุด 1 อย่าง + "ใช้ได้ 9 พ.ย. สมัครไว้ก่อน"`; }
+  else if(role==="build"){ const wave=TL_EV.filter(e=>/คลื่น/.test(e.t)).reverse().find(e=>day>=e.d); const wv=wave?wave.t.replace(/^คลื่น \d · /,""):"";
+    if(/News/.test(wv)) b=`คลื่น 1 · AI News Intelligence: ให้ AI อ่านข่าวแทน — โชว์ว่าข่าวเยอะแค่ไหนในวันเดียว แล้ว AI กรองเหลือเฉพาะหุ้นที่เราถือ · ย้ำว่า AI สรุป คนอ่านแล้วตัดสินใจเอง · นับถอยหลัง ${left} วัน`;
+    else if(/Trading/.test(wv)) b=`คลื่น 2 · AI Trading Alert: AI เตือนจังหวะ คุณตัดสินใจ — เล่าเคสที่พลาดเพราะไม่มีคนเตือน แล้วอธิบายว่าการเตือนต่างจากการสั่งซื้อยังไง · นับถอยหลัง ${left} วัน`;
+    else if(/Portfolio/.test(wv)) b=`คลื่น 3 · AI Portfolio Advisory: จัดพอร์ตแบบมีกรอบ — คุณตั้งความเสี่ยงที่รับได้ AI เสนอการจัด/ปรับพอร์ตในกรอบนั้น · ตอบคำถาม "แล้วใครรับผิดชอบ" ตรง ๆ · นับถอยหลัง ${left} วัน`;
+    else b=`สอน "AI ช่วยลงทุนได้แค่ไหน ไม่ช่วยอะไร" + นับถอยหลัง ${left} วัน + ชวนสมัคร Early Access`; b+=" · ทุกคลิปจบที่ \"สมัครไว้ก่อน 9 พ.ย.\""; }
+  else if(role==="launch"){ if(day===Ld-1||day===Ld) b=f>=3e5||host?`คลิปวันเปิดใช้ (ปล่อยอาทิตย์เย็น/จันทร์เช้า): เดโมหน้าจอจริง 1 เคสจบใน 60 วิ · พูดชัดว่า AI ทำอะไร/ไม่ทำอะไร · "วันนี้ใช้ได้แล้ว"`:`แกะกล่องฟีเจอร์ AI วันเปิดใช้ — เดโม 1 ฟีเจอร์ที่ว้าวที่สุด จบด้วย "ลองเองได้แล้ววันนี้"`;
+    else if(edu) b=`How-to ทีละขั้น: ใช้ AI ใน Liberator วิเคราะห์หุ้น 1 ตัวตั้งแต่ต้นจนจบ (ถาม → อ่านผล → ตั้งเงื่อนไขความเสี่ยง) + ทริค 3 ข้อ`;
+    else if(review) b=`รีวิวตรง ๆ หลังใช้จริง: ชอบ 3 ข้อ ข้อจำกัด 2 ข้อ ใครเหมาะ/ไม่เหมาะ — ความน่าเชื่อถือสำคัญกว่าขาย`;
     else if(fin) b=`เคสจริง: เปรียบเทียบการตัดสินใจก่อน-หลังมี AI (เวลา/ข้อมูล/ความมั่นใจ) + ย้ำกรอบความเสี่ยงที่ตัวเองตั้ง`;
-    else b=`ตอบข้อกังวลที่คนถามบ่อย (AI ผิดได้ไหม / ข้อมูลมาจากไหน / ต้องมีพอร์ตใหญ่ไหม) ด้วยการลองให้ดูในแอป`; }
-  else { if(life) b=`use case ในชีวิตประจำวัน: เช็กพอร์ตกับ AI 5 นาทีก่อนนอน/ระหว่างเดินทาง + ขั้นตอนเปิดบัญชีสั้น ๆ + สิทธิพิเศษ`;
+    else b=`ตอบข้อกังวลที่คนถามบ่อย (AI ผิดได้ไหม / ข้อมูลพอร์ตปลอดภัยไหม / ต้องมีพอร์ตใหญ่ไหม) ด้วยการลองให้ดูในแอป`; }
+  else { if(life) b=`use case ในชีวิตประจำวัน: เช็กพอร์ตกับ AI 5 นาทีก่อนนอน + ขั้นตอนเปิดบัญชีสั้น ๆ + สิทธิพิเศษ`;
     else if(f<5e4) b=`CTA ชัด: เปิดบัญชี/ดาวน์โหลด 3 ขั้นตอน + โค้ด/สิทธิพิเศษของช่อง + ตอบคอมเมนต์ที่ถาม`;
-    else b=`รีแคปฟีเจอร์ AI ที่ชอบที่สุด 1 อย่าง + "ถ้ายังไม่ได้ลอง เหลืออีก ${Math.max(0,DAYS-1-day)} วันสำหรับสิทธิพิเศษ" + ขั้นตอนเปิดบัญชี`; fmt=FORMATS[0]; }
+    else b=`รีแคปฟีเจอร์ AI ที่ชอบที่สุด 1 อย่าง + "เหลืออีก ${Math.max(0,DAYS-1-day)} วันสำหรับสิทธิ์คนเปิดก่อน" + ขั้นตอนเปิดบัญชี`; fmt=FORMATS[0]; }
   return {format:fmt,brief:b+"\n"+cta+"\n"+HASHTAGS}; }
 const postKey=(d,day)=>rid(d)+"_"+day;
 const postOf=(d,day)=>{ const p=POSTS[postKey(d,day)]; if(p&&(p.brief||p.format)) return Object.assign({sug:false},p); const b=briefFor(d,day); return {format:b.format,brief:b.brief,status:"plan",link:"",sug:true}; };
@@ -353,7 +357,7 @@ function autoDates(all){ const load={}; all.forEach(d=>datesOf(d).forEach(x=>loa
   const pickDay=(days)=>{ let best=days[0], bl=Infinity; days.forEach(x=>{ const l=(load[x]||0)-(TL_W[x]||1)*0.5; if(l<bl){ bl=l; best=x; } }); load[best]=(load[best]||0)+1; return best; };
   const launch=TL_EV.find(e=>e.launch); const L=launch?launch.d:(PHASES[1]?PHASES[1].from:0);
   all.filter(d=>!datesOf(d).length).sort((a,b)=>(b.f||0)-(a.f||0)).forEach(d=>{ let ph=phasesOf(d); if(!ph.length&&AIP[d.key]) ph=AIP[d.key].ph; const ds=[]; const f=d.f||0;
-    ph.forEach(n=>{ const days=phaseDays(n); if(!days.length) return; if(+n===2&&f>=3e5) ds.push(days.includes(L)?L:days[0]); else if(+n===2) ds.push(pickDay(days.filter(x=>x>=L).concat(days))); else ds.push(pickDay(days)); });
+    ph.forEach(n=>{ const days=phaseDays(n); if(!days.length) return; if(n===LP&&f>=3e5) ds.push(days.includes(L)?L:days[0]); else if(n===LP) ds.push(pickDay(days.filter(x=>x>=L).concat(days))); else ds.push(pickDay(days)); });
     if(!ph.length) ds.push(pickDay(phaseDays(Math.min(3,NP))));
     if(CFG.ONE_POST!==false) ds.splice(1); // 1 คน 1 โพสต์
     out.push({key:rid(d),name:d.name,dates:[...new Set(ds)].sort((a,b)=>a-b).join(","),by:reviewer}); });
@@ -497,7 +501,7 @@ window.addEventListener("load",()=>{ if(TAB==="strategy") smoothOn(); });
 function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella"); if(!U||!el) return; design=design||CFG.UMBRELLA_DESIGN||"ripple"; el.dataset.design=design;
   const W=U.waves; let cur=0;
   const panel=i=>{ const w=W[i]; return `<div class="um-panel" style="--c:${w.c}"><div class="um-when">${esc(w.when)}</div><h4>${esc(w.t)}</h4><div class="um-who">${esc(w.who)}</div><p>${esc(w.say)}</p><div class="um-hook">${esc(w.hook)}</div></div>`; };
-  const head=`<div class="um-head"><div class="um-k">Strategy วันงาน · 29 ต.ค. · คอนเทนต์ที่ควรมีในงาน</div><div class="um-word">${esc(U.word)}</div><div class="um-sub">${esc(U.sub)}</div><div class="um-line"><small>ประโยคหลักที่ควรมีในงาน</small>“${esc(U.line)}”</div></div>`;
+  const head=`<div class="um-head"><div class="um-k">Strategy วันงาน · วันแถลงข่าว (รอยืนยัน · คาด 1–2 พ.ย.) · คอนเทนต์ที่ควรมีในงาน</div><div class="um-word">${esc(U.word)}</div><div class="um-sub">${esc(U.sub)}</div><div class="um-line"><small>ประโยคหลักที่ควรมีในงาน</small>“${esc(U.line)}”</div></div>`;
   let viz="";
   if(design==="ripple"){
     const cx=300, cy=300, R=[92,134,172,208,241,272], ang=i=>(-92+i*33)*Math.PI/180;
@@ -511,22 +515,21 @@ function renderUmbrella(design){ const U=window.KOL_UMBRELLA, el=$("#umbrella");
     </svg><div class="um-side" id="um-side">${panel(0)}</div></div>
     <div class="um-legend">กดวงไหน = ดูว่าช่วงนั้นใครพูดอะไร · วงใกล้กลาง = เร็วและเข้มกว่า · ข่าวเหวี่ยงจากเวทีออกไปถึงวันที่ 20 พ.ย.</div>`;
   } else {
-    const cols=["29 ต.ค.","30–31","1–8 พ.ย.","9–10 พ.ย.","11–15","16–20"];
-    const POS=[[3,4,5],[3,4,5,6,7],[3,4,5,7]]; // คอลัมน์ของโหนดแต่ละสาย (2 = 29 ต.ค. คือเวที)
-    const lanes=U.lanes.map((l,li)=>`<div class="um-lane-k" style="--c:${l.c};grid-row:${li+2}">${esc(l.k)}</div>`+l.nodes.map((n,ni)=>{ const col=POS[li][ni]||ni+3; return `<div class="um-node" data-i="${col-2}" style="--c:${l.c};grid-column:${col};grid-row:${li+2}">${esc(n)}</div>`; }).join("")).join("");
+    const cols=U.cols||[["29 ต.ค.","เวทีแถลง"],["30–31",""],["1–8 พ.ย.",""],["9–10 พ.ย.","เปิดใช้จริง"],["11–15",""],["16–20",""]];
+    const lanes=U.lanes.map((l,li)=>`<div class="um-lane-k" style="--c:${l.c};grid-row:${li+2}">${esc(l.k)}</div>`+l.nodes.map(nd=>{ const col=Array.isArray(nd)?nd[0]:3, n=Array.isArray(nd)?nd[1]:nd; return `<div class="um-node" data-i="${col-2}" style="--c:${l.c};grid-column:${col};grid-row:${li+2}">${esc(n)}</div>`; }).join("")).join("");
     viz=`<div class="um-flow">
-      <div class="um-col-k"></div>${cols.map((c,i)=>`<div class="um-col${i===3?" launch":""}" data-i="${i}" style="grid-column:${i+2};grid-row:1">${c}${i===3?"<small>เปิดใช้จริง</small>":""}${i===0?"<small>เวทีแถลง</small>":""}</div>`).join("")}
-      <div class="um-stage" data-i="0" style="grid-column:2;grid-row:2/5"><b>เวที 29</b><span>ทุกสายเริ่มจากประโยคเดียวกัน</span><i></i></div>
+      <div class="um-col-k"></div>${cols.map((c,i)=>`<div class="um-col${i===3?" launch":""}${i===1?" stage-col":""}" data-i="${i}" style="grid-column:${i+2};grid-row:1">${esc(c[0])}${c[1]?`<small>${esc(c[1])}</small>`:""}</div>`).join("")}
+      <div class="um-stage" data-i="1" style="grid-column:3;grid-row:2/5"><b>เวทีแถลง</b><span>คาด 1–2 พ.ย. · รอยืนยัน<br>ทุกสายเริ่มจากประโยคเดียวกัน</span><i></i></div>
       ${lanes}
       <div class="um-merge" style="grid-column:5;grid-row:5"><i></i><b>จุดบรรจบ 9 พ.ย.</b><span>สื่อ + KOL + ช่องแบรนด์ ออกพร้อมกัน = เห็นทุกที่ใน 48 ชม.</span></div>
-      <div class="um-end" style="grid-column:6/8;grid-row:5"><b>ปลายทางเดียว</b><span>ทุกเส้นจบที่หน้าเปิดบัญชี/จองคิว — ไม่มีหน้ารับ = คนหายระหว่างทาง</span></div>
-    </div><div class="um-side" id="um-side">${panel(0)}</div>
+      <div class="um-end" style="grid-column:6/8;grid-row:5"><b>ปลายทางเดียว</b><span>ทุกเส้นจบที่หน้าเปิดบัญชี/สมัคร — ไม่มีหน้ารับ = คนหายระหว่างทาง</span></div>
+    </div><div class="um-side" id="um-side">${panel(1)}</div>
     <div class="um-legend">แต่ละจุดคือคอนเทนต์ที่ MIDI เสนอให้มี — 3 สาย (สื่อ · KOL · ช่องของแบรนด์) แตกจากเวทีเดียวกัน แล้วมาบรรจบวันที่ 9 · กดจุดไหนดูได้ว่าช่วงนั้นใครพูดอะไร</div>`;
   }
   el.innerHTML=`<section class="box um" data-design="${design}">${head}${viz}</section>`;
   const sel=i=>{ cur=i; $("#um-side").innerHTML=panel(i); el.querySelectorAll("[data-i]").forEach(n=>n.classList.toggle("on",+n.dataset.i===i)); };
   el.querySelectorAll("[data-i]").forEach(n=>{ n.addEventListener("click",()=>sel(+n.dataset.i)); n.addEventListener("mouseenter",()=>{ el.querySelectorAll("[data-i]").forEach(x=>x.classList.toggle("hov",+x.dataset.i===+n.dataset.i)); }); n.addEventListener("mouseleave",()=>el.querySelectorAll(".hov").forEach(x=>x.classList.remove("hov"))); });
-  sel(0);
+  sel(design==="flow"?1:0);
   // เล่นเองช้า ๆ จนกว่าจะมีคนกด
   let auto=setInterval(()=>sel((cur+1)%W.length),design==="flow"?2600:4000); el.addEventListener("click",()=>{ clearInterval(auto); auto=null; },{once:true});
 }
@@ -554,7 +557,7 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
         ${CRED}
       </div>
     </section>`;
-  const ch=[["hero","Strategy วันงาน"],["gap","11 วันระหว่างทาง"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
+  const ch=[["hero","Strategy วันงาน"],["gap","วางแผนให้เลื่อนได้"],["insight","คนไทยกับแอปลงทุน"],["plan","แผน A / B"],["extra","จังหวะ PR เพิ่มเติม"],["peso","ภาพใหญ่"],["day","วันแถลงข่าว"]];
   el.innerHTML=`
     <nav class="st-rail" aria-label="สารบัญ">${ch.map((c,i)=>`<a href="#st-${c[0]}" data-ch="${c[0]}" class="${i?"locked":""}"><i></i><span>${esc(c[1])}</span>${i?'<em class="lk">🔒 Sale</em>':""}</a>`).join("")}<b class="st-rail-line"></b></nav>
     <div class="st-body">
@@ -581,6 +584,12 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
       <div class="st-seg2">${S.plans.map((p,i)=>`<button type="button" data-i="${i}" class="${i===plan?"active":""}" style="--ph:${i?"#0B1052":"#0A5BFF"}"><small>${esc(p.name.split("·")[0])}${i?' <span class="lk">🔒 Sale</span>':""}</small><b>${esc(p.name.split("·")[1]||"")}</b><span>${esc(p.tag)}</span></button>`).join("")}</div>
       <div class="st-decide">${S.decide.map((d,i)=>`<div class="sv-c" style="--i:${i}"><b>${esc(d[0])}</b><span>${esc(d[1])}</span></div>`).join("")}</div>
       <div id="st-plan-body">${planHtml(S.plans[plan])}</div>${CRED}</section>
+    <section class="st-sec sv" id="st-extra"><h2 class="st-h">${esc(S.extra.h)}</h2>
+      <div class="st-quotes st-extra">${S.extra.items.map((c,i)=>`<div class="st-q sv-c" style="--i:${i}"><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`).join("")}</div>
+      <div class="st-two">
+        <div class="st-fb sv-c" style="--i:6"><h3>${esc(S.extra.fallback_h)}</h3>${S.extra.fallback.map(f=>`<div><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div>
+        <div class="st-now sv-c" style="--i:7"><h3>${esc(S.extra.now_h)}</h3><ol>${S.extra.now.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+      </div>${CRED}</section>
     <section class="st-sec sv" id="st-peso"><h2 class="st-h">KOL อยู่ตรงไหนของภาพใหญ่</h2>
       <div class="st-peso">${S.peso.map((p,i)=>`<div class="sv-c${p[0]==="Shared"?" hi":""}" style="--i:${i}"><b>${esc(p[0])}</b><span>${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join("")}</div>${CRED}</section>
     <section class="st-sec sv" id="st-day"><h2 class="st-h">วันแถลงข่าว 29 ต.ค. นาทีต่อนาที</h2>
@@ -597,11 +606,11 @@ function renderStrategy(){ const S=window.KOL_STRATEGY, el=$("#strategy"); if(!S
   const countUp=n=>{ const to=+n.dataset.n||0, t0=performance.now(); const step=t=>{ const k=Math.min(1,(t-t0)/900), e=1-Math.pow(1-k,3); n.textContent=Math.round(to*e)+"%"; if(k<1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
   const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add("in"); x.target.querySelectorAll("[data-n]:not(.done)").forEach(n=>{ n.classList.add("done"); countUp(n); }); } }),{threshold:.12,rootMargin:"0px 0px -8% 0px"});
   el.querySelectorAll(".sv").forEach(n=>io.observe(n));
-  const secs=[...el.querySelectorAll("[id^='st-']")].filter(n=>/^st-(hero|gap|insight|plan|peso|day)$/.test(n.id));
+  const secs=[...el.querySelectorAll("[id^='st-']")].filter(n=>/^st-(hero|gap|insight|plan|extra|peso|day)$/.test(n.id));
   const io2=new IntersectionObserver(es=>{ es.forEach(x=>{ if(x.isIntersecting){ el.querySelectorAll(".st-rail a").forEach(a=>a.classList.toggle("on",a.dataset.ch===x.target.id.replace("st-",""))); } }); },{rootMargin:"-40% 0px -50% 0px"});
   secs.forEach(n=>io2.observe(n));
   const unlock=()=>{ $("#st-locked").hidden=false; $("#st-lockcard").hidden=true; el.querySelectorAll(".st-rail a.locked").forEach(a=>a.classList.remove("locked")); el.querySelectorAll("#st-locked .sv").forEach(n=>{ io.unobserve(n); io.observe(n); }); };
-  if(AI_OPEN) unlock();
+  if(ACCESS&&ACCESS.admin){ AI_OPEN=true; } if(AI_OPEN){ unlock(); if(ACCESS&&ACCESS.admin) el.querySelectorAll(".lk").forEach(x=>x.textContent="🔓 Admin"); }
   $("#st-unlock").onclick=()=>askAI(unlock);
   el.querySelectorAll(".st-rail a").forEach(a=>a.onclick=e=>{ e.preventDefault(); if(a.classList.contains("locked")){ askAI(()=>{ unlock(); setTimeout(()=>a.click(),150); }); return; } const t=$(a.getAttribute("href")); const top=t?t.getBoundingClientRect().top+window.scrollY-90:0; if(LEN) LEN.scrollTo(top,{duration:1.2}); else window.scrollTo({top,behavior:"smooth"}); });
   renderUmbrella();
