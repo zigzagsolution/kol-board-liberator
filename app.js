@@ -292,11 +292,11 @@ function renderSched(all){ const el=$("#sc"); if(!el||$("#tabs .tab.active").dat
     list.forEach(d=>{ const ds=datesOf(d), ph=phasesOf(d); const src=avSrc(d); const ini=iniOf(d);
       h+=`<div class="who${SC_SEL===d.key?" sel":""}" draggable="true" data-k="${esc(d.key)}" title="ลากไปวางในช่องวัน หรือแตะเพื่อเลือก">${src?`<div class="av"><img src="${src}" alt=""></div>`:`<div class="av av-txt">${ini}</div>`}<div style="min-width:0"><div class="nm">${esc(d.name)}</div><div class="f">${fmtN(d.f)}${ph.length?` · ระยะ ${ph.join(",")}`:""}</div></div><span class="n">${ds.length?ds.length+" โพสต์":""}</span></div>`;
       TL_DAYS.forEach(x=>{ const dow=DAY(x).getDay(); const inPh=ph.length?ph.includes(String(tlPhase(x))):false; const has=ds.includes(x);
-        const sug=AI_OPEN&&!ds.length&&(SUG[rid(d)]||[]).includes(x); // วันที่ MIDI แนะนำ (จาง) แสดงเฉพาะเมื่อปลดล็อกด้วยรหัส Sale
+        const sug=CFG.SHOW_SUGGEST===true&&AI_OPEN&&!ds.length&&(SUG[rid(d)]||[]).includes(x); // ตารางเริ่มโล่งเสมอ — วันแนะนำจะถูก "วาง" จริงเมื่อกดปุ่ม ใช้วันที่ MIDI วางไว้
         h+=`<div class="cell${dow===0||dow===6?" we":""}${inPh&&!has?" rec":""}" data-k="${esc(d.key)}" data-d="${x}" style="--ph:${c}">${has?`<div class="post" draggable="true" data-k="${esc(d.key)}" data-d="${x}" title="${esc(d.name)} · ${dLabel(x)} — กดเพื่อดู/แก้แนวคอนเทนต์" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}<span class="st st-${postOf(d,x).status}"></span></div>`:sug?`<div class="post sug" data-sug="1" title="MIDI แนะนำ ${dLabel(x)} — กดเพื่อยืนยัน หรือลากรูปไปวันอื่น" style="--ph:${c}">${src?`<img src="${src}" alt="">`:""}</div>`:""}</div>`; }); }); });
   el.style.gridTemplateColumns=`176px repeat(${DAYS},minmax(0,1fr))`; el.innerHTML=h;
   const withDates=all.filter(d=>datesOf(d).length).length, posts=Object.values(tot).reduce((s,t)=>s+t.n,0);
-  $("#sc-sum").textContent=`กำหนดวันแล้ว ${withDates}/${all.length} คน · รวม ${posts} โพสต์${AI_OPEN?" · รูปจาง ๆ เส้นประ = วันที่ MIDI แนะนำ (กดเพื่อยืนยัน หรือลากไปวันอื่น)":""} · ขีดสีใต้ช่อง = วันในระยะของคนนั้น`;
+  $("#sc-sum").textContent=`กำหนดวันแล้ว ${withDates}/${all.length} คน · รวม ${posts} โพสต์${CFG.SHOW_SUGGEST===true&&AI_OPEN?" · รูปจาง ๆ เส้นประ = วันที่ MIDI แนะนำ (กดเพื่อยืนยัน หรือลากไปวันอื่น)":""} · ขีดสีใต้ช่อง = วันในระยะของคนนั้น`;
   // drag & drop
   let drag=null;
   el.querySelectorAll(".who,.post").forEach(n=>{ n.addEventListener("dragstart",e=>{ drag={k:n.dataset.k,from:n.dataset.d?+n.dataset.d:null}; e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain",n.dataset.k); }catch(_){} n.classList.add("ghost"); }); n.addEventListener("dragend",()=>n.classList.remove("ghost")); });
